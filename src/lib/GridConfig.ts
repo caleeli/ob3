@@ -6,6 +6,7 @@ class GridConfig {
 		sortBy?: string;
 		align: 'left' | 'right' | 'center';
 		control?: 'text' | 'select' | 'checkbox' | 'radio' | 'date' | 'time' | 'datetime' | 'actions';
+		width?: string;
 		format?: string[];
 		class?: string;
 		groupRows?: boolean;

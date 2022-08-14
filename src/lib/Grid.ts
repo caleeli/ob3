@@ -14,7 +14,7 @@ class Grid {
 	}
 
 	public async load() {
-		const data = await this.store.get();
+		const data = await this.store.get(0);
 		this.cell.splice(0);
 		this.hydrate(data);
 	}
@@ -65,8 +65,9 @@ class Grid {
 		return value;
 	}
 
-	public async sort(field: string, order: 'asc' | 'desc'): Promise<void> {
-		const data = await this.store.sort(field, order);
+	public async sort(field: string, direction: 'asc' | 'desc'): Promise<void> {
+		const data = await this.store.sort(field, direction);
+		this.cell.splice(0);
 		this.hydrate(data);
 	}
 

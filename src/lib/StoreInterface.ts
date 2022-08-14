@@ -1,10 +1,10 @@
 
 interface StoreInterface {
 
-    get(): Promise<any[]>;
+    get(offset?: number): Promise<any[]>;
     getNextPage(): Promise<any[]>;
     length(): Promise<number>;
-    sort(field: string, order: 'asc' | 'desc'): Promise<any[]>;
+    sort(field: string, direction: 'asc' | 'desc'): Promise<any[]>;
 }
 
 export default StoreInterface;

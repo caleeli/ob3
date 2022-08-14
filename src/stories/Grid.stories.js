@@ -137,9 +137,58 @@ PokemonApi.args = {
   store: new ApiStore({
     url: 'https://pokeapi.co/api/v2/pokemon',
     root: 'results',
+    limit: 25,
     query: {
-      limit: 15,
+      limit: (/** @type {{ limit: number; }} */{ limit }) => limit,
       offset: (/** @type {{ offset: number; }} */{ offset }) => offset,
+    },
+  }),
+};
+
+export const PreguntasApi = Template.bind({});
+PreguntasApi.args = {
+  config: {
+    headers: [
+      {
+        label: 'ID',
+        value: 'id',
+        sortBy: 'id',
+        align: 'center'
+      },
+      {
+        label: 'ID Grupo',
+        value: 'attributes.id_grupo',
+        sortBy: 'id_grupo',
+        align: 'center'
+      },
+      {
+        label: 'Indice',
+        value: 'attributes.indice',
+        sortBy: 'indice',
+        align: 'left'
+      },
+      {
+        label: 'Descripción',
+        value: 'attributes.descripcion',
+        sortBy: 'descripcion',
+        align: 'left',
+        width: '100%',
+      },
+    ],
+    sort: {
+      field: 'id',
+      order: 'asc'
+    }
+  },
+  store: new ApiStore({
+    url: 'http://localhost/projects/callizaya2/public/api.php/ob3/preguntas',
+    root: 'data',
+    limit: 20,
+    query: {
+      per_page: (/** @type {{ limit: number; }} */{ limit }) => limit,
+      page: (/** @type {{ offset: number; limit: number; }} */{ offset, limit }) => offset / limit + 1,
+      sort: (/** @type {{ sort_field: string; sort_direction: string; }} */{ sort_field, sort_direction }) => (sort_direction==='desc'?'-':'') + sort_field,
+      filter: ['tipo_credito(2)']
     },
   }),
 };

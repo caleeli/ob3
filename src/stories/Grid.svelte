@@ -36,7 +36,7 @@
 <table>
 	<tr>
 		{#each config.headers as header}
-			<th align={header.align || 'left'} on:click={() => header.sortBy && sortBy(header.sortBy)}>
+			<th align={header.align || 'left'} width={header.width || ''} on:click={() => header.sortBy && sortBy(header.sortBy)}>
 				{header.label}
 				<i
 					class={`icon icon-ic_fluent_arrow_sort_${
@@ -105,6 +105,7 @@
 		position: sticky;
 		top: 0;
 		background-color: #fff;
+		white-space: nowrap;
 	}
 	th:hover {
 		background-color: #eee;
