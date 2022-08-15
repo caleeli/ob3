@@ -11,7 +11,7 @@
 
 	export let config: GridConfig;
 	let value: any[] = [];
-	// Better Call Saul characters
+	let active: number = -1;
 	export let store: StoreInterface;
 	let grid = new Grid(config, store);
 	grid.load().then(() => {
@@ -36,7 +36,11 @@
 <table>
 	<tr>
 		{#each config.headers as header}
-			<th align={header.align || 'left'} width={header.width || ''} on:click={() => header.sortBy && sortBy(header.sortBy)}>
+			<th
+				align={header.align || 'left'}
+				width={header.width || ''}
+				on:click={() => header.sortBy && sortBy(header.sortBy)}
+			>
 				{header.label}
 				<i
 					class={`icon icon-ic_fluent_arrow_sort_${
@@ -48,7 +52,10 @@
 	</tr>
 	{#if grid}
 		{#each grid.cell as data, row}
-			<tr>
+			<tr
+				class={active == row ? 'active' : ''}
+				on:click={() => (active = active === row ? -1 : row)}
+			>
 				{#each config.headers as header, col}
 					{#if grid.cell[row] && grid.firstInGroup(row, col)}
 						<td
@@ -125,6 +132,9 @@
 	}
 	tr:hover td {
 		background-color: #eee;
+	}
+	tr.active {
+		outline: -webkit-focus-ring-color auto 1px;
 	}
 	.error {
 		color: red;
