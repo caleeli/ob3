@@ -26,8 +26,8 @@ class Grid {
 
 	private hydrate(data: any[]) {
 		try {
-			this.data = data;
-			this.data.forEach((dataRow: any) => {
+			this.data.push(...data);
+			data.forEach((dataRow: any) => {
 				const rowCell: any[] = [];
 				this.config.headers.forEach((header: any) => {
 					const value = this.calcValue(header, dataRow);

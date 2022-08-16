@@ -10,9 +10,10 @@
 	const dispatch = createEventDispatcher();
 
 	export let config: GridConfig;
+	export let store: StoreInterface;
+
 	let value: any[] = [];
 	let active: number = -1;
-	export let store: StoreInterface;
 	let grid = new Grid(config, store);
 	grid.load().then(() => {
 		grid = grid;
@@ -115,7 +116,7 @@
 		white-space: nowrap;
 	}
 	th:hover {
-		background-color: #eee;
+		background-color: var(--fds-solid-background-secondary);
 		-webkit-user-select: none;
 		-khtml-user-select: none;
 		-moz-user-select: -moz-none;
@@ -126,12 +127,12 @@
 		visibility: hidden;
 	}
 	td {
-		border-top: 1px solid #eee;
-		border-bottom: 1px solid #eee;
+		border-top: 1px solid var(--fds-solid-background-secondary);
+		border-bottom: 1px solid var(--fds-solid-background-secondary);
 		padding: 0.5rem;
 	}
 	tr:hover td {
-		background-color: #eee;
+		background-color: var(--fds-solid-background-secondary);
 	}
 	tr.active {
 		outline: -webkit-focus-ring-color auto 1px;
