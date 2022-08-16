@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { Button } from 'fluent-svelte';
 	import { TextBox } from 'fluent-svelte';
+	import TextArea from '../lib/TextArea.svelte';
 	import { PersonPicture } from 'fluent-svelte';
 	import { ComboBox } from 'fluent-svelte';
+	import { get, set } from 'lodash';
 
 	export let title: string = '';
 	export let content: {
@@ -28,12 +30,22 @@
 			value: string;
 			label: string;
 		}[];
+		rows?: number;
 	}[][] = [];
+	export let border: boolean = true;
 	export let blur: boolean = false;
 	export let data: any = {};
+	let accessor = new Proxy(data, {
+		get: (target, name) => {
+			return get(target, name);
+		},
+		set: (target, name, value) => {
+			return set(target, name, value);
+		}
+	});
 </script>
 
-<form class={`section ${blur ? 'blur-background' : ''}`}>
+<form class={`${border ? 'section' : ''} ${blur ? 'blur-background' : ''}`}>
 	<h2>{title}</h2>
 	{#each content as row}
 		<div class="wrapper">
@@ -47,7 +59,20 @@
 							id={cell.name}
 							placeholder={cell.placeholder || ''}
 							type={cell.type}
-							bind:value={data[cell.name]}
+							bind:value={accessor[cell.name]}
+						/>
+					</div>
+				{/if}
+				{#if cell.control === 'TextArea'}
+					<div>
+						<label for={cell.name}>
+							{cell.label || ''}
+						</label>
+						<TextArea
+							id={cell.name}
+							placeholder={cell.placeholder || ''}
+							rows={cell.rows || 2}
+							bind:value={accessor[cell.name]}
 						/>
 					</div>
 				{/if}
@@ -61,7 +86,7 @@
 							placeholder={cell.placeholder || ''}
 							items={cell.options}
 							class="w-100"
-							bind:value={data[cell.name]}
+							bind:value={accessor[cell.name]}
 						/>
 					</div>
 				{/if}
@@ -71,7 +96,7 @@
 					</Button>
 				{/if}
 				{#if cell.control === 'Avatar'}
-					<PersonPicture size={64} src={data[cell.name]} />
+					<PersonPicture size={64} src={accessor[cell.name]} />
 				{/if}
 				{#if cell.control === 'Header'}
 					<h3>{cell.label}</h3>
