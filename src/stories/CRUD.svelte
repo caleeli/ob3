@@ -1,15 +1,18 @@
 <script lang="ts">
 	import { Button, ContentDialog } from 'fluent-svelte';
-	import type GridConfig from 'src/lib/GridConfig';
-	import type StoreInterface from 'src/lib/StoreInterface';
+	import type GridConfig from '../lib/GridConfig';
+	import type StoreInterface from '../lib/StoreInterface';
 	import Form from './Form.svelte';
 	import Grid from './Grid.svelte';
+	import { translation as __ } from '../lib/translations';
 
 	export let config: GridConfig;
 	export let store: StoreInterface;
 	export let create: any[][];
+	export let update: any[][];
 
 	let open = false;
+	let confirmDelete = false;
 	let title = '';
 	let record = {};
 	let original: any | null = null;
@@ -25,9 +28,13 @@
 		open = true;
 		title = 'Edit';
 	}
-	async function deleteRecord(event: { detail: any }) {
-		const record = event.detail;
-		await store.delete(record.id);
+	function deleteRecord(event: { detail: any }) {
+		original = event.detail;
+		confirmDelete = true;
+	}
+	async function confirmDeleteRecord() {
+		confirmDelete = false;
+		await store.delete(original.id);
 		await store.refresh();
 	}
 	async function save() {
@@ -45,11 +52,19 @@
 	}
 </script>
 
-<ContentDialog bind:open {title}>
-	<Form content={create} border={false} data={record} />
+<ContentDialog bind:open title={__(title)}>
+	<Form content={original ? update || create : create || update} border={false} data={record} />
 	<svelte:fragment slot="footer">
-		<Button variant="accent" on:click={save}>Save</Button>
-		<Button on:click={cancel}>Cancel</Button>
+		<Button variant="accent" on:click={save}>{__('Save')}</Button>
+		<Button on:click={cancel}>{__('Cancel')}</Button>
+	</svelte:fragment>
+</ContentDialog>
+
+<ContentDialog bind:open={confirmDelete} title={__('Delete')}>
+	<p>{__('Are you sure to delete this record?')}</p>
+	<svelte:fragment slot="footer">
+		<Button variant="accent" on:click={confirmDeleteRecord}>{__('Delete')}</Button>
+		<Button on:click={() => (confirmDelete = false)}>{__('Cancel')}</Button>
 	</svelte:fragment>
 </ContentDialog>
 
