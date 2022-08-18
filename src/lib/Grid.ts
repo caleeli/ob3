@@ -11,6 +11,7 @@ class Grid {
 	constructor(config: GridConfig, store: StoreInterface) {
 		this.config = config;
 		this.store = store;
+		store.setSort(config.sort.field, config.sort.order);
 	}
 
 	public async load() {

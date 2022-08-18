@@ -26,34 +26,29 @@ PreguntasApi.args = {
   config: {
     headers: [
       {
-        label: 'ID',
+        label: '#',
         value: 'attributes.number',
-        sortBy: 'number',
         align: 'center'
       },
       {
         label: 'ID Grupo',
         value: 'attributes.id_grupo',
-        sortBy: 'id_grupo',
         align: 'center'
       },
       {
         label: 'Indice',
         value: 'attributes.indice',
-        sortBy: 'indice',
         align: 'left'
       },
       {
         label: 'Descripción',
         value: 'attributes.descripcion',
-        sortBy: 'descripcion',
         align: 'left',
         width: '100%',
       },
       {
         label: '',
         value: '["edit","delete"]',
-        sortBy: '',
         align: 'center',
         control: 'actions',
       },

@@ -5,11 +5,14 @@ class ArrayStore implements StoreInterface {
 
     constructor(private array: any[]) {
     }
+    setSort(field: string, direction: "asc" | "desc"): void {
+        console.warn("Method not implemented.");
+    }
     delete(id: string | number): Promise<any> {
         throw new Error("Method not implemented.");
     }
     onrefresh(callback: (data: any[]) => void): void {
-        throw new Error("Method not implemented.");
+        console.warn("Method not implemented.");
     }
     refresh(): Promise<any> {
         throw new Error("Method not implemented.");

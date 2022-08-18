@@ -87,6 +87,10 @@ class ApiStore implements StoreInterface {
         this.sort_direction = direction;
         return this.get(0);
     }
+    setSort(field: string, direction: "asc" | "desc"): void {
+        this.sort_field = field;
+        this.sort_direction = direction;
+    }
 }
 
 export default ApiStore;
