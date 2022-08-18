@@ -70,7 +70,7 @@
 
 <div class="toolbar">
 	<Button variant="hyperlink" on:click={add}>
-		<i class="icon icon-ic_fluent_add_16_regular" />
+		<i class="icon icon-ic_fluent_add_16_regular" /> {__('Add')}
 	</Button>
 </div>
 
