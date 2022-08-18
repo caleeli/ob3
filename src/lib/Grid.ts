@@ -19,6 +19,12 @@ class Grid {
 		this.hydrate(data);
 	}
 
+	public async loadFromData(data: any[]) {
+		this.data.splice(0);
+		this.cell.splice(0);
+		this.hydrate(data);
+	}
+
 	public async loadNextPage() {
 		const data = await this.store.getNextPage();
 		this.hydrate(data);

@@ -12,18 +12,33 @@
 	let open = false;
 	let title = '';
 	let record = {};
+	let original: any | null = null;
 	function add() {
 		open = true;
 		title = 'Add';
+		record = {};
+		original = null;
 	}
 	function edit(event: { detail: any }) {
 		record = event.detail;
+		original = JSON.parse(JSON.stringify(record));
 		open = true;
 		title = 'Edit';
 	}
-	function save() {
+	async function deleteRecord(event: { detail: any }) {
+		const record = event.detail;
+		await store.delete(record.id);
+		await store.refresh();
+	}
+	async function save() {
 		open = false;
-		store.save(record);
+		if (original) {
+			await store.update(original.id, record);
+			await store.refresh();
+		} else {
+			await store.create(record);
+			await store.refresh();
+		}
 	}
 	function cancel() {
 		open = false;
@@ -44,7 +59,7 @@
 	</Button>
 </div>
 
-<Grid {config} {store} on:edit={edit} />
+<Grid {config} {store} on:edit={edit} on:delete={deleteRecord} />
 
 <style>
 	.toolbar {

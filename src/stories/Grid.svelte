@@ -18,6 +18,10 @@
 	grid.load().then(() => {
 		grid = grid;
 	});
+	store.onrefresh((data: any[]) => {
+		grid.loadFromData(data);
+		grid = grid;
+	});
 	async function sortBy(sortBy: string) {
 		config.sort.field = sortBy;
 		config.sort.order = config.sort.order === 'asc' ? 'desc' : 'asc';
@@ -32,6 +36,7 @@
 		await grid.loadNextPage();
 		grid = grid;
 	}
+
 </script>
 
 <table>
@@ -142,5 +147,8 @@
 	}
 	:global(div[role='group'] button + button) {
 		margin-left: 0px;
+	}
+	:global(div[role='group']) {
+		white-space: nowrap;
 	}
 </style>

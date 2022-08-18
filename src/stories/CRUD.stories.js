@@ -27,8 +27,8 @@ PreguntasApi.args = {
     headers: [
       {
         label: 'ID',
-        value: 'id',
-        sortBy: 'id',
+        value: 'attributes.number',
+        sortBy: 'number',
         align: 'center'
       },
       {
@@ -52,14 +52,14 @@ PreguntasApi.args = {
       },
       {
         label: '',
-        value: '["edit"]',
+        value: '["edit","delete"]',
         sortBy: '',
         align: 'center',
         control: 'actions',
       },
     ],
     sort: {
-      field: 'id',
+      field: 'number',
       order: 'asc'
     }
   },
@@ -79,8 +79,8 @@ PreguntasApi.args = {
       {
         control: 'TextBox',
         type: 'number',
-        name: 'id',
-        placeholder: 'id',
+        name: 'attributes.number',
+        placeholder: 'attributes.number',
       },
     ],
     [
@@ -106,6 +106,14 @@ PreguntasApi.args = {
         name: 'attributes.descripcion',
         placeholder: 'descripcion',
         rows: 4,
+      },
+    ],
+    [
+      {
+        control: 'TextBox',
+        type: 'text',
+        name: 'attributes.tipo_credito',
+        placeholder: 'tipo_credito',
       },
     ],
   ],
