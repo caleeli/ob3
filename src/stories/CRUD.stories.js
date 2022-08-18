@@ -31,7 +31,7 @@ PreguntasApi.args = {
         align: 'center'
       },
       {
-        label: 'ID Grupo',
+        label: 'Grupo',
         value: 'attributes.id_grupo',
         align: 'center'
       },
@@ -75,7 +75,7 @@ PreguntasApi.args = {
         control: 'TextBox',
         type: 'number',
         name: 'attributes.number',
-        placeholder: 'attributes.number',
+        label: '# línea',
       },
     ],
     [
@@ -83,7 +83,7 @@ PreguntasApi.args = {
         control: 'TextBox',
         type: 'number',
         name: 'attributes.id_grupo',
-        placeholder: 'id_grupo',
+        label: 'Grupo',
       },
     ],
     [
@@ -91,7 +91,7 @@ PreguntasApi.args = {
         control: 'TextBox',
         type: 'text',
         name: 'attributes.indice',
-        placeholder: 'indice',
+        label: 'Índice',
       },
     ],
     [
@@ -99,7 +99,7 @@ PreguntasApi.args = {
         control: 'TextArea',
         type: 'text',
         name: 'attributes.descripcion',
-        placeholder: 'descripcion',
+        label: 'Descripción',
         rows: 4,
       },
     ],
@@ -108,7 +108,7 @@ PreguntasApi.args = {
         control: 'TextBox',
         type: 'text',
         name: 'attributes.tipo_credito',
-        placeholder: 'tipo_credito',
+        label: 'Tipo de crédito',
       },
     ],
   ],

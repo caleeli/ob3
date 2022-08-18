@@ -48,7 +48,7 @@
 <form class={`${border ? 'section' : ''} ${blur ? 'blur-background' : ''}`}>
 	<h2>{title}</h2>
 	{#each content as row}
-		<div class="wrapper">
+		<div class="form-row">
 			{#each row as cell}
 				{#if cell.control === 'TextBox'}
 					<div>
@@ -111,14 +111,14 @@
 		margin: 0.2rem 0rem;
 		display: block;
 	}
-	div.wrapper {
+	div.form-row {
 		margin-top: 1rem;
 		display: flex;
 		flex-direction: row;
 		flex-wrap: nowrap;
 		align-items: center;
 	}
-	div.wrapper > * {
+	div.form-row > * {
 		flex-grow: 1;
 		margin: 0rem 1rem 0rem 0rem;
 		display: inline-block;
