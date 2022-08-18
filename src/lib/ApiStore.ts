@@ -32,6 +32,10 @@ class ApiStore implements StoreInterface {
             data = record;
         }
         const response = await fetch(url.toString(), { method: 'POST', body: JSON.stringify(data) });
+        if (!(response.status >= 200 && response.status < 300)) {
+            const json = await response.json();
+            throw new Error(json.error || response.statusText);
+        }
         return response;
     }
     async update(id: number | string, record: any): Promise<any> {
@@ -43,6 +47,10 @@ class ApiStore implements StoreInterface {
             data = record;
         }
         const response = await fetch(url.toString() + '/' + id, { method: 'PUT', body: JSON.stringify(data) });
+        if (!(response.status >= 200 && response.status < 300)) {
+            const json = await response.json();
+            throw new Error(json.error || response.statusText);
+        }
         return response;
     }
     async get(offset?: number): Promise<any[]> {

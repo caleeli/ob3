@@ -69,47 +69,96 @@ PreguntasApi.args = {
       filter: ['tipo_credito(2)']
     },
   }),
-  create: [
-    [
-      {
-        control: 'TextBox',
-        type: 'number',
-        name: 'attributes.number',
-        label: '# línea',
+  toolbar: [
+    {
+      icon: 'add',
+      label: 'Agregar',
+      action: 'add',
+      initial: {
+        attributes: {
+          number: '',
+          id_grupo: '',
+          indice: '',
+          descripcion: '',
+          tipo_credito: 2,
+        }
       },
-    ],
-    [
-      {
-        control: 'TextBox',
-        type: 'number',
-        name: 'attributes.id_grupo',
-        label: 'Grupo',
-      },
-    ],
-    [
-      {
-        control: 'TextBox',
-        type: 'text',
-        name: 'attributes.indice',
-        label: 'Índice',
-      },
-    ],
-    [
-      {
-        control: 'TextArea',
-        type: 'text',
-        name: 'attributes.descripcion',
-        label: 'Descripción',
-        rows: 4,
-      },
-    ],
-    [
-      {
-        control: 'TextBox',
-        type: 'text',
-        name: 'attributes.tipo_credito',
-        label: 'Tipo de crédito',
-      },
-    ],
+      form: [
+        [
+          {
+            control: 'TextBox',
+            type: 'number',
+            name: 'attributes.number',
+            label: '# línea',
+          },
+        ],
+        [
+          {
+            control: 'TextBox',
+            type: 'number',
+            name: 'attributes.id_grupo',
+            label: 'Grupo',
+          },
+        ],
+        [
+          {
+            control: 'TextBox',
+            type: 'text',
+            name: 'attributes.indice',
+            label: 'Índice',
+          },
+        ],
+        [
+          {
+            control: 'TextArea',
+            type: 'text',
+            name: 'attributes.descripcion',
+            label: 'Descripción',
+            rows: 4,
+          },
+        ],
+      ],
+    }
+  ],
+  rowActions: [
+    {
+      label: '',
+      action: 'edit',
+      form: [
+        [
+          {
+            control: 'TextBox',
+            type: 'number',
+            name: 'attributes.number',
+            label: '# línea',
+          },
+        ],
+        [
+          {
+            control: 'TextBox',
+            type: 'number',
+            name: 'attributes.id_grupo',
+            label: 'Grupo',
+          },
+        ],
+        [
+          {
+            control: 'TextBox',
+            type: 'text',
+            name: 'attributes.indice',
+            label: 'Índice',
+          },
+        ],
+        [
+          {
+            control: 'TextArea',
+            type: 'text',
+            name: 'attributes.descripcion',
+            label: 'Descripción',
+            rows: 4,
+          },
+        ],
+      ],
+    }
   ],
 };
