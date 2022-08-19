@@ -1,17 +1,20 @@
 import ApiStore from '../lib/ApiStore';
-import { within, userEvent } from '@storybook/testing-library';
 import TreeView from './TreeView.svelte';
 
 export default {
   title: 'Example/TreeView',
   component: TreeView,
-  parameters: {
+  argTypes: {
+    select: { action: 'select' },
   },
 };
 
 const Template = (args) => ({
   Component: TreeView,
   props: args,
+  on: {
+    select: args.select,
+  },
 });
 
 /**

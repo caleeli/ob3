@@ -1,17 +1,13 @@
-<script context="module">
-	// retain module scoped expansion state for each tree node
-	const _expansionState = {
-		/* treeNodeId: expanded <boolean> */
-	};
-</script>
-
 <script lang="ts">
 	import type StoreInterface from '../lib/StoreInterface';
-
+	import { createEventDispatcher } from 'svelte';
 	import '../lib/icons/FluentSystemIcons-Regular.css';
-	import type TreeNode from '$lib/TreeNode';
+	import type TreeNode from '../lib/TreeNode';
+
+	const dispatch = createEventDispatcher();
 
 	export let store: StoreInterface;
+	export let root_node: string = 'root';
 	export let is_root = true;
 	export let editable = false;
 	export let tree: TreeNode = {
@@ -53,11 +49,13 @@
 		unselectChildren(root);
 		node.selected = true;
 		tree = tree;
+		dispatch('select', node);
 	};
 	function selectOne(node: TreeNode) {
 		root.selected = false;
 		unselectChildren(root);
 		node.selected = true;
+		dispatch('select', node.data);
 		tree = tree;
 	}
 	function unselectChildren(node: TreeNode) {
@@ -75,7 +73,7 @@
 		store.get().then((data) => {
 			root = row2node(
 				{
-					id: 'root'
+					id: root_node
 				},
 				data
 			);
@@ -105,7 +103,6 @@
 						bind:value={tree.label}
 						size={Math.max(5, tree.label.length)}
 						on:click|stopPropagation={() => selectOne(tree)}
-						on:dblclick={expand}
 					/>
 				{:else}
 					<span class="node-name">{tree.label}</span>
@@ -113,7 +110,7 @@
 			</div>
 			{#if tree.open}
 				{#each tree.children as child}
-					<svelte:self bind:tree={child} is_root={false} bind:root />
+					<svelte:self bind:tree={child} is_root={false} bind:root on:select />
 				{/each}
 			{/if}
 		{:else}

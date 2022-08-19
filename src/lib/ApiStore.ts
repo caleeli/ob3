@@ -9,7 +9,7 @@ class ApiStore implements StoreInterface {
     public sort_direction: 'asc' | 'desc' = 'asc';
     private listeners: ((data: any[]) => void)[] = [];
 
-    constructor(private config: { url: string, root: string, query?: any, limit?: number }) { }
+    constructor(private config: { url: string, root?: string, query?: any, limit?: number }) { }
     async delete(id: string | number): Promise<any> {
         const url = new URL(this.config.url);
         const response = await fetch(url.toString() + '/' + id, { method: 'DELETE' });
@@ -56,7 +56,7 @@ class ApiStore implements StoreInterface {
     async get(offset?: number): Promise<any[]> {
         const url = new URL(this.config.url);
         const params = this.config.query;
-        this.limit = this.config.limit;
+        this.limit = this.config.limit === undefined ? this.limit : this.config.limit;
         if (offset !== undefined) {
             this.offset = offset;
         }
