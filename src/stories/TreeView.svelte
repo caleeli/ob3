@@ -30,8 +30,12 @@
 		open: true,
 		color: 'black'
 	};
+	export let converter: (
+		currentRow: any,
+		allRows: any[],
+		converter: (currentRow: any, allRows: any[]) => TreeNode
+	) => TreeNode;
 
-	let expanded = _expansionState[tree.label] || true;
 	let icons: { [key: string]: string } = {
 		undefined: 'home',
 		'': 'home',
@@ -50,9 +54,6 @@
 		node.selected = true;
 		tree = tree;
 	};
-	const expand = () => {
-		expanded = true;
-	};
 	function selectOne(node: TreeNode) {
 		root.selected = false;
 		unselectChildren(root);
@@ -67,25 +68,8 @@
 			});
 		}
 	}
-	function row2node(
-		row: {
-			id: string;
-			attributes?: { text: string; parent: string; type?: string; leaf?: boolean };
-		},
-		data: any[]
-	): TreeNode {
-		const children = data
-			.filter((row_i) => row_i.attributes.parent == row.id)
-			.map((row) => row2node(row, data));
-		return {
-			label: row.attributes?.text || '',
-			children,
-			selected: false,
-			open: true,
-			icon: children.length ? 'folder' : 'app_generic',
-			color: children.length ? 'orangered' : 'steelblue',
-			data: row
-		};
+	function row2node(currentRow: any, allRows: any[]): TreeNode {
+		return converter(currentRow, allRows, row2node);
 	}
 	if (store) {
 		store.get().then((data) => {
@@ -133,7 +117,10 @@
 				{/each}
 			{/if}
 		{:else}
-			<div on:click|stopPropagation={() => selectOne(tree)} class={`${(tree.selected && 'selected') || ''}`}>
+			<div
+				on:click|stopPropagation={() => selectOne(tree)}
+				class={`${(tree.selected && 'selected') || ''}`}
+			>
 				{#if editable}
 					<input type="checkbox" on:click|stopPropagation bind:checked={tree.selected} />
 				{/if}
@@ -186,6 +173,6 @@
 		/* transition: transform 200ms; */
 	}
 	.selected {
-		background: hsl(var(--fds-accent-light-3))!important;
+		background: hsl(var(--fds-accent-light-3)) !important;
 	}
 </style>

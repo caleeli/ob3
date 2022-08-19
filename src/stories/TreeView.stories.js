@@ -14,6 +14,27 @@ const Template = (args) => ({
   props: args,
 });
 
+/**
+ * @param {any} currentRow
+ * @param {any} allRows
+ * @param {(arg0: any, arg1: any[]) => any} converter
+ *
+ * @returns {any}
+ */
+function menu2node(currentRow, allRows, converter) {
+  const children = allRows
+    .filter((/** @type {any} */ row_i) => row_i.attributes.parent == currentRow.id)
+    .map((/** @type {any} */ row) => converter(row, allRows));
+  return {
+    label: currentRow.attributes?.text || '',
+    children,
+    selected: false,
+    open: true,
+    icon: children.length ? 'folder' : 'app_generic',
+    color: children.length ? 'orangered' : 'steelblue',
+    data: currentRow
+  };
+}
 export const Simple = Template.bind({});
 Simple.args = {
   store: new ApiStore({
@@ -23,4 +44,5 @@ Simple.args = {
       per_page: 200,
     },
   }),
+  converter: menu2node
 };
