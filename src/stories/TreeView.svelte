@@ -1,0 +1,191 @@
+<script context="module">
+	// retain module scoped expansion state for each tree node
+	const _expansionState = {
+		/* treeNodeId: expanded <boolean> */
+	};
+</script>
+
+<script lang="ts">
+	import type StoreInterface from '../lib/StoreInterface';
+
+	import '../lib/icons/FluentSystemIcons-Regular.css';
+	import type TreeNode from '$lib/TreeNode';
+
+	export let store: StoreInterface;
+	export let is_root = true;
+	export let editable = false;
+	export let tree: TreeNode = {
+		label: '',
+		children: [],
+		selected: false,
+		icon: '',
+		open: true,
+		color: 'black'
+	};
+	export let root: TreeNode = {
+		label: '',
+		children: [],
+		selected: false,
+		icon: '',
+		open: true,
+		color: 'black'
+	};
+
+	let expanded = _expansionState[tree.label] || true;
+	let icons: { [key: string]: string } = {
+		undefined: 'home',
+		'': 'home',
+		folder: 'folder',
+		file: 'file',
+		component: 'cube',
+		building: 'box-open',
+		processor: 'microchip',
+		call_processor: 'download',
+		import: 'file-import'
+	};
+	const toggleExpansion = (node: TreeNode) => {
+		node.open = !node.open;
+		tree = tree;
+	};
+	const expand = () => {
+		expanded = true;
+	};
+	function selectOne(node: TreeNode) {
+		root.selected = false;
+		unselectChildren(root);
+		node.selected = true;
+		root = root;
+	}
+	function unselectChildren(node) {
+		if (node.children) {
+			node.children.forEach((child) => {
+				child.selected = false;
+				unselectChildren(child);
+			});
+		}
+	}
+	$: arrowDown = expanded;
+	function row2node(
+		row: {
+			id: string;
+			attributes?: { text: string; parent: string; type?: string; leaf?: boolean };
+		},
+		data: any[]
+	): TreeNode {
+		const children = data
+			.filter((row_i) => row_i.attributes.parent == row.id)
+			.map((row) => row2node(row, data));
+		return {
+			label: row.attributes?.text || '',
+			children,
+			selected: false,
+			open: true,
+			icon: children.length ? 'folder' : 'app_generic',
+			color: children.length ? 'orangered' : 'steelblue',
+			data: row
+		};
+	}
+	if (store) {
+		store.get().then((data) => {
+			tree = row2node(
+				{
+					id: 'root'
+				},
+				data
+			);
+		});
+	}
+</script>
+
+<ul class={is_root ? 'root' : 'child'}>
+	<!-- transition:slide -->
+	<li>
+		{#if tree.children && tree.children.length > 0}
+			<div on:click={() => toggleExpansion(tree)} class={`${(tree.selected && 'selected') || ''}`}>
+				<i
+					class={`icon icon-ic_fluent_${tree.open ? 'chevron_down' : 'chevron_right'}_20_regular`}
+				/>
+				{#if editable}
+					<input type="checkbox" on:click|stopPropagation bind:checked={tree.selected} />
+				{/if}
+				<i
+					class={`icon icon-ic_fluent_${icons[tree.icon] || tree.icon}_20_regular`}
+					style={`color: ${tree.color};`}
+				/>
+				{#if editable}
+					<input
+						class="node-name"
+						bind:value={tree.label}
+						size={Math.max(5, tree.label.length)}
+						on:click|stopPropagation={() => selectOne(tree)}
+						on:dblclick={expand}
+					/>
+				{:else}
+					<span class="node-name">{tree.label}</span>
+				{/if}
+			</div>
+			{#if tree.open}
+				{#each tree.children as child}
+					<svelte:self bind:tree={child} is_root={false} />
+				{/each}
+			{/if}
+		{:else}
+			<div>
+				{#if editable}
+					<input type="checkbox" on:click|stopPropagation bind:checked={tree.selected} />
+				{/if}
+				<i
+					class={`icon icon-ic_fluent_${icons[tree.icon] || tree.icon}_20_regular`}
+					style={`color: ${tree.color};`}
+				/>
+				{#if editable}
+					<input
+						class="node-name"
+						bind:value={tree.label}
+						size={Math.max(5, tree.label.length)}
+						on:click|stopPropagation={() => selectOne(tree)}
+					/>
+				{:else}
+					<span class="node-name">{tree.label}</span>
+				{/if}
+			</div>
+		{/if}
+	</li>
+</ul>
+
+<style>
+	ul.root {
+		margin: 0;
+		padding: 0;
+	}
+	ul.child {
+		margin: 0 0 0 0.5rem;
+		padding-left: 0.7rem;
+		border-left: 1px dashed var(--fds-control-strong-fill-default);
+	}
+	ul {
+		list-style: none;
+		user-select: none;
+		cursor: pointer;
+	}
+	li > div {
+		white-space: nowrap;
+	}
+	li > div:hover {
+		background-color: var(--fds-solid-background-secondary);
+	}
+	.no-arrow {
+		padding-left: 1rem;
+	}
+	.arrow {
+		cursor: pointer;
+		display: inline-block;
+		/* transition: transform 200ms; */
+	}
+	.arrowDown {
+		transform: rotate(90deg);
+	}
+	.selected {
+		background: #eee;
+	}
+</style>

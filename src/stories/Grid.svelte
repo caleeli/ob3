@@ -112,6 +112,7 @@
 		width: 100%;
 		font-size: var(--fds-body-font-size);
 		cursor: default;
+		empty-cells: show;
 	}
 	th {
 		padding: 0.5rem;
@@ -119,6 +120,7 @@
 		top: 0;
 		background-color: #fff;
 		white-space: nowrap;
+		z-index: 1;
 	}
 	th:hover {
 		background-color: var(--fds-solid-background-secondary);
