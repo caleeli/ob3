@@ -45,6 +45,9 @@
 	};
 	const toggleExpansion = (node: TreeNode) => {
 		node.open = !node.open;
+		root.selected = false;
+		unselectChildren(root);
+		node.selected = true;
 		tree = tree;
 	};
 	const expand = () => {
@@ -54,9 +57,9 @@
 		root.selected = false;
 		unselectChildren(root);
 		node.selected = true;
-		root = root;
+		tree = tree;
 	}
-	function unselectChildren(node) {
+	function unselectChildren(node: TreeNode) {
 		if (node.children) {
 			node.children.forEach((child) => {
 				child.selected = false;
@@ -64,7 +67,6 @@
 			});
 		}
 	}
-	$: arrowDown = expanded;
 	function row2node(
 		row: {
 			id: string;
@@ -87,12 +89,13 @@
 	}
 	if (store) {
 		store.get().then((data) => {
-			tree = row2node(
+			root = row2node(
 				{
 					id: 'root'
 				},
 				data
 			);
+			tree = root;
 		});
 	}
 </script>
@@ -126,11 +129,11 @@
 			</div>
 			{#if tree.open}
 				{#each tree.children as child}
-					<svelte:self bind:tree={child} is_root={false} />
+					<svelte:self bind:tree={child} is_root={false} bind:root />
 				{/each}
 			{/if}
 		{:else}
-			<div>
+			<div on:click|stopPropagation={() => selectOne(tree)} class={`${(tree.selected && 'selected') || ''}`}>
 				{#if editable}
 					<input type="checkbox" on:click|stopPropagation bind:checked={tree.selected} />
 				{/if}
@@ -182,10 +185,7 @@
 		display: inline-block;
 		/* transition: transform 200ms; */
 	}
-	.arrowDown {
-		transform: rotate(90deg);
-	}
 	.selected {
-		background: #eee;
+		background: hsl(var(--fds-accent-light-3))!important;
 	}
 </style>
