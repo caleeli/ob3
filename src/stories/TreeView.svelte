@@ -159,7 +159,7 @@
 		white-space: nowrap;
 	}
 	li > div:hover {
-		background-color: var(--fds-solid-background-secondary);
+		background-color: var(--fds-solid-background-tertiary);
 	}
 	.no-arrow {
 		padding-left: 1rem;
@@ -170,6 +170,6 @@
 		/* transition: transform 200ms; */
 	}
 	.selected {
-		background: hsl(var(--fds-accent-light-3)) !important;
+		background: var(--fds-solid-background-secondary);
 	}
 </style>

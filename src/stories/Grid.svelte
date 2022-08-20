@@ -38,10 +38,8 @@
 		grid = grid;
 	}
 	function toggleRowGroup(row: number, rows: number) {
-		console.log(row, rows);
 		for (let r = row, l = row + rows; r < l; r++) {
 			grid.rowGroup[r].open = !grid.rowGroup[r].open;
-			console.log(grid.rowGroup[r].open);
 		}
 		grid = grid;
 	}
@@ -160,7 +158,7 @@
 		padding: 0.5rem;
 	}
 	tr:hover td {
-		background-color: var(--fds-solid-background-secondary);
+		background-color: var(--fds-solid-background-tertiary);
 	}
 	tr.active td {
 		background-color: var(--fds-solid-background-secondary);
