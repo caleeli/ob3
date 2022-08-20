@@ -149,7 +149,7 @@ PreguntasApi.args = {
   config: {
     headers: [
       {
-        label: 'ID Grupo',
+        label: 'Grupo',
         value: 'attributes.id_grupo',
         sortable: true,
         field: 'id_grupo',
