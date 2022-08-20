@@ -4,26 +4,70 @@ import type StoreInterface from "./StoreInterface";
 class Grid {
 	private config: GridConfig;
 	public cell: any[][] = [];
+	public rowGroup: { open: boolean; }[] = [];
 	private data: any[] = [];
 	public store: StoreInterface;
 	public error = "";
+	public sortBy: { field: string, direction: 'asc' | 'desc' }[] = [];
 	// Constructor
 	constructor(config: GridConfig, store: StoreInterface) {
 		this.config = config;
 		this.store = store;
-		store.setSort(config.sort.field, config.sort.order);
+		// Initialize sort columns
+		this.sortBy = this.config.headers.filter((header: any) => header.groupRows)
+			.map((header: any) => ({ field: header.field, direction: 'asc' }));
+		this.config.sort.forEach((sortConfig: {
+			field: string;
+			direction: 'asc' | 'desc';
+		}) => {
+			const col = this.sortBy.find((col): boolean => col.field === sortConfig.field);
+			if (col) {
+				col.direction = sortConfig.direction;
+			} else {
+				this.sortBy.push({ field: sortConfig.field, direction: sortConfig.direction });
+			}
+		});
+		store.setSort(this.sortBy);
+	}
+
+	public async toggleSort(field: string) {
+		const isGrouped = this.config.headers.find((header: any) => header.groupRows && header.field === field);
+		const col = this.sortBy.find((col): boolean => col.field === field);
+		if (!col) {
+			this.sortBy.push({ field, direction: 'asc' });
+		} else if (!isGrouped && col.direction === 'desc') {
+			this.sortBy.splice(this.sortBy.indexOf(col), 1);
+		} else {
+			col.direction = col.direction === 'asc' ? 'desc' : 'asc';
+		}
+		const data = await this.store.sort(this.sortBy);
+		this.cleanCells();
+		this.hydrate(data);
+	}
+
+	public getDirection(field: string | undefined): "asc" | "desc" | null {
+		const col = this.sortBy.find((col): boolean => col.field === field);
+		if (!col) {
+			return null;
+		}
+		return col.direction;
 	}
 
 	public async load() {
 		const data = await this.store.get(0);
-		this.cell.splice(0);
+		this.cleanCells();
 		this.hydrate(data);
 	}
 
 	public async loadFromData(data: any[]) {
 		this.data.splice(0);
-		this.cell.splice(0);
+		this.cleanCells();
 		this.hydrate(data);
+	}
+
+	private cleanCells() {
+		this.cell.splice(0);
+		this.rowGroup.splice(0);
 	}
 
 	public async loadNextPage() {
@@ -41,6 +85,7 @@ class Grid {
 					rowCell.push(value);
 				});
 				this.cell.push(rowCell);
+				this.rowGroup.push({ open: true });
 			});
 		} catch (error) {
 			this.error = String(error);
@@ -70,12 +115,6 @@ class Grid {
 			}
 		});
 		return value;
-	}
-
-	public async sort(field: string, direction: 'asc' | 'desc'): Promise<void> {
-		const data = await this.store.sort(field, direction);
-		this.cell.splice(0);
-		this.hydrate(data);
 	}
 
 	private calcValue(header: any, dataRow: any): string {
@@ -113,7 +152,7 @@ class Grid {
 			return 1;
 		}
 		const colsCount = this.cell[row].length;
-		let colspan = 0;
+		let colspan = -1;
 		const value = this.cell[row][col];
 		for (; col < colsCount; col++) {
 			if (this.cell[row][col] === value) {

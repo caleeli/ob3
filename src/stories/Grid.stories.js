@@ -1,4 +1,4 @@
-import ApiStore from '../lib/ApiStore';
+import ApiStore, { JSONApiSortHandler } from '../lib/ApiStore';
 import ArrayStore from '../lib/ArrayStore';
 import Grid from './Grid.svelte';
 
@@ -27,19 +27,22 @@ FromArray.args = {
       {
         label: 'Name',
         value: 'attributes.name',
-        sortBy: 'attributes.name',
+        sortable: true,
+        field: 'attributes.name',
         align: 'left'
       },
       {
         label: 'Age',
         value: 'attributes.age',
-        sortBy: 'attributes.age',
+        sortable: true,
+        field: 'attributes.age',
         align: 'center'
       },
       {
         label: 'Double Age',
         value: 'attributes.age*2',
-        sortBy: 'attributes.age',
+        sortable: true,
+        field: 'attributes.age',
         align: 'center'
       },
       {
@@ -55,10 +58,7 @@ FromArray.args = {
         align: 'center'
       }
     ],
-    sort: {
-      field: '',
-      order: 'asc'
-    }
+    sort: []
   },
   store: new ArrayStore([
     { attributes: { name: 'Jimmy Mcgill', age: 45 } },
@@ -74,19 +74,22 @@ FromApi.args = {
       {
         label: 'ID',
         value: 'id',
-        sortBy: 'id',
+        sortable: true,
+        field: 'id',
         align: 'left'
       },
       {
         label: 'First Name',
         value: 'first_name',
-        sortBy: 'first_name',
+        sortable: true,
+        field: 'first_name',
         align: 'left'
       },
       {
         label: 'Last name',
         value: 'last_name',
-        sortBy: 'last_name',
+        sortable: true,
+        field: 'last_name',
         align: 'left'
       },
       {
@@ -101,10 +104,7 @@ FromApi.args = {
         align: 'center'
       }
     ],
-    sort: {
-      field: '',
-      order: 'asc'
-    }
+    sort: []
   },
   store: new ApiStore({
     url: 'https://random-data-api.com/api/users/random_user?size=5',
@@ -119,20 +119,19 @@ PokemonApi.args = {
       {
         label: 'Name',
         value: 'name',
-        sortBy: 'name',
+        sortable: true,
+        field: 'name',
         align: 'left'
       },
       {
         label: 'URL',
         value: 'url',
-        sortBy: 'url',
+        sortable: true,
+        field: 'url',
         align: 'left'
       },
     ],
-    sort: {
-      field: '',
-      order: 'asc'
-    }
+    sort: []
   },
   store: new ApiStore({
     url: 'https://pokeapi.co/api/v2/pokemon',
@@ -150,44 +149,49 @@ PreguntasApi.args = {
   config: {
     headers: [
       {
-        label: 'ID',
-        value: 'id',
-        sortBy: 'id',
+        label: 'ID Grupo',
+        value: 'attributes.id_grupo',
+        sortable: true,
+        field: 'id_grupo',
+        groupRows: true,
         align: 'center'
       },
       {
-        label: 'ID Grupo',
-        value: 'attributes.id_grupo',
-        sortBy: 'id_grupo',
+        label: '#',
+        value: 'attributes.number',
+        sortable: true,
+        field: 'number',
         align: 'center'
       },
       {
         label: 'Indice',
         value: 'attributes.indice',
-        sortBy: 'indice',
+        sortable: true,
+        field: 'indice',
         align: 'left'
       },
       {
         label: 'Descripción',
         value: 'attributes.descripcion',
-        sortBy: 'descripcion',
+        sortable: true,
+        field: 'descripcion',
         align: 'left',
         width: '100%',
       },
     ],
-    sort: {
-      field: 'id',
-      order: 'asc'
-    }
+    sort: [{
+      field: 'number',
+      direction: 'asc'
+    }]
   },
   store: new ApiStore({
     url: 'http://localhost/projects/callizaya2/public/api.php/ob3/preguntas',
     root: 'data',
-    limit: 20,
+    limit: 200,
     query: {
       per_page: (/** @type {{ limit: number; }} */{ limit }) => limit,
       page: (/** @type {{ offset: number; limit: number; }} */{ offset, limit }) => offset / limit + 1,
-      sort: (/** @type {{ sort_field: string; sort_direction: string; }} */{ sort_field, sort_direction }) => (sort_direction==='desc'?'-':'') + sort_field,
+      sort: JSONApiSortHandler,
       filter: ['tipo_credito(2)']
     },
   }),

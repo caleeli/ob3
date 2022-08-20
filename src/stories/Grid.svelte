@@ -22,10 +22,11 @@
 		grid.loadFromData(data);
 		grid = grid;
 	});
-	async function sortBy(sortBy: string) {
-		config.sort.field = sortBy;
-		config.sort.order = config.sort.order === 'asc' ? 'desc' : 'asc';
-		await grid.sort(config.sort.field, config.sort.order);
+	async function toggleSort(sortBy: string | undefined) {
+		if (!sortBy) {
+			return;
+		}
+		await grid.toggleSort(sortBy);
 		grid = grid;
 	}
 	async function doAction(action: string, row: number) {
@@ -36,7 +37,14 @@
 		await grid.loadNextPage();
 		grid = grid;
 	}
-
+	function toggleRowGroup(row: number, rows: number) {
+		console.log(row, rows);
+		for (let r = row, l = row + rows; r < l; r++) {
+			grid.rowGroup[r].open = !grid.rowGroup[r].open;
+			console.log(grid.rowGroup[r].open);
+		}
+		grid = grid;
+	}
 </script>
 
 <table>
@@ -45,29 +53,42 @@
 			<th
 				align={header.align || 'left'}
 				width={header.width || ''}
-				on:click={() => header.sortBy && sortBy(header.sortBy)}
+				on:click={() => header.sortable && toggleSort(header.field)}
 			>
 				{header.label}
 				<i
 					class={`icon icon-ic_fluent_arrow_sort_${
-						config.sort.order === 'desc' ? 'down' : 'up'
-					}_16_regular ${config.sort.field === header.sortBy ? 'visible' : 'hidden'}`}
+						grid.getDirection(header.field) === 'desc' ? 'down' : 'up'
+					}_16_regular ${grid.getDirection(header.field) ? 'visible' : 'hidden'}`}
 				/>
 			</th>
 		{/each}
 	</tr>
 	{#if grid}
 		{#each grid.cell as data, row}
-			<tr
-				class={active == row ? 'active' : ''}
-				on:click={() => (active = active === row ? -1 : row)}
-			>
+			{#if grid.cell[row] && grid.firstInGroup(row, 0)}
+				<tr>
+					<td
+						colspan={config.headers.length}
+						rowspan="1"
+						on:click={() => toggleRowGroup(row, grid.rowspan(row, 0))}
+					>
+						<i
+							class={`icon icon-ic_fluent_${
+								grid.rowGroup[row].open ? 'chevron_down' : 'chevron_right'
+							}_20_regular`}
+						/>
+						{grid.formatted(row, 0)}
+					</td>
+				</tr>
+			{/if}
+			<tr class={`${active == row ? 'active' : ''} ${grid.rowGroup[row].open ? '' : 'closed'}`}>
 				{#each config.headers as header, col}
-					{#if grid.cell[row] && grid.firstInGroup(row, col)}
+					{#if grid.cell[row]}
 						<td
+							class={`${config.headers[col].groupRows ? 'grouped' : ''}`}
 							align={header.align}
-							rowspan={grid.rowspan(row, col)}
-							colspan={grid.colspan(row, col)}
+							on:click={() => (active = active === row ? -1 : row)}
 						>
 							{#if header.control === 'actions'}
 								<div role="group">
@@ -123,7 +144,7 @@
 		z-index: 1;
 	}
 	th:hover {
-		background-color: var(--fds-solid-background-secondary);
+		background-color: var(--fds-solid-background-base);
 		-webkit-user-select: none;
 		-khtml-user-select: none;
 		-moz-user-select: -moz-none;
@@ -141,8 +162,11 @@
 	tr:hover td {
 		background-color: var(--fds-solid-background-secondary);
 	}
-	tr.active {
-		outline: -webkit-focus-ring-color auto 1px;
+	tr.active td {
+		background-color: var(--fds-solid-background-secondary);
+	}
+	tr.closed {
+		display: none;
 	}
 	.error {
 		color: red;
@@ -152,5 +176,8 @@
 	}
 	:global(div[role='group']) {
 		white-space: nowrap;
+	}
+	.grouped {
+		opacity: 0;
 	}
 </style>

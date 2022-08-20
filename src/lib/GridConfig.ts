@@ -3,7 +3,8 @@ class GridConfig {
 	public headers: {
 		label: string;
 		value: string;
-		sortBy?: string;
+		field?: string;
+		sortable?: boolean;
 		align: 'left' | 'right' | 'center';
 		control?: 'text' | 'select' | 'checkbox' | 'radio' | 'date' | 'time' | 'datetime' | 'actions';
 		width?: string;
@@ -13,11 +14,8 @@ class GridConfig {
 	}[] = [];
 	public sort: {
 		field: string;
-		order: 'asc' | 'desc';
-	} = {
-			field: '',
-			order: 'asc',
-		};
+		direction: 'asc' | 'desc';
+	}[] = [];
 }
 
 export default GridConfig;

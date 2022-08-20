@@ -5,7 +5,7 @@ class ArrayStore implements StoreInterface {
 
     constructor(private array: any[]) {
     }
-    setSort(field: string, direction: "asc" | "desc"): void {
+    setSort(sort: { field: string, direction: 'asc' | 'desc' }[]): void {
         console.warn("Method not implemented.");
     }
     delete(id: string | number): Promise<any> {
@@ -20,7 +20,7 @@ class ArrayStore implements StoreInterface {
     create(record: any): Promise<any> {
         throw new Error("Method not implemented.");
     }
-    update(id: number|string, record: any): Promise<any> {
+    update(id: number | string, record: any): Promise<any> {
         throw new Error("Method not implemented.");
     }
     async get(): Promise<any[]> {
@@ -32,7 +32,9 @@ class ArrayStore implements StoreInterface {
     async length(): Promise<number> {
         return this.array.length;
     }
-    async sort(field: string, order: 'asc' | 'desc'): Promise<any[]> {
+    async sort(sort: { field: string, direction: 'asc' | 'desc' }[]): Promise<any[]> {
+        const field = sort[0].field;
+        const order = sort[0].direction;
         this.array.sort((a, b) => {
             if (get(a, field) < get(b, field)) {
                 return order === 'asc' ? -1 : 1;

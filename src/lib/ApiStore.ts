@@ -5,8 +5,7 @@ class ApiStore implements StoreInterface {
     private array: any[] = [];
     public offset = 0;
     public limit = 10;
-    public sort_field = '';
-    public sort_direction: 'asc' | 'desc' = 'asc';
+    public sortBy: { field: string, direction: 'asc' | 'desc' }[] = []
     private listeners: ((data: any[]) => void)[] = [];
 
     constructor(private config: { url: string, root?: string, query?: any, limit?: number }) { }
@@ -90,15 +89,17 @@ class ApiStore implements StoreInterface {
     async length(): Promise<number> {
         return this.array.length;
     }
-    async sort(field: string, direction: 'asc' | 'desc'): Promise<any[]> {
-        this.sort_field = field;
-        this.sort_direction = direction;
+    async sort(sort: { field: string, direction: 'asc' | 'desc' }[]): Promise<any[]> {
+        this.sortBy = sort;
         return this.get(0);
     }
-    setSort(field: string, direction: "asc" | "desc"): void {
-        this.sort_field = field;
-        this.sort_direction = direction;
+    setSort(sort: { field: string, direction: 'asc' | 'desc' }[]): void {
+        this.sortBy = sort;
     }
 }
 
 export default ApiStore;
+
+export function JSONApiSortHandler(grid: { sortBy: { field: string; direction: 'asc' | 'desc' }[]; }): string {
+    return grid.sortBy.map(({ direction, field }) => `${direction === 'desc' ? '-' : ''} ${field}`).join(',');
+}
