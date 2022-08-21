@@ -15,13 +15,19 @@
 	let value: any[] = [];
 	let active: number = -1;
 	let grid = new Grid(config, store);
-	grid.load().then(() => {
-		grid = grid;
-	});
+	load();
 	store.onrefresh((data: any[]) => {
 		grid.loadFromData(data);
 		grid = grid;
 	});
+	async function load() {
+		try {
+		await grid.load();
+		} catch (err: any) {
+			grid.error = err.message || err;
+		}
+		grid = grid;
+	}
 	async function toggleSort(sortBy: string | undefined) {
 		if (!sortBy) {
 			return;

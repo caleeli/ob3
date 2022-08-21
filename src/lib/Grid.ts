@@ -54,9 +54,13 @@ class Grid {
 	}
 
 	public async load() {
-		const data = await this.store.get(0);
-		this.cleanCells();
-		this.hydrate(data);
+		try {
+			const data = await this.store.get(0);
+			this.cleanCells();
+			this.hydrate(data);
+		} catch (error) {
+			this.error = String(error);
+		}
 	}
 
 	public async loadFromData(data: any[]) {
