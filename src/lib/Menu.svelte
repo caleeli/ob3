@@ -7,7 +7,8 @@
 		url: 'menus',
 		root: 'data',
 		query: {
-			per_page: 200
+			per_page: 200,
+			sort: 'position'
 		}
 	});
 

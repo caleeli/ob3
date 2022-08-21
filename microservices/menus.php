@@ -16,9 +16,6 @@ class Menus
     public $where = [
         'and acl_id in (select permission from permissions where role_id=5)',
     ];
-    public $sort = [
-        '-position',
-    ];
 }
 
 return Menus::class;
