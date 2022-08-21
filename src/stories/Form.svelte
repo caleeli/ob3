@@ -35,10 +35,11 @@
 				inProgress.push(cell.action);
 				inProgress = inProgress;
 				const response = await cell.action();
-				inProgress = inProgress.filter((x) => x !== cell.action);
 				return response;
 			} catch (err: any) {
-				error = err.message;
+				error = err.message || err;
+			} finally {
+				inProgress = inProgress.filter((x) => x !== cell.action);
 			}
 		}
 		return true;
@@ -51,7 +52,7 @@
 >
 	<h2>{__(title)}</h2>
 	{#if error}
-		<InfoBar open={error != ''} message={error} severity="caution" class="form-error" />
+		<InfoBar open={error != ''} message={__(error)} severity="caution" class="form-error" />
 	{/if}
 	{#each content as row}
 		<div class="form-row">

@@ -66,7 +66,20 @@
 			{
 				control: 'Button',
 				variant: 'accent',
-				label: 'Change Password'
+				label: 'Change Password',
+				action: () => {
+					if (data.password !== data.confirm_password) {
+						return Promise.reject('Passwords do not match');
+					}
+					if (!data.password) {
+						return Promise.reject('Password is required');
+					}
+					return store.update(data.id, {
+						attributes: {
+							password: data.password
+						}
+					});
+				}
 			}
 		]
 	];
@@ -79,11 +92,15 @@
 		attributes: {
 			name: string;
 		};
+		password?: string;
+		confirm_password?: string;
 	} = {
 		id: '',
 		attributes: {
 			name: ''
-		}
+		},
+		password: '',
+		confirm_password: ''
 	};
 	login.subscribe(async (login: { attributes: { user_id: string } } | null) => {
 		if (login) {

@@ -9,6 +9,8 @@
     "Change Password": "Cambiar contraseña",
     "New Password": "Nueva contraseña",
     "Confirm Password": "Confirmar contraseña",
+    "Passwords do not match": "Las contraseñas no coinciden",
+    "Password is required": "La contraseña es obligatoria",
     "Log out": "Cerrar sesión",
     "Welcome, <b>:name</b>!": "¡Bienvenido, <b>:name</b>!",
     "Cancel": "Cancelar",

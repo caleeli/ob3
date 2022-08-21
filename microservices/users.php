@@ -10,6 +10,7 @@ class Users
     public $update = [
         'adusrnomb'=> ':name',
         'updated_at'=> 'now()',
+        'adusrpass'=> '${md5($password)}',
     ];
 }
 
