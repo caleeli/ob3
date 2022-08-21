@@ -2,7 +2,7 @@
 	import Menu from '../lib/Menu.svelte';
 </script>
 
-<center>
+<div class="logo">
 	<svg
 		width="256"
 		height="128"
@@ -24,4 +24,11 @@
 			fill-opacity="0.4"
 		/>
 	</svg>
-</center>
+</div>
+
+<style>
+	.logo {
+		text-align: center;
+		margin-top: 10rem;
+	}
+</style>

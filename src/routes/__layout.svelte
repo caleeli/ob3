@@ -1,14 +1,13 @@
 <script lang="ts">
 	import Header from '../stories/Header.svelte';
-	import { access_token } from '../store';
+	import { login } from '../store';
 	import Menu from '../lib/Menu.svelte';
 
-	let user: { name: any; token: string } | null = null;
-	access_token.subscribe((token) => {
-		if (token) {
+	let user: { name: any } | null = null;
+	login.subscribe((login: { attributes: { name: string } } | null): void => {
+		if (login) {
 			user = {
-				token: token,
-				name: 'Harry'
+				name: login.attributes.name
 			};
 		}
 	});
@@ -20,9 +19,9 @@
 	{#if user}
 		<Menu />
 	{/if}
-    <div class="content">
-        <slot />
-    </div>
+	<div class="content">
+		<slot />
+	</div>
 </main>
 
 <style>
@@ -52,8 +51,8 @@
 		}
 	}
 
-    .content {
+	.content {
 		flex-grow: 1;
-        padding: 1rem;
+		padding: 1rem;
 	}
 </style>

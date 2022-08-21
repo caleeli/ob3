@@ -1,5 +1,5 @@
 <?php
-
+require 'users.php';
 class Login
 {
     public $table = 'login';
@@ -7,6 +7,7 @@ class Login
     public $attributes = [
         'user_id' => 'user_id',
         'username' => 'username',
+        'name' => '(select adusrnomb from users where adusrcorr = user_id)',
     ];
     public $create = [
         'username'=> ':username',
@@ -14,6 +15,15 @@ class Login
         'created_at'=> 'now()',
     ];
     public $returnCreatedRecord = true;
+    public $relationships = [
+        'token' => [
+            'model' => Users::class,
+            'id' => '$user_id',
+        ],
+    ];
+    public $include = [
+        'token',
+    ];
 
     public static function getUserId($username, $password)
     {

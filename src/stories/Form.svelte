@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, InfoBar } from 'fluent-svelte';
+	import { Button, InfoBar, ProgressRing } from 'fluent-svelte';
 	import { TextBox } from 'fluent-svelte';
 	import TextArea from '../lib/TextArea.svelte';
 	import { PersonPicture } from 'fluent-svelte';
@@ -17,6 +17,7 @@
 	export let blur: boolean = false;
 	export let data: any = {};
 	export let error = '';
+	let inProgress: { (): Promise<void>; (): Promise<void> }[] = [];
 	let accessor = new Proxy(data, {
 		get: (target, name) => {
 			return get(target, name);
@@ -27,6 +28,20 @@
 	});
 	function submit() {
 		dispatch('submit', data);
+	}
+	async function buttonAction(cell: FormField) {
+		if (cell.action) {
+			try {
+				inProgress.push(cell.action);
+				inProgress = inProgress;
+				const response = await cell.action();
+				inProgress = inProgress.filter((x) => x !== cell.action);
+				return response;
+			} catch (err: any) {
+				error = err.message;
+			}
+		}
+		return true;
 	}
 </script>
 
@@ -84,7 +99,11 @@
 					</div>
 				{/if}
 				{#if cell.control === 'Button'}
-					<Button variant={cell.variant}>
+					<Button
+						variant={cell.variant}
+						on:click={() => buttonAction(cell)}
+						disabled={cell.action && inProgress.indexOf(cell.action) > -1}
+					>
 						{__(cell.label)}
 					</Button>
 				{/if}

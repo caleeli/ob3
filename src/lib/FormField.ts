@@ -13,7 +13,7 @@ class FormField {
         | 'month'
         | 'time'
         | 'week' = 'text';
-    public name? = '';
+    public name?= '';
     public label?= '';
     public placeholder?= '';
     public variant?: 'standard' | 'accent' | 'hyperlink';
@@ -22,5 +22,7 @@ class FormField {
         name: string;
     }[];
     public rows?: number;
+    public action?: (() => Promise<void>);
+    public actionInProgress?: boolean = false;
 }
 export default FormField;

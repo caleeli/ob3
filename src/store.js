@@ -1,16 +1,16 @@
 import { writable } from 'svelte/store';
 
-export const access_token = writable('');
+export const login = writable(null);
 
-access_token.subscribe((token) => {
-    if (typeof localStorage !== 'undefined' && token) {
-        localStorage.setItem('access_token', token);
+login.subscribe((data) => {
+    if (typeof localStorage !== 'undefined' && data) {
+        localStorage.setItem('login', JSON.stringify(data));
     }
 });
 
 if (typeof localStorage !== 'undefined') {
-    const token = localStorage.getItem('access_token');
-    if (token) {
-        access_token.set(token);
+    const data = JSON.parse(localStorage.getItem('login') || 'null');
+    if (data) {
+        login.set(data);
     }
 }

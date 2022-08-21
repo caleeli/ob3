@@ -5,8 +5,8 @@
         },
         {
             "action": "jwt_token",
-            "condition": "data",
-            "target": "data"
+            "condition": "data.relationships.token",
+            "target": "data.relationships.token"
         }
     ]
 }

@@ -48,7 +48,7 @@
 		<div>
 			{#if user}
 				<span class="welcome">
-					{@html __('Welcome, <b>:name</b>!', user)}
+					{user.name}
 				</span>
 				<Button on:click={onLogout}>{__('Log out')}</Button>
 			{/if}

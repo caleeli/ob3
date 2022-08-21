@@ -1,16 +1,17 @@
 import type StoreInterface from "./StoreInterface";
 import { get, set } from "lodash";
-import { access_token } from '../store';
+import { login } from '../store';
+const backend_base = import.meta.env.VITE_BACKEND_URL;
 
 let headers = {
     'Content-Type': 'application/json',
     'Authorization': '',
 };
-access_token.subscribe((token) => {
-    if (token) {
+login.subscribe((data: { attributes: any; relationships: { token: string } } | null) => {
+    if (data) {
         headers = {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
+            'Authorization': 'Bearer ' + data.relationships.token,
         };
     }
 });
@@ -23,11 +24,6 @@ class ApiStore implements StoreInterface {
     private listeners: ((data: any[]) => void)[] = [];
 
     constructor(private config: { url: string, root?: string, query?: any, limit?: number }) { }
-    async delete(id: string | number): Promise<any> {
-        const url = new URL(this.config.url);
-        const response = await fetch(url.toString() + '/' + id, { method: 'DELETE', headers: headers });
-        return response;
-    }
     async refresh(): Promise<any> {
         const data = await this.get(0);
         this.listeners.forEach((callback: (arg0: any[]) => any) => callback(data));
@@ -37,7 +33,7 @@ class ApiStore implements StoreInterface {
         this.listeners.push(callback);
     }
     async create(record: any): Promise<any> {
-        const url = new URL(this.config.url);
+        const url = new URL(this.config.url, backend_base);
         let data = {};
         if (this.config.root) {
             set(data, this.config.root, record);
@@ -49,10 +45,14 @@ class ApiStore implements StoreInterface {
             const json = await response.json();
             throw new Error(json.error || response.statusText);
         }
-        return await response.json();
+        let result = await response.json();
+        if (this.config.root) {
+            result = get(result, this.config.root);
+        }
+        return result;
     }
     async update(id: number | string, record: any): Promise<any> {
-        const url = new URL(this.config.url);
+        const url = new URL(this.config.url, backend_base);
         let data = {};
         if (this.config.root) {
             set(data, this.config.root, record);
@@ -64,10 +64,14 @@ class ApiStore implements StoreInterface {
             const json = await response.json();
             throw new Error(json.error || response.statusText);
         }
-        return response;
+        let result = await response.json();
+        if (this.config.root) {
+            result = get(result, this.config.root);
+        }
+        return result;
     }
     async get(offset?: number): Promise<any[]> {
-        const url = new URL(this.config.url);
+        const url = new URL(this.config.url, backend_base);
         const params = this.config.query;
         this.limit = this.config.limit === undefined ? this.limit : this.config.limit;
         if (offset !== undefined) {
@@ -95,6 +99,40 @@ class ApiStore implements StoreInterface {
             this.array = get(this.array, this.config.root);
         }
         return this.array;
+    }
+    async show(id: string | number, params?: any): Promise<any[]> {
+        const url = new URL(this.config.url + '/' + id, backend_base);
+        if (params) {
+            Object.keys(params).forEach(key => {
+                if (Array.isArray(params[key])) {
+                    // if value is array, add multiple params
+                    params[key].forEach((value: string) => url.searchParams.append(key + '[]', value));
+                } else if (params[key] instanceof Function) {
+                    // if value is function, add function result as param
+                    url.searchParams.append(key, params[key](this));
+                } else if (params[key] instanceof Object) {
+                    // if value is object, add multiple params
+                    Object.keys(params[key]).forEach(value => url.searchParams.append(key + '[' + value + ']', params[key][value]));
+                } else if (params[key] !== undefined) {
+                    url.searchParams.append(key, params[key]);
+                }
+            });
+        }
+        const response = await fetch(url.toString(), { headers: headers });
+        if (!(response.status >= 200 && response.status < 300)) {
+            const json = await response.json();
+            throw new Error(json.error || response.statusText);
+        }
+        let result = await response.json();
+        if (this.config.root) {
+            result = get(result, this.config.root);
+        }
+        return result;
+    }
+    async delete(id: string | number): Promise<any> {
+        const url = new URL(this.config.url, backend_base);
+        const response = await fetch(url.toString() + '/' + id, { method: 'DELETE', headers: headers });
+        return response;
     }
     async getNextPage(): Promise<any[]> {
         this.offset += this.limit;

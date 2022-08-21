@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { access_token } from '../store';
+	import { login } from '../store';
 	import ApiStore from '../lib/ApiStore';
 	import type FormField from '../lib/FormField';
 	import { translation as __ } from '../lib/translations';
@@ -50,7 +50,7 @@
 					password: data.detail.password
 				}
 			});
-			await access_token.set(token.data);
+			login.set(token);
 			goto('/dashboard');
 		} catch (err: any) {
 			error = err.message;

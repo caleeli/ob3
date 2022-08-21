@@ -1,7 +1,9 @@
 <script lang="ts">
 	import type FormField from '../lib/FormField';
 	import Form from '../stories/Form.svelte';
-	import { translation as __ } from '../lib/translations';
+	import type StoreInterface from '$lib/StoreInterface';
+	import ApiStore from '../lib/ApiStore';
+	import { login } from '../store';
 
 	let form: FormField[][] = [
 		[
@@ -20,29 +22,22 @@
 			{
 				control: 'TextBox',
 				type: 'text',
-				name: 'firstname',
-				label: 'First Name'
-			},
-			{
-				control: 'TextBox',
-				type: 'text',
-				name: 'lastname',
-				label: 'Last Name'
-			}
-		],
-		[
-			{
-				control: 'TextBox',
-				type: 'text',
-				name: 'email',
-				label: 'E-mail'
+				name: 'attributes.name',
+				label: 'Name'
 			}
 		],
 		[
 			{
 				control: 'Button',
 				variant: 'accent',
-				label: 'Update Information'
+				label: 'Update Information',
+				action: () => {
+					return store.update(data.id, {
+						attributes: {
+							name: data.attributes.name
+						}
+					});
+				}
 			}
 		],
 		[
@@ -75,6 +70,28 @@
 			}
 		]
 	];
+	let store: StoreInterface = new ApiStore({
+		url: 'users',
+		root: 'data'
+	});
+	let data: {
+		id: string;
+		attributes: {
+			name: string;
+		};
+	} = {
+		id: '',
+		attributes: {
+			name: ''
+		}
+	};
+	login.subscribe(async (login: { attributes: { user_id: string } } | null) => {
+		if (login) {
+			const record = await store.show(login.attributes.user_id);
+			data = Object.assign(data, record);
+			form = form;
+		}
+	});
 </script>
 
-<Form content={form} border={false} />
+<Form content={form} border={false} {data} />

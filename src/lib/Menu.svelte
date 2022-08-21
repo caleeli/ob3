@@ -4,7 +4,7 @@
 	import { goto } from '$app/navigation';
 
 	let store = new ApiStore({
-		url: 'http://localhost/projects/callizaya2/public/api.php/ob3/menus',
+		url: 'menus',
 		root: 'data',
 		query: {
 			per_page: 200
