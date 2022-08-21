@@ -70,7 +70,7 @@
 	</tr>
 	{#if grid}
 		{#each grid.cell as data, row}
-			{#if grid.cell[row] && grid.firstInGroup(row, 0)}
+			{#if grid.cell[row] && config.headers[0].groupRows && grid.firstInGroup(row, 0)}
 				<tr>
 					<td
 						colspan={config.headers.length}
