@@ -9,6 +9,7 @@ class Menus
         'parent' => 'parent',
         'type' => 'type',
         'leaf' => 'leaf',
+        'page' => 'page',
     ];
     public $filters = [
     ];

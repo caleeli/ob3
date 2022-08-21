@@ -11,8 +11,6 @@
 	export let store: StoreInterface;
 	export let toolbar: CrudAction[];
 	export let rowActions: CrudAction[];
-	export let create: any[][];
-	export let update: any[][];
 
 	let form: any[][];
 	let open = false;
@@ -20,7 +18,7 @@
 	let title = '';
 	let record = {};
 	let original: any | null = null;
-	let error = '';
+	let error = '', error_suffix = '';
 	function add(initial = {}) {
 		error = '';
 		open = true;
@@ -60,7 +58,9 @@
 			}
 			open = false;
 		} catch (err: any) {
-			error = err.message;
+			// error_suffix to refresh the form after an error
+			error_suffix = error_suffix ? '' : ' ';
+			error = err.message + error_suffix;
 		}
 	}
 	function cancel() {
@@ -86,10 +86,7 @@
 </script>
 
 <ContentDialog bind:open title={__(title)} class="content-dialog-max-size">
-	{#if error}
-		<InfoBar message={error} severity="caution" />
-	{/if}
-	<Form content={form} border={false} data={record} />
+	<Form content={form} border={false} data={record} {error} />
 	<svelte:fragment slot="footer">
 		<Button variant="accent" on:click={save}>{__('Save')}</Button>
 		<Button on:click={cancel}>{__('Cancel')}</Button>

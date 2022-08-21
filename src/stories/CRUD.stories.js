@@ -1,4 +1,4 @@
-import ApiStore from '../lib/ApiStore';
+import ApiStore, { JSONApiSortHandler } from '../lib/ApiStore';
 import CRUD from './CRUD.svelte';
 
 export default {
@@ -53,10 +53,10 @@ PreguntasApi.args = {
         control: 'actions',
       },
     ],
-    sort: {
+    sort: [{
       field: 'number',
       order: 'asc'
-    }
+    }]
   },
   store: new ApiStore({
     url: 'http://localhost/projects/callizaya2/public/api.php/ob3/preguntas',
@@ -65,7 +65,7 @@ PreguntasApi.args = {
     query: {
       per_page: (/** @type {{ limit: number; }} */{ limit }) => limit,
       page: (/** @type {{ offset: number; limit: number; }} */{ offset, limit }) => offset / limit + 1,
-      sort: (/** @type {{ sort_field: string; sort_direction: string; }} */{ sort_field, sort_direction }) => (sort_direction === 'desc' ? '-' : '') + sort_field,
+      sort: JSONApiSortHandler,
       filter: ['tipo_credito(2)']
     },
   }),

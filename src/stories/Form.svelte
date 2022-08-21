@@ -1,40 +1,22 @@
 <script lang="ts">
-	import { Button } from 'fluent-svelte';
+	import { Button, InfoBar } from 'fluent-svelte';
 	import { TextBox } from 'fluent-svelte';
 	import TextArea from '../lib/TextArea.svelte';
 	import { PersonPicture } from 'fluent-svelte';
 	import { ComboBox } from 'fluent-svelte';
 	import { get, set } from 'lodash';
+	import type FormField from '../lib/FormField';
+	import { translation as __ } from '../lib/translations';
+	import { createEventDispatcher } from 'svelte';
+
+	const dispatch = createEventDispatcher();
 
 	export let title: string = '';
-	export let content: {
-		control: string;
-		type:
-			| 'number'
-			| 'search'
-			| 'text'
-			| 'password'
-			| 'email'
-			| 'tel'
-			| 'url'
-			| 'date'
-			| 'datetime-local'
-			| 'month'
-			| 'time'
-			| 'week';
-		name: string;
-		label: string;
-		placeholder: string;
-		variant: 'standard' | 'accent' | 'hyperlink';
-		options: {
-			value: string;
-			label: string;
-		}[];
-		rows?: number;
-	}[][] = [];
+	export let content: FormField[][] = [];
 	export let border: boolean = true;
 	export let blur: boolean = false;
 	export let data: any = {};
+	export let error = '';
 	let accessor = new Proxy(data, {
 		get: (target, name) => {
 			return get(target, name);
@@ -43,43 +25,54 @@
 			return set(target, name, value);
 		}
 	});
+	function submit() {
+		dispatch('submit', data);
+	}
 </script>
 
-<form class={`${border ? 'section' : ''} ${blur ? 'blur-background' : ''}`}>
-	<h2>{title}</h2>
+<form
+	class={`${border ? 'section' : ''} ${blur ? 'blur-background' : ''}`}
+	on:submit|preventDefault={submit}
+>
+	<h2>{__(title)}</h2>
+	{#if error}
+		<InfoBar open={error != ''} message={error} severity="caution" class="form-error" />
+	{/if}
 	{#each content as row}
 		<div class="form-row">
 			{#each row as cell}
-				{#if cell.control === 'TextBox'}
+				{#if cell.control === 'TextBox' && cell.name}
 					<div>
 						<label for={cell.name}>
-							{cell.label || ''}
+							{__(cell.label || '')}
 						</label>
 						<TextBox
 							id={cell.name}
 							placeholder={cell.placeholder || ''}
 							type={cell.type}
+							clearButton={false}
 							bind:value={accessor[cell.name]}
 						/>
 					</div>
 				{/if}
-				{#if cell.control === 'TextArea'}
+				{#if cell.control === 'TextArea' && cell.name}
 					<div>
 						<label for={cell.name}>
-							{cell.label || ''}
+							{__(cell.label || '')}
 						</label>
 						<TextArea
 							id={cell.name}
 							placeholder={cell.placeholder || ''}
 							rows={cell.rows || 2}
+							clearButton={false}
 							bind:value={accessor[cell.name]}
 						/>
 					</div>
 				{/if}
-				{#if cell.control === 'ComboBox'}
+				{#if cell.control === 'ComboBox' && cell.options && cell.name}
 					<div>
 						<label for={cell.name}>
-							{cell.label || ''}
+							{__(cell.label || '')}
 						</label>
 						<ComboBox
 							id={cell.name}
@@ -92,14 +85,14 @@
 				{/if}
 				{#if cell.control === 'Button'}
 					<Button variant={cell.variant}>
-						{cell.label}
+						{__(cell.label)}
 					</Button>
 				{/if}
-				{#if cell.control === 'Avatar'}
+				{#if cell.control === 'Avatar' && cell.name}
 					<PersonPicture size={64} src={accessor[cell.name]} />
 				{/if}
 				{#if cell.control === 'Header'}
-					<h3>{cell.label}</h3>
+					<h3>{__(cell.label)}</h3>
 				{/if}
 			{/each}
 		</div>
@@ -124,7 +117,6 @@
 		display: inline-block;
 	}
 	form.section {
-		background: #ffffff;
 		padding: 1rem 1rem;
 		border-radius: 2px;
 		background-clip: padding-box;
@@ -142,5 +134,10 @@
 	}
 	:global(.w-100) {
 		width: 100%;
+	}
+	:global(.form-error) {
+		position: sticky !important;
+		top: 0px;
+		z-index: 1;
 	}
 </style>

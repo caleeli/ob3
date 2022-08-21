@@ -1,0 +1,12 @@
+{
+    "transform_response": [
+        {
+            "action": "json_api"
+        },
+        {
+            "action": "jwt_token",
+            "condition": "data",
+            "target": "data"
+        }
+    ]
+}

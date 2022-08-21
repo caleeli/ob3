@@ -1,5 +1,19 @@
 import type StoreInterface from "./StoreInterface";
 import { get, set } from "lodash";
+import { access_token } from '../store';
+
+let headers = {
+    'Content-Type': 'application/json',
+    'Authorization': '',
+};
+access_token.subscribe((token) => {
+    if (token) {
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        };
+    }
+});
 
 class ApiStore implements StoreInterface {
     private array: any[] = [];
@@ -11,7 +25,7 @@ class ApiStore implements StoreInterface {
     constructor(private config: { url: string, root?: string, query?: any, limit?: number }) { }
     async delete(id: string | number): Promise<any> {
         const url = new URL(this.config.url);
-        const response = await fetch(url.toString() + '/' + id, { method: 'DELETE' });
+        const response = await fetch(url.toString() + '/' + id, { method: 'DELETE', headers: headers });
         return response;
     }
     async refresh(): Promise<any> {
@@ -30,12 +44,12 @@ class ApiStore implements StoreInterface {
         } else {
             data = record;
         }
-        const response = await fetch(url.toString(), { method: 'POST', body: JSON.stringify(data) });
+        const response = await fetch(url.toString(), { method: 'POST', body: JSON.stringify(data), headers: headers });
         if (!(response.status >= 200 && response.status < 300)) {
             const json = await response.json();
             throw new Error(json.error || response.statusText);
         }
-        return response;
+        return await response.json();
     }
     async update(id: number | string, record: any): Promise<any> {
         const url = new URL(this.config.url);
@@ -45,7 +59,7 @@ class ApiStore implements StoreInterface {
         } else {
             data = record;
         }
-        const response = await fetch(url.toString() + '/' + id, { method: 'PUT', body: JSON.stringify(data) });
+        const response = await fetch(url.toString() + '/' + id, { method: 'PUT', body: JSON.stringify(data), headers: headers });
         if (!(response.status >= 200 && response.status < 300)) {
             const json = await response.json();
             throw new Error(json.error || response.statusText);
@@ -75,7 +89,7 @@ class ApiStore implements StoreInterface {
                 }
             });
         }
-        const response = await fetch(url.toString());
+        const response = await fetch(url.toString(), { headers: headers });
         this.array = await response.json();
         if (this.config.root) {
             this.array = get(this.array, this.config.root);
