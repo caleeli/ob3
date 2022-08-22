@@ -170,6 +170,6 @@
 		/* transition: transform 200ms; */
 	}
 	.selected {
-		background: var(--fds-solid-background-secondary);
+		background-color: hsla(var(--fds-accent-dark-1), 20%);
 	}
 </style>

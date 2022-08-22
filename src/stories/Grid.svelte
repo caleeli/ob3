@@ -11,9 +11,9 @@
 
 	export let config: GridConfig;
 	export let store: StoreInterface;
+	export let multiselect: boolean = false;
 
-	let value: any[] = [];
-	let active: number = -1;
+	let selected: number[] = [];
 	let grid = new Grid(config, store);
 	load();
 	store.onrefresh((data: any[]) => {
@@ -22,7 +22,7 @@
 	});
 	async function load() {
 		try {
-		await grid.load();
+			await grid.load();
 		} catch (err: any) {
 			grid.error = err.message || err;
 		}
@@ -46,6 +46,18 @@
 	function toggleRowGroup(row: number, rows: number) {
 		for (let r = row, l = row + rows; r < l; r++) {
 			grid.rowGroup[r].open = !grid.rowGroup[r].open;
+		}
+		grid = grid;
+	}
+	function toggleSelect(row: number) {
+		if (multiselect) {
+			if (selected.includes(row)) {
+				selected = selected.filter((r) => r !== row);
+			} else {
+				selected.push(row);
+			}
+		} else {
+			selected = [row];
 		}
 		grid = grid;
 	}
@@ -86,13 +98,17 @@
 					</td>
 				</tr>
 			{/if}
-			<tr class={`${active == row ? 'active' : ''} ${grid.rowGroup[row].open ? '' : 'closed'}`}>
+			<tr
+				class={`${selected.includes(row) ? 'active' : ''} ${
+					grid.rowGroup[row].open ? '' : 'closed'
+				}`}
+			>
 				{#each config.headers as header, col}
 					{#if grid.cell[row]}
 						<td
 							class={`${config.headers[col].groupRows ? 'grouped' : ''}`}
 							align={header.align}
-							on:click={() => (active = active === row ? -1 : row)}
+							on:click={() => toggleSelect(row)}
 						>
 							{#if header.control === 'actions'}
 								<div role="group">
@@ -124,7 +140,7 @@
 	on:complete={loadNextPage}
 >
 	{#if !intersectionObserverSupport}
-		<div>???</div>
+		<div />
 	{:else}
 		<div>...</div>
 	{/if}
@@ -134,7 +150,7 @@
 	table {
 		border-collapse: collapse;
 		border-spacing: 0;
-		width: 100%;
+		width: max-content;
 		font-size: var(--fds-body-font-size);
 		cursor: default;
 		empty-cells: show;
@@ -167,7 +183,7 @@
 		background-color: var(--fds-solid-background-tertiary);
 	}
 	tr.active td {
-		background-color: var(--fds-solid-background-secondary);
+		background-color: hsla(var(--fds-accent-dark-1), 20%);
 	}
 	tr.closed {
 		display: none;
