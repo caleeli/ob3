@@ -11,9 +11,8 @@
 
 	export let config: GridConfig;
 	export let store: StoreInterface;
-	export let multiselect: boolean = false;
+	export let selected: number[] = [];
 
-	let selected: number[] = [];
 	let grid = new Grid(config, store);
 	load();
 	store.onrefresh((data: any[]) => {
@@ -50,7 +49,7 @@
 		grid = grid;
 	}
 	function toggleSelect(row: number) {
-		if (multiselect) {
+		if (config.multiSelect) {
 			if (selected.includes(row)) {
 				selected = selected.filter((r) => r !== row);
 			} else {

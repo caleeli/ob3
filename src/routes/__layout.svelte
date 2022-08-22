@@ -43,6 +43,8 @@
 		/*max-width: 1024px;*/
 		margin: 0 auto;
 		box-sizing: border-box;
+		height: calc(100vh - 4rem);
+		overflow: hidden;
 	}
 
 	@media (min-width: 480px) {
@@ -53,6 +55,7 @@
 
 	.content {
 		flex-grow: 1;
-		padding: 1rem;
+		overflow: auto;
+		height: 100%;
 	}
 </style>

@@ -159,3 +159,11 @@ export default ApiStore;
 export function JSONApiSortHandler(grid: { sortBy: { field: string; direction: 'asc' | 'desc' }[]; }): string {
     return grid.sortBy.map(({ direction, field }) => `${direction === 'desc' ? '-' : ''} ${field}`).join(',');
 }
+
+export function JSONApiPageHandler(grid: { offset: number; limit: number }): number {
+    return grid.offset / grid.limit + 1;
+}
+
+export function JSONApiPerPageHandler(grid: { limit: number }): number {
+    return grid.limit;
+}

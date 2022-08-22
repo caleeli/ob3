@@ -47,5 +47,8 @@
 		height: 100%;
 		border-right: 3px double var(--fds-control-alt-fill-tertiary);
 		padding-right: 1rem;
+		overflow: auto;
+		height: 100%;
+		width: 50rem;
 	}
 </style>

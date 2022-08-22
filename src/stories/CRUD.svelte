@@ -9,8 +9,8 @@
 
 	export let config: GridConfig;
 	export let store: StoreInterface;
-	export let toolbar: CrudAction[];
-	export let rowActions: CrudAction[];
+	export let toolbar: CrudAction[] = [];
+	export let rowActions: CrudAction[] = [];
 
 	let form: any[][];
 	let open = false;
@@ -19,10 +19,10 @@
 	let record = {};
 	let original: any | null = null;
 	let error = '', error_suffix = '';
-	function add(initial = {}) {
+	function add(initial = {}, popupTitle = 'Add') {
 		error = '';
 		open = true;
-		title = 'Add';
+		title = popupTitle;
 		record = initial;
 		original = null;
 	}
@@ -67,9 +67,12 @@
 		open = false;
 	}
 	function doAction(tool: CrudAction) {
-		if (tool.action === 'add') {
+		if (tool.form && tool.initial) {
 			form = tool.form;
 			add(JSON.parse(JSON.stringify(tool.initial)));
+		} else if (tool.form) {
+			form = tool.form;
+			add({}, tool.label);
 		} else if (tool.action instanceof Function) {
 			return tool.action();
 		}

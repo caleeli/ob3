@@ -16,6 +16,7 @@ class GridConfig {
 		field: string;
 		direction: 'asc' | 'desc';
 	}[] = [];
+	public multiSelect? = false;
 }
 
 export default GridConfig;
