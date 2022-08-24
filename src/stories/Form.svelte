@@ -9,9 +9,9 @@
 	import { translation as __ } from '../lib/translations';
 	import { createEventDispatcher } from 'svelte';
 	import ApiStore from '$lib/ApiStore';
+	import { onMount } from 'svelte';
 
 	const dispatch = createEventDispatcher();
-	let searchValue = '';
 
 	export let title: string = '';
 	export let content: FormField[][] = [];
@@ -75,15 +75,19 @@
 			return false;
 		}
 	}
-	$: {
+	onMount(async () => {
+		// initialize options
+		console.log('mount', content);
 		content.forEach((row) => {
 			row.forEach((cell) => {
-				if (cell.control === 'ComboBox' && cell.store && !cell.options) {
+				if (cell.control === 'ComboBox' && cell.store) {
+					// reset search value
+					cell.searchValue = '';
 					loadOptions(cell);
 				}
 			});
 		});
-	}
+	});
 </script>
 
 <form
