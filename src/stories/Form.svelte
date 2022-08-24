@@ -77,7 +77,6 @@
 	}
 	onMount(async () => {
 		// initialize options
-		console.log('mount', content);
 		content.forEach((row) => {
 			row.forEach((cell) => {
 				if (cell.control === 'ComboBox' && cell.store) {

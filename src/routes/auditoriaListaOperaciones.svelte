@@ -173,9 +173,17 @@
 				[
 					{
 						control: 'ComboBox',
-						options: [],
 						name: 'sucursal',
 						label: 'Sucursal',
+						storeValueField: 'id',
+						storeNameField: 'attributes.name',
+						store: new ApiStore({
+							url: 'sucursales',
+							root: 'data',
+							query: {
+								filter: (store: ApiStore) => [`filterByName(${JSON.stringify(store.searchValue)})`],
+							},
+						}),
 					},
 				],
 			],
