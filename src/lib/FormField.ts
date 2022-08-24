@@ -1,3 +1,6 @@
+import type ApiStore from "./ApiStore";
+import type StoreInterface from "./StoreInterface";
+
 class FormField {
     public control = 'TextBox';
     public type?:
@@ -18,11 +21,18 @@ class FormField {
     public placeholder?= '';
     public variant?: 'standard' | 'accent' | 'hyperlink';
     public options?: {
-        value: string;
+        value: any;
         name: string;
+        disabled?: boolean;
     }[];
     public rows?: number;
     public action?: (() => Promise<void>);
+    public store?: StoreInterface | ApiStore;
+    public storeValueField?: string;
+    public storeNameField?: string;
+    public storeDisabledField?: string;
+    // internal properties
     public actionInProgress?: boolean = false;
+    public searchValue?: string = '';
 }
 export default FormField;

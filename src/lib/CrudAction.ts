@@ -6,6 +6,7 @@ class CrudAction {
 	public action?: string | (() => void) | undefined;
 	public initial?: any;
 	public form?: FormField[][];
+	public handler?: (record: any, selected: any[]) => Promise<void>;
 }
 
 export default CrudAction;

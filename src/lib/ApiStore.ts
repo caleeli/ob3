@@ -20,6 +20,7 @@ class ApiStore implements StoreInterface {
     private array: any[] = [];
     public offset = 0;
     public limit = 10;
+    public searchValue = '';
     public sortBy: { field: string, direction: 'asc' | 'desc' }[] = []
     private listeners: ((data: any[]) => void)[] = [];
 
@@ -79,17 +80,19 @@ class ApiStore implements StoreInterface {
         }
         if (params) {
             Object.keys(params).forEach(key => {
-                if (Array.isArray(params[key])) {
-                    // if value is array, add multiple params
-                    params[key].forEach((value: string) => url.searchParams.append(key + '[]', value));
-                } else if (params[key] instanceof Function) {
+                let param = params[key];
+                if (params[key] instanceof Function) {
                     // if value is function, add function result as param
-                    url.searchParams.append(key, params[key](this));
-                } else if (params[key] instanceof Object) {
+                    param = params[key](this);
+                }
+                if (Array.isArray(param)) {
+                    // if value is array, add multiple params
+                    param.forEach((value: string) => url.searchParams.append(key + '[]', value));
+                } else if (param instanceof Object) {
                     // if value is object, add multiple params
-                    Object.keys(params[key]).forEach(value => url.searchParams.append(key + '[' + value + ']', params[key][value]));
-                } else if (params[key] !== undefined) {
-                    url.searchParams.append(key, params[key]);
+                    Object.keys(param).forEach(value => url.searchParams.append(key + '[' + value + ']', param[value]));
+                } else if (param !== undefined) {
+                    url.searchParams.append(key, param);
                 }
             });
         }

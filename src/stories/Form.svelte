@@ -8,8 +8,10 @@
 	import type FormField from '../lib/FormField';
 	import { translation as __ } from '../lib/translations';
 	import { createEventDispatcher } from 'svelte';
+	import ApiStore from '$lib/ApiStore';
 
 	const dispatch = createEventDispatcher();
+	let searchValue = '';
 
 	export let title: string = '';
 	export let content: FormField[][] = [];
@@ -24,7 +26,7 @@
 		},
 		set: (target, name, value) => {
 			return set(target, name, value);
-		}
+		},
 	});
 	function submit() {
 		dispatch('submit', data);
@@ -43,6 +45,44 @@
 			}
 		}
 		return true;
+	}
+	function loadOptions(cell: FormField) {
+		if (cell.store) {
+			let valueField = cell.storeValueField || 'id';
+			let nameField = cell.storeNameField || 'attributes.name';
+			let disabledField = cell.storeDisabledField || '';
+			cell.options = [];
+			if (cell.store instanceof ApiStore) {
+				cell.store.searchValue = cell.searchValue || '';
+			}
+			cell.store.get().then((data) => {
+				cell.options = data.map((item) => {
+					return {
+						value: get(item, valueField),
+						name: String(get(item, nameField)),
+						disabled: disabledField && get(item, disabledField),
+					};
+				});
+				content = content;
+			});
+		}
+	}
+	function comboBoxKeydown(event: KeyboardEvent, cell: FormField) {
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			event.stopPropagation();
+			loadOptions(cell);
+			return false;
+		}
+	}
+	$: {
+		content.forEach((row) => {
+			row.forEach((cell) => {
+				if (cell.control === 'ComboBox' && cell.store && !cell.options) {
+					loadOptions(cell);
+				}
+			});
+		});
 	}
 </script>
 
@@ -95,7 +135,10 @@
 							placeholder={cell.placeholder || ''}
 							items={cell.options}
 							class="w-100"
+							editable={true}
+							bind:searchValue={cell.searchValue}
 							bind:value={accessor[cell.name]}
+							on:keydown={(e) => comboBoxKeydown(e, cell)}
 						/>
 					</div>
 				{/if}

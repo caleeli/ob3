@@ -18,7 +18,10 @@
 	let title = '';
 	let record = {};
 	let original: any | null = null;
-	let error = '', error_suffix = '';
+	let error = '',
+		error_suffix = '';
+	let selected: number[] = [];
+	let handler: ((record: any, selected: any[]) => Promise<void>) | undefined;
 	function add(initial = {}, popupTitle = 'Add') {
 		error = '';
 		open = true;
@@ -49,6 +52,10 @@
 	}
 	async function save() {
 		try {
+			if (handler) {
+				await handler(record, selected);
+				return;
+			}
 			if (original) {
 				await store.update(original.id, record);
 				await store.refresh();
@@ -72,6 +79,7 @@
 			add(JSON.parse(JSON.stringify(tool.initial)));
 		} else if (tool.form) {
 			form = tool.form;
+			handler = tool.handler;
 			add({}, tool.label);
 		} else if (tool.action instanceof Function) {
 			return tool.action();
@@ -121,6 +129,7 @@
 	{store}
 	on:edit={(event) => doRowAction('edit', event)}
 	on:delete={(event) => doRowAction('delete', event)}
+	bind:selected
 />
 
 <style>

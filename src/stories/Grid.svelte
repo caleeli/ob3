@@ -48,7 +48,7 @@
 		}
 		grid = grid;
 	}
-	function toggleSelect(row: number) {
+	function toggleSelect(row: any) {
 		if (config.multiSelect) {
 			if (selected.includes(row)) {
 				selected = selected.filter((r) => r !== row);
@@ -98,7 +98,7 @@
 				</tr>
 			{/if}
 			<tr
-				class={`${selected.includes(row) ? 'active' : ''} ${
+				class={`${selected.includes(data) ? 'active' : ''} ${
 					grid.rowGroup[row].open ? '' : 'closed'
 				}`}
 			>
@@ -107,7 +107,7 @@
 						<td
 							class={`${config.headers[col].groupRows ? 'grouped' : ''}`}
 							align={header.align}
-							on:click={() => toggleSelect(row)}
+							on:click={() => toggleSelect(data)}
 						>
 							{#if header.control === 'actions'}
 								<div role="group">

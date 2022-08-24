@@ -143,7 +143,7 @@
 	});
 	let toolbar: CrudAction[] = [
 		{
-			icon: 'fa fa-plus',
+			icon: 'add',
 			label: 'Agregar a Muestra',
 			form: [
 				[
@@ -157,9 +157,17 @@
 				[
 					{
 						control: 'ComboBox',
-						options: [],
 						name: 'revisor',
 						label: 'Revisor',
+						storeValueField: 'id',
+						storeNameField: 'attributes.name',
+						store: new ApiStore({
+							url: 'users',
+							root: 'data',
+							query: {
+								filter: (store: ApiStore) => [`filterByName(${JSON.stringify(store.searchValue)})`],
+							},
+						}),
 					},
 				],
 				[
@@ -171,6 +179,9 @@
 					},
 				],
 			],
+			async handler(record: any, selected: any[]) {
+				console.log(record, selected);
+			},
 		},
 	];
 </script>
