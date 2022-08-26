@@ -43,3 +43,22 @@
 | con_mora           | varchar(11)   | YES  |     |         |                |
 | gasto              | varchar(128)  | YES  |     |         |                |
 | acbccccic          | int(11)       | YES  |     |         |                |
+## muestra
+
+| Field          | Type          | Null | Key | Default    | Extra          |
+| -------------- | ------------- | ---- | --- | ---------- | -------------- |
+| informe        | int(11)       | NO   | PRI |            | auto_increment |
+| prmprnpre      | varchar(16)   | NO   | PRI |            |                |
+| revisor        | int(11)       | NO   |     |            |                |
+| calidad        | varchar(32)   | NO   | PRI | PRELIMINAR |                |
+| sucursal       | varchar(128)  | YES  |     |            |                |
+| elaborado_por  | int(11)       | YES  |     |            |                |
+| tipoinf        | varchar(4)    | YES  |     |            |                |
+| visita         | varchar(32)   | YES  |     |            |                |
+| lugar_visita   | varchar(64)   | YES  |     |            |                |
+| fecha_muestra  | varchar(32)   | YES  |     |            |                |
+| fecha_revision | varchar(32)   | YES  |     |            |                |
+| tipo_credito   | int(11)       | YES  |     | 1          |                |
+| fecha_visita   | varchar(32)   | YES  |     |            |                |
+| fecha_guardado | datetime      | NO   |     |            |                |
+| observaciones  | varchar(2048) | YES  |     |            |                |

@@ -8,7 +8,7 @@
 	import type FormField from '../lib/FormField';
 	import { translation as __ } from '../lib/translations';
 	import { createEventDispatcher } from 'svelte';
-	import ApiStore from '$lib/ApiStore';
+	import ApiStore from '../lib/ApiStore';
 	import { onMount } from 'svelte';
 
 	const dispatch = createEventDispatcher();
@@ -159,6 +159,9 @@
 				{/if}
 				{#if cell.control === 'Header'}
 					<h3>{__(cell.label)}</h3>
+				{/if}
+				{#if cell.control === 'Empty'}
+					<div>&nbsp;</div>
 				{/if}
 			{/each}
 		</div>

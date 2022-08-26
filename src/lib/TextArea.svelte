@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { get_current_component } from 'svelte/internal';
-	// import { externalMouseEvents, createEventForwarder } from '$lib/internal';
+	// import { externalMouseEvents, createEventForwarder } from '../lib/internal';
 
 	import TextBoxButton from 'fluent-svelte/TextBox/TextBoxButton.svelte';
 

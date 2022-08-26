@@ -5,7 +5,7 @@
 	import Form from './Form.svelte';
 	import Grid from './Grid.svelte';
 	import { translation as __ } from '../lib/translations';
-	import type CrudAction from '$lib/CrudAction';
+	import type CrudAction from '../lib/CrudAction';
 
 	export let config: GridConfig;
 	export let store: StoreInterface;

@@ -49,6 +49,6 @@
 		padding-right: 1rem;
 		overflow: auto;
 		height: 100%;
-		width: 50rem;
+		width: 25rem;
 	}
 </style>

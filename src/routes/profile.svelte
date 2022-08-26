@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type FormField from '../lib/FormField';
 	import Form from '../stories/Form.svelte';
-	import type StoreInterface from '$lib/StoreInterface';
+	import type StoreInterface from '../lib/StoreInterface';
 	import ApiStore from '../lib/ApiStore';
 	import { login } from '../store';
 
