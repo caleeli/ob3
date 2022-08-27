@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, InfoBar, ProgressRing } from 'fluent-svelte';
+	import { Button, Checkbox, InfoBar, ProgressRing } from 'fluent-svelte';
 	import { TextBox } from 'fluent-svelte';
 	import TextArea from '../lib/TextArea.svelte';
 	import { PersonPicture } from 'fluent-svelte';
@@ -126,6 +126,13 @@
 							clearButton={false}
 							bind:value={accessor[cell.name]}
 						/>
+					</div>
+				{/if}
+				{#if cell.control === 'Checkbox' && cell.name}
+					<div>
+						<Checkbox id={cell.name} bind:checked={accessor[cell.name]}>
+							{__(cell.label || '')}
+						</Checkbox>
 					</div>
 				{/if}
 				{#if cell.control === 'ComboBox' && cell.options && cell.name}

@@ -8,12 +8,11 @@
 
 	const dispatch = createEventDispatcher();
 
-	let store: StoreInterface;
 	export let form: FormField[][];
 	export let open = false;
 	export let data: any = {};
+	export let title = '';
 
-	let title = '';
 	let original: any | null = null;
 	let error = '',
 		error_suffix = '';

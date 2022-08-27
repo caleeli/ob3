@@ -47,10 +47,8 @@
 		await grid.loadNextPage();
 		grid = grid;
 	}
-	function toggleRowGroup(row: number, rows: number) {
-		for (let r = row, l = row + rows; r < l; r++) {
-			grid.rowGroup[r].open = !grid.rowGroup[r].open;
-		}
+	function toggleRowGroup(col: number, value:any) {
+		grid.collapse(col, value);
 		grid = grid;
 	}
 	function toggleSelect(row: any) {
@@ -67,15 +65,14 @@
 	}
 	function clickHeader(header: any, header_index: number) {
 		if (isEditMode) {
-			editHeader = true;
-			editHeaderIndex = header_index;
-			editConfig = config.headers[editHeaderIndex];
+			editHeaderConfig(header_index);
 		}
 		return header.sortable && toggleSort(header.field);
 	}
 
-	let editConfig = {};
-	let properties: FormField[][] = [
+	let editConfigData = {};
+	let editConfigForm: FormField[][] = [];
+	let editConfigFormHeader: FormField[][] = [
 		[
 			{
 				control: 'TextBox',
@@ -121,8 +118,32 @@
 				],
 			},
 		],
+		[
+			{
+				control: 'Checkbox',
+				label: 'Group rows',
+				name: 'groupRows',
+			},
+		],
 	];
-	let editHeader = false;
+	let editConfigFormGrid: FormField[][] = [
+		[
+			{
+				control: 'TextBox',
+				label: 'Model URL',
+				name: 'store.config.url',
+			},
+		],
+		[
+			{
+				control: 'Checkbox',
+				label: 'Multi Select',
+				name: 'config.multiSelect',
+			},
+		],
+	];
+	let editConfigTitle = '';
+	let editConfig = false;
 	let editHeaderIndex = 0;
 	let isEditMode = false;
 	let dragColumnIndex = -1;
@@ -130,7 +151,7 @@
 	edit_mode.subscribe((edit_mode) => {
 		isEditMode = edit_mode;
 	});
-	function updateHeader() {
+	function updateConfig() {
 		config = config;
 		load();
 		saveConfig();
@@ -154,6 +175,17 @@
 		load();
 		saveConfig();
 	}
+	function editHeaderConfig(header_index: number) {
+		editConfigForm = editConfigFormHeader;
+		editConfig = true;
+		editHeaderIndex = header_index;
+		editConfigData = config.headers[editHeaderIndex];
+	}
+	function editGridConfig() {
+		editConfigForm = editConfigFormGrid;
+		editConfig = true;
+		editConfigData = { config, store };
+	}
 	function saveConfig() {
 		if (!configStore) {
 			return;
@@ -162,8 +194,20 @@
 	}
 </script>
 
-<EditProperties form={properties} data={editConfig} bind:open={editHeader} on:save={updateHeader} />
+<EditProperties
+	title={editConfigTitle}
+	form={editConfigForm}
+	data={editConfigData}
+	bind:open={editConfig}
+	on:save={updateConfig}
+/>
 
+<div class="toolbar">
+	<slot name="toolbar" />
+	{#if isEditMode}
+		<Button on:click={editGridConfig}>⚙️</Button>
+	{/if}
+</div>
 <table>
 	<tr>
 		{#each config.headers as header, header_index}
@@ -192,25 +236,27 @@
 	</tr>
 	{#if grid}
 		{#each grid.cell as data, row}
-			{#if grid.cell[row] && config.headers[0].groupRows && grid.firstInGroup(row, 0)}
+			{#each config.headers as header, col}
+			{#if grid.cell[row] && header.groupRows && grid.firstInGroup(row, col)}
 				<tr>
 					<td
 						colspan={config.headers.length}
 						rowspan="1"
-						on:click={() => toggleRowGroup(row, grid.rowspan(row, 0))}
+						on:click={() => toggleRowGroup(col, grid.cell[row][col])}
 					>
 						<i
 							class={`icon icon-ic_fluent_${
-								grid.rowGroup[row].open ? 'chevron_down' : 'chevron_right'
+								grid.isCollapsed(row) ? 'chevron_right': 'chevron_down'
 							}_20_regular`}
 						/>
-						{grid.formatted(row, 0)}
+						{grid.formatted(row, col)}
 					</td>
 				</tr>
 			{/if}
+			{/each}
 			<tr
 				class={`${selected.includes(data) ? 'active' : ''} ${
-					grid.rowGroup[row].open ? '' : 'closed'
+					grid.isCollapsed(row) ? 'closed' : ''
 				}`}
 			>
 				{#each config.headers as header, col}
@@ -308,13 +354,13 @@
 		white-space: nowrap;
 	}
 	.grouped {
-		opacity: 0;
+		opacity: 0.5;
 	}
 	th.editable {
 		cursor: crosshair;
 	}
 	th.editable::after {
-		content: '✍';
+		content: '⚙️';
 		position: absolute;
 		right: 0;
 	}
@@ -323,5 +369,18 @@
 	}
 	th.drag-over-right {
 		border-right: 3px double var(--fds-solid-background-secondary);
+	}
+	.toolbar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		background-color: var(--fds-solid-background-base);
+	}
+	:global(.toolbar [slot]) {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.5rem;
+		background-color: var(--fds-solid-background-base);
 	}
 </style>

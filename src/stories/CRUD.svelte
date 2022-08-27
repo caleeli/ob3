@@ -117,15 +117,6 @@
 	</svelte:fragment>
 </ContentDialog>
 
-<div class="toolbar">
-	{#each toolbar as tool}
-		<Button variant="hyperlink" on:click={() => doAction(tool)}>
-			<i class={`icon icon-ic_fluent_${tool.icon}_16_regular`} />
-			{tool.label ? __(tool.label) : ''}
-		</Button>
-	{/each}
-</div>
-
 <Grid
 	{config}
 	{store}
@@ -133,16 +124,18 @@
 	on:edit={(event) => doRowAction('edit', event)}
 	on:delete={(event) => doRowAction('delete', event)}
 	bind:selected
-/>
+>
+	<div slot="toolbar">
+		{#each toolbar as tool}
+			<Button variant="hyperlink" on:click={() => doAction(tool)}>
+				<i class={`icon icon-ic_fluent_${tool.icon}_16_regular`} />
+				{tool.label ? __(tool.label) : ''}
+			</Button>
+		{/each}
+	</div>
+</Grid>
 
 <style>
-	.toolbar {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 0.5rem;
-		background-color: var(--fds-solid-background-base);
-	}
 	:global(.content-dialog-max-size) {
 		overflow: visible !important;
 	}

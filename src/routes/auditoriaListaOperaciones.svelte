@@ -12,16 +12,17 @@
 
 	let configStore = new ConfigStore('auditoriaListaOperaciones', page_config);
 	let config: GridConfig = page_config.grid;
-	let store = new ApiStore({
-		url: 'operaciones',
-		root: 'data',
-		limit: 200,
-		query: {
-			per_page: JSONApiPerPageHandler,
-			page: JSONApiPageHandler,
-			sort: JSONApiSortHandler,
-		},
-	});
+	let store = new ApiStore(
+		Object.assign(page_config.store, {
+			root: 'data',
+			limit: 200,
+			query: {
+				per_page: JSONApiPerPageHandler,
+				page: JSONApiPageHandler,
+				sort: JSONApiSortHandler,
+			},
+		})
+	);
 	let toolbar: CrudAction[] = [
 		{
 			icon: 'add',

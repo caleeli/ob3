@@ -4,7 +4,7 @@ import type StoreInterface from "./StoreInterface";
 class Grid {
 	private config: GridConfig;
 	public cell: any[][] = [];
-	public rowGroup: { open: boolean; }[] = [];
+	public collapsed: any[][] = [];
 	private data: any[] = [];
 	public store: StoreInterface;
 	public error = "";
@@ -71,7 +71,7 @@ class Grid {
 
 	private cleanCells() {
 		this.cell.splice(0);
-		this.rowGroup.splice(0);
+		this.collapsed.splice(0);
 	}
 
 	public async loadNextPage() {
@@ -89,7 +89,6 @@ class Grid {
 					rowCell.push(value);
 				});
 				this.cell.push(rowCell);
-				this.rowGroup.push({ open: true });
 			});
 		} catch (error) {
 			this.error = String(error);
@@ -146,6 +145,8 @@ class Grid {
 		for (; row < rowsCount; row++) {
 			if (this.cell[row][col] === value) {
 				rowspan++;
+			} else {
+				break;
 			}
 		}
 		return rowspan;
@@ -174,6 +175,27 @@ class Grid {
 		return new Intl.NumberFormat('es-BO', {
 			minimumFractionDigits: 2
 		}).format(number);
+	}
+
+	public collapse(col: number, value: any) {
+		if (!this.collapsed[col]) {
+			this.collapsed[col] = [];
+		}
+		if (this.collapsed[col].includes(value)) {
+			this.collapsed[col] = this.collapsed[col].filter((v) => v !== value);
+		} else {
+			this.collapsed[col].push(value);
+		}
+	}
+
+	public isCollapsed(row: number) {
+		for (let col = 0; col < this.collapsed.length; col++) {
+			const value = this.cell[row][col];
+			if (this.collapsed[col] && this.collapsed[col].includes(value)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
 

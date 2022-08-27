@@ -12,13 +12,15 @@
                 "label": "Cod Préstamo",
                 "value": "attributes.prmprnpre",
                 "field": "prmprnpre",
-                "align": "left"
+                "align": "left",
+                "groupRows": false
             },
             {
                 "label": "Asesor",
                 "value": "attributes.asesor",
                 "field": "asesor",
-                "align": "left"
+                "align": "left",
+                "groupRows": false
             },
             {
                 "label": "Producto",
@@ -127,5 +129,11 @@
             }
         ],
         "sort": []
+    },
+    "store": {
+        "url": "operaciones",
+        "root": "data",
+        "limit": 200,
+        "query": []
     }
 }
