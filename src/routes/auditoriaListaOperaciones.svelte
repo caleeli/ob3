@@ -7,13 +7,11 @@
 	} from '../lib/ApiStore';
 	import type GridConfig from '../lib/GridConfig';
 	import Crud from '../stories/CRUD.svelte';
-	import headers from './auditoriaListaOperaciones.json';
+	import page_config from './auditoriaListaOperaciones.json';
+	import ConfigStore from '../lib/ConfigStore';
 
-	let config: GridConfig = {
-		multiSelect: true,
-		headers: headers,
-		sort: [],
-	};
+	let configStore = new ConfigStore('auditoriaListaOperaciones', page_config);
+	let config: GridConfig = page_config.grid;
 	let store = new ApiStore({
 		url: 'operaciones',
 		root: 'data',
@@ -77,4 +75,4 @@
 	];
 </script>
 
-<Crud {config} {store} {toolbar} configStoreId="auditoriaListaOperaciones" />
+<Crud {config} {store} {toolbar} {configStore} />

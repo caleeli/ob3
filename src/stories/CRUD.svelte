@@ -6,12 +6,13 @@
 	import Grid from './Grid.svelte';
 	import { translation as __ } from '../lib/translations';
 	import type CrudAction from '../lib/CrudAction';
+	import type ConfigStore from '../lib/ConfigStore';
 
 	export let config: GridConfig;
 	export let store: StoreInterface;
 	export let toolbar: CrudAction[] = [];
 	export let rowActions: CrudAction[] = [];
-	export let configStoreId = '';
+	export let configStore: ConfigStore | undefined;
 
 	let form: any[][];
 	let open = false;
@@ -128,7 +129,7 @@
 <Grid
 	{config}
 	{store}
-	{configStoreId}
+	{configStore}
 	on:edit={(event) => doRowAction('edit', event)}
 	on:delete={(event) => doRowAction('delete', event)}
 	bind:selected

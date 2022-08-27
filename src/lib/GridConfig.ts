@@ -1,5 +1,6 @@
 
 class GridConfig {
+	public id: string;
 	public headers: {
 		label: string;
 		value: string;

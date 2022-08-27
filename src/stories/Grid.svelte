@@ -9,14 +9,14 @@
 	import Visibility from '../lib/Visibility.svelte';
 	import EditProperties from '../lib/EditProperties.svelte';
 	import type FormField from '../lib/FormField';
-	import ApiStore from '../lib/ApiStore';
+	import type ConfigStore from '../lib/ConfigStore';
 
 	const dispatch = createEventDispatcher();
 
 	export let config: GridConfig;
 	export let store: StoreInterface;
-	export let selected: number[] = [];
-	export let configStoreId = '';
+	export let selected: any[] = [];
+	export let configStore: ConfigStore | undefined = undefined;
 
 	let grid = new Grid(config, store);
 	load();
@@ -127,9 +127,6 @@
 	let isEditMode = false;
 	let dragColumnIndex = -1;
 	let dragOverIndex = -1;
-	let configStore = new ApiStore({
-		url: 'edit_page_config',
-	});
 	edit_mode.subscribe((edit_mode) => {
 		isEditMode = edit_mode;
 	});
@@ -158,12 +155,10 @@
 		saveConfig();
 	}
 	function saveConfig() {
-		if (!configStoreId) {
+		if (!configStore) {
 			return;
 		}
-		configStore.update(configStoreId, {
-			data: config.headers,
-		});
+		configStore.save();
 	}
 </script>
 
@@ -178,7 +173,7 @@
 						? 'drag-over-' + (dragColumnIndex > dragOverIndex ? 'left' : 'right')
 						: ''
 				}`}
-				align={header.align || 'left'}
+				style={`text-align:${header.align || 'left'};`}
 				width={header.width || ''}
 				on:click={() => clickHeader(header, header_index)}
 				draggable={isEditMode}
@@ -222,7 +217,7 @@
 					{#if grid.cell[row]}
 						<td
 							class={`${config.headers[col].groupRows ? 'grouped' : ''}`}
-							align={header.align}
+							style={`text-align:${header.align || 'left'};`}
 							on:click={() => toggleSelect(data)}
 						>
 							{#if header.control === 'actions'}
