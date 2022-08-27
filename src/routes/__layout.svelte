@@ -1,17 +1,26 @@
 <script lang="ts">
 	import Header from '../stories/Header.svelte';
-	import { login } from '../store';
+	import { login, edit_mode } from '../store';
 	import Menu from '../lib/Menu.svelte';
 
 	let user: { name: any } | null = null;
 	login.subscribe((login: { attributes: { name: string } } | null): void => {
 		if (login) {
 			user = {
-				name: login.attributes.name
+				name: login.attributes.name,
 			};
 		}
 	});
+
+	function handleKeydown(event: { keyCode: number }) {
+		// F2: Change to edit mode
+		if (event.keyCode === 113) {
+			edit_mode.update(value => !value);
+		}
+	}
 </script>
+
+<svelte:window on:keydown={handleKeydown} />
 
 <Header {user} />
 

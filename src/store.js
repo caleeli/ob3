@@ -1,6 +1,7 @@
 import { writable } from 'svelte/store';
 
 export const login = writable(null);
+export const edit_mode = writable(false);
 
 login.subscribe((data) => {
     if (typeof localStorage !== 'undefined' && data) {

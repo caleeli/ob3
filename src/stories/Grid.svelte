@@ -4,14 +4,19 @@
 	import '../lib/icons/FluentSystemIcons-Regular.css';
 	import { Button } from 'fluent-svelte';
 	import { createEventDispatcher } from 'svelte';
-	import type StoreInterface from 'src/lib/StoreInterface';
+	import { edit_mode } from '../store';
+	import type StoreInterface from '../lib/StoreInterface';
 	import Visibility from '../lib/Visibility.svelte';
+	import EditProperties from '../lib/EditProperties.svelte';
+	import type FormField from '../lib/FormField';
+	import ApiStore from '../lib/ApiStore';
 
 	const dispatch = createEventDispatcher();
 
 	export let config: GridConfig;
 	export let store: StoreInterface;
 	export let selected: number[] = [];
+	export let configStoreId = '';
 
 	let grid = new Grid(config, store);
 	load();
@@ -60,15 +65,126 @@
 		}
 		grid = grid;
 	}
+	function clickHeader(header: any, header_index: number) {
+		if (isEditMode) {
+			editHeader = true;
+			editHeaderIndex = header_index;
+			editConfig = config.headers[editHeaderIndex];
+		}
+		return header.sortable && toggleSort(header.field);
+	}
+
+	let editConfig = {};
+	let properties: FormField[][] = [
+		[
+			{
+				control: 'TextBox',
+				label: 'Field',
+				name: 'field',
+				type: 'text',
+			},
+		],
+		[
+			{
+				control: 'TextBox',
+				label: 'Label',
+				name: 'label',
+				type: 'text',
+			},
+		],
+		[
+			{
+				control: 'TextBox',
+				label: 'Value',
+				name: 'value',
+				type: 'text',
+			},
+		],
+		[
+			{
+				control: 'ComboBox',
+				label: 'Align',
+				name: 'align',
+				options: [
+					{
+						name: 'Left',
+						value: 'left',
+					},
+					{
+						name: 'Center',
+						value: 'center',
+					},
+					{
+						name: 'Right',
+						value: 'right',
+					},
+				],
+			},
+		],
+	];
+	let editHeader = false;
+	let editHeaderIndex = 0;
+	let isEditMode = false;
+	let dragColumnIndex = -1;
+	let dragOverIndex = -1;
+	let configStore = new ApiStore({
+		url: 'edit_page_config',
+	});
+	edit_mode.subscribe((edit_mode) => {
+		isEditMode = edit_mode;
+	});
+	function updateHeader() {
+		config = config;
+		load();
+		saveConfig();
+	}
+	function dragStartColumn(e: DragEvent & { currentTarget: EventTarget }, header_index: number) {
+		dragColumnIndex = header_index;
+		e.dataTransfer && (e.dataTransfer.effectAllowed = 'move');
+	}
+	function dragOverColumn(e: DragEvent & { currentTarget: EventTarget }, header_index: number) {
+		e.preventDefault();
+		dragOverIndex = header_index;
+	}
+	function dropColumn(dropColumnIndex: number) {
+		if (dragColumnIndex > dropColumnIndex) {
+			config.headers.splice(dropColumnIndex, 0, config.headers.splice(dragColumnIndex, 1)[0]);
+		} else {
+			config.headers.splice(dropColumnIndex, 0, config.headers.splice(dragColumnIndex, 1)[0]);
+		}
+		dragOverIndex = -1;
+		config = config;
+		load();
+		saveConfig();
+	}
+	function saveConfig() {
+		if (!configStoreId) {
+			return;
+		}
+		configStore.update(configStoreId, {
+			data: config.headers,
+		});
+	}
 </script>
+
+<EditProperties form={properties} data={editConfig} bind:open={editHeader} on:save={updateHeader} />
 
 <table>
 	<tr>
-		{#each config.headers as header}
+		{#each config.headers as header, header_index}
 			<th
+				class={`${isEditMode ? 'editable' : ''} ${
+					dragOverIndex === header_index
+						? 'drag-over-' + (dragColumnIndex > dragOverIndex ? 'left' : 'right')
+						: ''
+				}`}
 				align={header.align || 'left'}
 				width={header.width || ''}
-				on:click={() => header.sortable && toggleSort(header.field)}
+				on:click={() => clickHeader(header, header_index)}
+				draggable={isEditMode}
+				on:dragstart={(e) => dragStartColumn(e, header_index)}
+				on:dragover={(e) => dragOverColumn(e, header_index)}
+				on:drop={(e) => dropColumn(header_index)}
 			>
 				{header.label}
 				<i
@@ -198,5 +314,19 @@
 	}
 	.grouped {
 		opacity: 0;
+	}
+	th.editable {
+		cursor: crosshair;
+	}
+	th.editable::after {
+		content: '✍';
+		position: absolute;
+		right: 0;
+	}
+	th.drag-over-left {
+		border-left: 3px double var(--fds-solid-background-secondary);
+	}
+	th.drag-over-right {
+		border-right: 3px double var(--fds-solid-background-secondary);
 	}
 </style>

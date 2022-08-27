@@ -11,6 +11,7 @@
 	export let store: StoreInterface;
 	export let toolbar: CrudAction[] = [];
 	export let rowActions: CrudAction[] = [];
+	export let configStoreId = '';
 
 	let form: any[][];
 	let open = false;
@@ -127,6 +128,7 @@
 <Grid
 	{config}
 	{store}
+	{configStoreId}
 	on:edit={(event) => doRowAction('edit', event)}
 	on:delete={(event) => doRowAction('delete', event)}
 	bind:selected
@@ -140,8 +142,10 @@
 		padding: 0.5rem;
 		background-color: var(--fds-solid-background-base);
 	}
+	:global(.content-dialog-max-size) {
+		overflow: visible !important;
+	}
 	:global(.content-dialog-max-size .content-dialog-body) {
 		max-height: calc(100vh - 10rem);
-		overflow: auto;
 	}
 </style>
