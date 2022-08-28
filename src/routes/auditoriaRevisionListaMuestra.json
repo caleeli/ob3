@@ -148,9 +148,39 @@
                 "sortable": false
             },
             {
-                "label": "Agencia",
-                "value": "attributes.agencia",
-                "field": "agencia",
+                "label": "Cod Aut",
+                "value": "attributes.prmprautp",
+                "field": "prmprautp",
+                "align": "left",
+                "groupRows": false,
+                "modelAttribute": "informe",
+                "format": [],
+                "sortable": false
+            },
+            {
+                "label": "Autorizado por",
+                "value": "attributes.autoriza",
+                "field": "autoriza",
+                "align": "left",
+                "groupRows": false,
+                "modelAttribute": "informe",
+                "format": [],
+                "sortable": false
+            },
+            {
+                "label": "Cod Asesor",
+                "value": "attributes.prmprrseg",
+                "field": "prmprrseg",
+                "align": "left",
+                "groupRows": false,
+                "modelAttribute": "informe",
+                "format": [],
+                "sortable": false
+            },
+            {
+                "label": "Asesor",
+                "value": "attributes.asesor",
+                "field": "asesor",
                 "align": "left",
                 "groupRows": false,
                 "modelAttribute": "informe",

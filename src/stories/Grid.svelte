@@ -64,9 +64,18 @@
 		}
 		grid = grid;
 	}
-	function clickHeader(header: any, header_index: number) {
+	function clickHeader(
+		header: any,
+		header_index: number,
+		e: MouseEvent & { currentTarget: EventTarget & HTMLTableHeaderCellElement }
+	) {
 		if (isEditMode) {
-			editHeaderConfig(header_index);
+			// check if ctrl is pressed
+			if (e.ctrlKey) {
+				editHeaderDuplicateConfig(header_index);
+			} else {
+				editHeaderConfig(header_index);
+			}
 		}
 		return header.sortable && toggleSort(header.field);
 	}
@@ -83,7 +92,7 @@
 				name: 'field',
 				async action(value) {
 					config.headers[editHeaderIndex].value = `attributes.${value}`;
-				}
+				},
 			},
 			{
 				control: 'TextBox',
@@ -142,10 +151,10 @@
 					if (value) {
 						field.push('currency');
 					} else {
-						field = field.filter((f:string) => f !== 'currency');
+						field = field.filter((f: string) => f !== 'currency');
 					}
 					return field;
-				}
+				},
 			},
 		],
 		[
@@ -155,10 +164,7 @@
 				variant: 'standard',
 				async action() {
 					// duplicate header editHeaderIndex
-					const header = config.headers[editHeaderIndex];
-					const newHeader = { ...header };
-					config.headers.splice(editHeaderIndex + 1, 0, newHeader);
-					updateConfig();
+					editHeaderDuplicateConfig(editHeaderIndex);
 					editConfig = false;
 				},
 			},
@@ -205,6 +211,12 @@
 		load();
 		saveConfig();
 	}
+	function editHeaderDuplicateConfig(header_index: number) {
+		const header = config.headers[header_index];
+		const newHeader = { ...header };
+		config.headers.splice(header_index + 1, 0, newHeader);
+		updateConfig();
+	}
 	function dragStartColumn(e: DragEvent & { currentTarget: EventTarget }, header_index: number) {
 		dragColumnIndex = header_index;
 		e.dataTransfer && (e.dataTransfer.effectAllowed = 'move');
@@ -246,9 +258,11 @@
 			const keys = Object.keys(model.attributes);
 			editConfigModelAttributes.splice(0);
 			editConfigModelAttributes.push({ name: '', value: '' });
-			editConfigModelAttributes.push(...keys.map((key) => {
-				return { name: key, value: key };
-			}));
+			editConfigModelAttributes.push(
+				...keys.map((key) => {
+					return { name: key, value: key };
+				})
+			);
 			editConfigFormHeader = editConfigFormHeader;
 		});
 	}
@@ -279,7 +293,7 @@
 				}`}
 				style={`text-align:${header.align || 'left'};`}
 				width={header.width || ''}
-				on:click={() => clickHeader(header, header_index)}
+				on:click={(e) => clickHeader(header, header_index, e)}
 				draggable={isEditMode}
 				on:dragstart={(e) => dragStartColumn(e, header_index)}
 				on:dragover={(e) => dragOverColumn(e, header_index)}
@@ -418,6 +432,9 @@
 	}
 	th.editable {
 		cursor: crosshair;
+	}
+	:global(.control-pressed) th.editable {
+		cursor: copy;
 	}
 	th.editable::after {
 		content: '⚙️';

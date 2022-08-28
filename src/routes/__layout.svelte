@@ -4,6 +4,8 @@
 	import Menu from '../lib/Menu.svelte';
 
 	let user: { name: any } | null = null;
+	let shiftKey: boolean = false;
+	let ctrlKey: boolean = false;
 	login.subscribe((login: { attributes: { name: string } } | null): void => {
 		if (login) {
 			user = {
@@ -12,19 +14,25 @@
 		}
 	});
 
-	function handleKeydown(event: { keyCode: number }) {
+	function handleKeydown(event: { keyCode: number; shiftKey: any; ctrlKey: any }) {
 		// F2: Change to edit mode
 		if (event.keyCode === 113) {
-			edit_mode.update(value => !value);
+			edit_mode.update((value) => !value);
 		}
+		shiftKey = event.shiftKey;
+		ctrlKey = event.ctrlKey;
+	}
+	function handleKeyup(event: { keyCode: number; shiftKey: any; ctrlKey: any }) {
+		shiftKey = event.shiftKey;
+		ctrlKey = event.ctrlKey;
 	}
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window on:keydown={handleKeydown} on:keyup={handleKeyup} />
 
 <Header {user} />
 
-<main>
+<main class={`${shiftKey ? 'shift-pressed' : ''} ${ctrlKey ? 'control-pressed' : ''}`}>
 	{#if user}
 		<Menu />
 	{/if}
