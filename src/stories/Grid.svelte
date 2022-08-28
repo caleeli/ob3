@@ -11,6 +11,8 @@
 	import type FormField from '../lib/FormField';
 	import type ConfigStore from '../lib/ConfigStore';
 	import type ApiStore from '$lib/ApiStore';
+	import type CrudAction from '$lib/CrudAction';
+	import { translation as __ } from '../lib/translations';
 
 	const dispatch = createEventDispatcher();
 
@@ -18,6 +20,7 @@
 	export let store: StoreInterface | ApiStore;
 	export let selected: any[] = [];
 	export let configStore: ConfigStore | undefined = undefined;
+	export let toolbar: CrudAction[] = [];
 
 	let grid = new Grid(config, store);
 	load();
@@ -196,6 +199,78 @@
 				name: 'config.multiSelect',
 			},
 		],
+		[
+			{
+				control: 'Button',
+				label: 'Add Toolbar Button',
+				variant: 'standard',
+				async action() {
+					toolbar.push({
+						icon: 'add',
+						label: 'New Button',
+						action: 'new',
+					});
+					updateConfig();
+				},
+			},
+		],
+	];
+	let editConfigFormToolbarButton: FormField[][] = [
+		[
+			{
+				control: 'ComboBox',
+				label: 'Icon',
+				name: 'icon',
+				options: [
+					{
+						name: 'add',
+						value: 'add',
+					},
+					{
+						name: 'delete',
+						value: 'delete',
+					},
+					{
+						name: 'edit',
+						value: 'edit',
+					},
+					{
+						name: 'open',
+						value: 'open',
+					},
+					{
+						name: 'save',
+						value: 'save',
+					},
+					{
+						name: 'search',
+						value: 'search',
+					},
+				],
+			},
+			{
+				control: 'TextBox',
+				label: 'Label',
+				name: 'label',
+				type: 'text',
+			},
+		],
+		[
+			{
+				control: 'TextBox',
+				label: 'Href link',
+				name: 'href',
+				type: 'text',
+			},
+		],
+		[
+			{
+				control: 'TextBox',
+				label: 'Action',
+				name: 'action',
+				type: 'text',
+			},
+		],
 	];
 	let editConfigTitle = '';
 	let editConfig = false;
@@ -266,6 +341,23 @@
 			editConfigFormHeader = editConfigFormHeader;
 		});
 	}
+	function doToolbarAction(tool: CrudAction) {
+		if (isEditMode) {
+			editConfigForm = editConfigFormToolbarButton;
+			editConfig = true;
+			editConfigData = tool;
+			return;
+		}
+		dispatch('toolbar', { tool, selected: config.multiSelect ? selected : selected[0] });
+	}
+	// e.g. auditoriaRevision/${selected.id}
+	function href(tool: CrudAction) {
+		if (!tool.href) {
+			return;
+		}
+		const fn = new Function('selected', 'try{return `' + tool.href + '`}catch(e){return null}');
+		return fn(config.multiSelect ? selected : selected[0]);
+	}
 </script>
 
 <EditProperties
@@ -277,7 +369,12 @@
 />
 
 <div class="toolbar">
-	<slot name="toolbar" />
+	{#each toolbar as tool}
+		<Button variant="hyperlink" on:click={() => doToolbarAction(tool)} href={href(tool, selected)}>
+			<i class={`icon icon-ic_fluent_${tool.icon}_16_regular`} />
+			{tool.label ? __(tool.label) : ''}
+		</Button>
+	{/each}
 	{#if isEditMode}
 		<Button on:click={editGridConfig}>⚙️</Button>
 	{/if}
@@ -329,7 +426,7 @@
 				{/if}
 			{/each}
 			<tr
-				class={`${selected.includes(data) ? 'active' : ''} ${
+				class={`${selected.includes(grid.data[row]) ? 'active' : ''} ${
 					grid.isCollapsed(row) ? 'closed' : ''
 				}`}
 			>
@@ -338,7 +435,7 @@
 						<td
 							class={`${config.headers[col].groupRows ? 'grouped' : ''}`}
 							style={`text-align:${header.align || 'left'};`}
-							on:click={() => toggleSelect(data)}
+							on:click={() => toggleSelect(grid.data[row])}
 						>
 							{#if header.control === 'actions'}
 								<div role="group">
@@ -449,13 +546,6 @@
 	}
 	.toolbar {
 		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		background-color: var(--fds-solid-background-base);
-	}
-	:global(.toolbar [slot]) {
-		display: flex;
-		justify-content: space-between;
 		align-items: center;
 		padding: 0.5rem;
 		background-color: var(--fds-solid-background-base);

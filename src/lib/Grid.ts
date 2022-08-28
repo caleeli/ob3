@@ -5,7 +5,7 @@ class Grid {
 	private config: GridConfig;
 	public cell: any[][] = [];
 	public collapsed: any[][] = [];
-	private data: any[] = [];
+	public data: any[] = [];
 	public store: StoreInterface;
 	public error = "";
 	public sortBy: { field: string, direction: 'asc' | 'desc' }[] = [];

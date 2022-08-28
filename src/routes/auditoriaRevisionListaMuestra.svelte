@@ -22,7 +22,7 @@
 			},
 		})
 	);
-	let toolbar: CrudAction[] = [];
+	let toolbar: CrudAction[] = page_config.toolbar;
 </script>
 
 <Crud {config} {store} {toolbar} {configStore} />

@@ -75,7 +75,8 @@
 	function cancel() {
 		open = false;
 	}
-	function doAction(tool: CrudAction) {
+	function doAction(payload: { [key: string]: CrudAction | any }) {
+		const tool = payload.tool;
 		if (tool.form && tool.initial) {
 			form = tool.form;
 			add(JSON.parse(JSON.stringify(tool.initial)));
@@ -85,6 +86,15 @@
 			add({}, tool.label);
 		} else if (tool.action instanceof Function) {
 			return tool.action();
+		} else if (typeof tool.action === 'string') {
+			const context = Object.assign({}, payload, {
+				deleteRecord(record: any) {
+					deleteRecord({ detail: record });
+				},
+			});
+			const input = Object.keys(context);
+			const fn = new Function(...input, 'return ' + tool.action);
+			return fn(...input.map((key) => context[key]));
 		}
 	}
 	function doRowAction(action: string, event: { detail: any }) {
@@ -121,19 +131,12 @@
 	{config}
 	{store}
 	{configStore}
+	{toolbar}
 	on:edit={(event) => doRowAction('edit', event)}
 	on:delete={(event) => doRowAction('delete', event)}
+	on:toolbar={(event) => doAction(event.detail)}
 	bind:selected
->
-	<div slot="toolbar">
-		{#each toolbar as tool}
-			<Button variant="hyperlink" on:click={() => doAction(tool)}>
-				<i class={`icon icon-ic_fluent_${tool.icon}_16_regular`} />
-				{tool.label ? __(tool.label) : ''}
-			</Button>
-		{/each}
-	</div>
-</Grid>
+/>
 
 <style>
 	:global(.content-dialog-max-size) {

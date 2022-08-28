@@ -195,5 +195,19 @@
         "root": "data",
         "limit": 100,
         "query": []
-    }
+    },
+    "toolbar": [
+        {
+            "icon": "open",
+            "label": "Revisar",
+            "action": "new",
+            "href": "auditoriaRevision\/${selected.id}"
+        },
+        {
+            "icon": "delete",
+            "label": "Delete",
+            "action": "deleteRecord(selected)",
+            "href": ""
+        }
+    ]
 }

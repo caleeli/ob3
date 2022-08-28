@@ -159,7 +159,7 @@
 						<TextBox
 							id={cell.name}
 							placeholder={cell.placeholder || ''}
-							type={cell.type}
+							type={cell.type || 'text'}
 							clearButton={false}
 							bind:value={accessor[getName(cell)]}
 						/>
