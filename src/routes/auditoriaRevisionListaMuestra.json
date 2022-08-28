@@ -1,0 +1,169 @@
+{
+    "grid": {
+        "multiSelect": false,
+        "headers": [
+            {
+                "label": "Informe",
+                "value": "attributes.informe",
+                "field": "informe",
+                "align": "left",
+                "groupRows": true
+            },
+            {
+                "label": "Nro Préstamo",
+                "value": "attributes.prmprnpre",
+                "field": "prmprnpre",
+                "align": "left",
+                "groupRows": false
+            },
+            {
+                "label": "Producto",
+                "value": "attributes.prtcrdesc",
+                "field": "prtcrdesc",
+                "align": "left",
+                "groupRows": false,
+                "modelAttribute": "informe"
+            },
+            {
+                "label": "Fecha desemb",
+                "value": "attributes.prmprfdes",
+                "field": "prmprfdes",
+                "align": "center",
+                "groupRows": false,
+                "modelAttribute": "informe",
+                "sortable": false
+            },
+            {
+                "label": "Monto desemb",
+                "value": "attributes.prmprmdes",
+                "field": "prmprmdes",
+                "align": "right",
+                "groupRows": false,
+                "modelAttribute": "informe",
+                "format": [
+                    "currency"
+                ],
+                "sortable": false
+            },
+            {
+                "label": "Saldo",
+                "value": "attributes.prmprsald",
+                "field": "prmprsald",
+                "align": "right",
+                "groupRows": false,
+                "modelAttribute": "informe",
+                "format": [
+                    "currency"
+                ],
+                "sortable": false
+            },
+            {
+                "label": "Cod Moneda",
+                "value": "attributes.prmprcmon",
+                "field": "prmprcmon",
+                "align": "center",
+                "groupRows": false,
+                "modelAttribute": "informe",
+                "format": [],
+                "sortable": false
+            },
+            {
+                "label": "Moneda",
+                "value": "attributes.moneda",
+                "field": "moneda",
+                "align": "left",
+                "groupRows": false,
+                "modelAttribute": "informe",
+                "format": [],
+                "sortable": false
+            },
+            {
+                "label": "Cod Estado",
+                "value": "attributes.prmprstat",
+                "field": "prmprstat",
+                "align": "center",
+                "groupRows": false,
+                "modelAttribute": "informe",
+                "format": [],
+                "sortable": false
+            },
+            {
+                "label": "Estado",
+                "value": "attributes.estado",
+                "field": "estado",
+                "align": "center",
+                "groupRows": false,
+                "modelAttribute": "informe",
+                "format": [],
+                "sortable": false
+            },
+            {
+                "label": "Plazo",
+                "value": "attributes.prmprplzo",
+                "field": "prmprplzo",
+                "align": "center",
+                "groupRows": false,
+                "modelAttribute": "informe",
+                "format": [],
+                "sortable": false
+            },
+            {
+                "label": "Cod Reg",
+                "value": "attributes.prmprplaz",
+                "field": "prmprplaz",
+                "align": "center",
+                "groupRows": false,
+                "modelAttribute": "informe",
+                "format": [],
+                "sortable": false
+            },
+            {
+                "label": "Regional",
+                "value": "attributes.plaza",
+                "field": "plaza",
+                "align": "center",
+                "groupRows": false,
+                "modelAttribute": "informe",
+                "format": [],
+                "sortable": false
+            },
+            {
+                "label": "Cod Agencia",
+                "value": "attributes.prmpragen",
+                "field": "prmpragen",
+                "align": "center",
+                "groupRows": false,
+                "modelAttribute": "informe",
+                "format": [],
+                "sortable": false
+            },
+            {
+                "label": "Agencia",
+                "value": "attributes.agencia",
+                "field": "agencia",
+                "align": "left",
+                "groupRows": false,
+                "modelAttribute": "informe",
+                "format": [],
+                "sortable": false
+            },
+            {
+                "label": "Agencia",
+                "value": "attributes.agencia",
+                "field": "agencia",
+                "align": "left",
+                "groupRows": false,
+                "modelAttribute": "informe",
+                "format": [],
+                "sortable": false
+            }
+        ],
+        "sort": []
+    },
+    "store": {
+        "url": "muestra",
+        "root": "data",
+        "limit": 100,
+        "query": []
+    }
+}

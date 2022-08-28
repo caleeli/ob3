@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Button, ContentDialog, InfoBar } from 'fluent-svelte';
-	import type StoreInterface from '../lib/StoreInterface';
 	import Form from '../stories/Form.svelte';
 	import { translation as __ } from '../lib/translations';
 	import type FormField from './FormField';
@@ -13,11 +12,8 @@
 	export let data: any = {};
 	export let title = '';
 
-	let original: any | null = null;
 	let error = '',
 		error_suffix = '';
-	let selected: number[] = [];
-	let handler: ((record: any, selected: any[]) => Promise<void>) | undefined;
 	async function save() {
 		dispatch('save', data);
 		open = false;

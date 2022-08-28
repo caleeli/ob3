@@ -26,11 +26,13 @@ class FormField {
         disabled?: boolean;
     }[];
     public rows?: number;
-    public action?: (() => Promise<void>);
+    public action?: (() => Promise<void>) | ((value?: any) => Promise<void>);
     public store?: StoreInterface | ApiStore;
     public storeValueField?: string;
     public storeNameField?: string;
     public storeDisabledField?: string;
+    public getter?: (field: any) => any;
+    public setter?: (field: any, value: any) => any;
     // internal properties
     public actionInProgress?: boolean = false;
     public searchValue?: string = '';

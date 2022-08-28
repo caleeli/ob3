@@ -10,11 +10,12 @@
 	import EditProperties from '../lib/EditProperties.svelte';
 	import type FormField from '../lib/FormField';
 	import type ConfigStore from '../lib/ConfigStore';
+	import type ApiStore from '$lib/ApiStore';
 
 	const dispatch = createEventDispatcher();
 
 	export let config: GridConfig;
-	export let store: StoreInterface;
+	export let store: StoreInterface | ApiStore;
 	export let selected: any[] = [];
 	export let configStore: ConfigStore | undefined = undefined;
 
@@ -47,7 +48,7 @@
 		await grid.loadNextPage();
 		grid = grid;
 	}
-	function toggleRowGroup(col: number, value:any) {
+	function toggleRowGroup(col: number, value: any) {
 		grid.collapse(col, value);
 		grid = grid;
 	}
@@ -72,12 +73,22 @@
 
 	let editConfigData = {};
 	let editConfigForm: FormField[][] = [];
+	let editConfigModelAttributes: { name: string; value: string }[] = [];
 	let editConfigFormHeader: FormField[][] = [
 		[
 			{
-				control: 'TextBox',
+				control: 'ComboBox',
 				label: 'Field',
+				options: editConfigModelAttributes,
 				name: 'field',
+				async action(value) {
+					config.headers[editHeaderIndex].value = `attributes.${value}`;
+				}
+			},
+			{
+				control: 'TextBox',
+				label: 'Value',
+				name: 'value',
 				type: 'text',
 			},
 		],
@@ -88,16 +99,6 @@
 				name: 'label',
 				type: 'text',
 			},
-		],
-		[
-			{
-				control: 'TextBox',
-				label: 'Value',
-				name: 'value',
-				type: 'text',
-			},
-		],
-		[
 			{
 				control: 'ComboBox',
 				label: 'Align',
@@ -123,6 +124,54 @@
 				control: 'Checkbox',
 				label: 'Group rows',
 				name: 'groupRows',
+			},
+			{
+				control: 'Checkbox',
+				label: 'Sortable',
+				name: 'sortable',
+			},
+			{
+				control: 'Checkbox',
+				label: 'Currency',
+				name: 'format',
+				getter(field: string[] | undefined) {
+					return field && field.includes('currency');
+				},
+				setter(field: string[] | undefined, value: any) {
+					field = [];
+					if (value) {
+						field.push('currency');
+					} else {
+						field = field.filter((f:string) => f !== 'currency');
+					}
+					return field;
+				}
+			},
+		],
+		[
+			{
+				control: 'Button',
+				label: 'Duplicate',
+				variant: 'standard',
+				async action() {
+					// duplicate header editHeaderIndex
+					const header = config.headers[editHeaderIndex];
+					const newHeader = { ...header };
+					config.headers.splice(editHeaderIndex + 1, 0, newHeader);
+					updateConfig();
+					editConfig = false;
+				},
+			},
+			{
+				control: 'Button',
+				label: 'Remove',
+				variant: 'standard',
+				async action() {
+					// remove header editHeaderIndex
+					config.headers.splice(editHeaderIndex, 1);
+					updateConfig();
+					editConfig = false;
+				},
 			},
 		],
 	];
@@ -192,6 +241,17 @@
 		}
 		configStore.save();
 	}
+	if (config && configStore) {
+		configStore.getModelMeta(store.config.url).then((model) => {
+			const keys = Object.keys(model.attributes);
+			editConfigModelAttributes.splice(0);
+			editConfigModelAttributes.push({ name: '', value: '' });
+			editConfigModelAttributes.push(...keys.map((key) => {
+				return { name: key, value: key };
+			}));
+			editConfigFormHeader = editConfigFormHeader;
+		});
+	}
 </script>
 
 <EditProperties
@@ -223,7 +283,7 @@
 				draggable={isEditMode}
 				on:dragstart={(e) => dragStartColumn(e, header_index)}
 				on:dragover={(e) => dragOverColumn(e, header_index)}
-				on:drop={(e) => dropColumn(header_index)}
+				on:drop={() => dropColumn(header_index)}
 			>
 				{header.label}
 				<i
@@ -237,22 +297,22 @@
 	{#if grid}
 		{#each grid.cell as data, row}
 			{#each config.headers as header, col}
-			{#if grid.cell[row] && header.groupRows && grid.firstInGroup(row, col)}
-				<tr>
-					<td
-						colspan={config.headers.length}
-						rowspan="1"
-						on:click={() => toggleRowGroup(col, grid.cell[row][col])}
-					>
-						<i
-							class={`icon icon-ic_fluent_${
-								grid.isCollapsed(row) ? 'chevron_right': 'chevron_down'
-							}_20_regular`}
-						/>
-						{grid.formatted(row, col)}
-					</td>
-				</tr>
-			{/if}
+				{#if grid.cell[row] && header.groupRows && grid.firstInGroup(row, col)}
+					<tr>
+						<td
+							colspan={config.headers.length}
+							rowspan="1"
+							on:click={() => toggleRowGroup(col, grid.cell[row][col])}
+						>
+							<i
+								class={`icon icon-ic_fluent_${
+									grid.isCollapsed(row) ? 'chevron_right' : 'chevron_down'
+								}_20_regular`}
+							/>
+							{grid.formatted(row, col)}
+						</td>
+					</tr>
+				{/if}
 			{/each}
 			<tr
 				class={`${selected.includes(data) ? 'active' : ''} ${
