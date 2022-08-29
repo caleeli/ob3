@@ -43,9 +43,13 @@
 
 <style>
 	@import url('https://unpkg.com/fluent-svelte/theme.css');
+	:root {
+		--header-height: 6rem;
+	}
 	:global(body) {
 		margin: 0;
 		padding: 0;
+		overflow: hidden;
 		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
 			'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
 		-webkit-font-smoothing: antialiased;
@@ -57,19 +61,11 @@
 		flex-direction: row;
 		padding: 0;
 		width: 100%;
-		/*max-width: 1024px;*/
 		margin: 0 auto;
 		box-sizing: border-box;
-		height: calc(100vh - 4rem);
+		height: calc(100vh - var(--header-height));
 		overflow: hidden;
 	}
-
-	@media (min-width: 480px) {
-		footer {
-			padding: 40px 0;
-		}
-	}
-
 	.content {
 		flex-grow: 1;
 		width: 100rem;

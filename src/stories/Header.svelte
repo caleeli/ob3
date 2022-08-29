@@ -55,3 +55,9 @@
 		</div>
 	</div>
 </header>
+
+<style>
+	header {
+		height: var(--header-height);
+	}
+</style>

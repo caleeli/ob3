@@ -1,0 +1,75 @@
+{
+    "grid": {
+        "multiSelect": false,
+        "headers": [
+            {
+                "label": "ID",
+                "value": "id",
+                "field": "id",
+                "align": "left",
+                "format": [],
+                "sortable": false,
+                "groupRows": false
+            },
+            {
+                "label": "Group",
+                "value": "attributes.id_grupo",
+                "field": "id_grupo",
+                "align": "left",
+                "format": [],
+                "sortable": false,
+                "groupRows": true
+            },
+            {
+                "label": "Number",
+                "value": "attributes.number",
+                "field": "number",
+                "align": "left",
+                "format": [],
+                "sortable": true,
+                "groupRows": false
+            },
+            {
+                "label": "Indice",
+                "value": "attributes.indice",
+                "field": "indice",
+                "align": "left",
+                "format": [],
+                "sortable": false,
+                "groupRows": false
+            },
+            {
+                "label": "tipo cred",
+                "value": "attributes.tipo_credito",
+                "field": "tipo_credito",
+                "align": "left",
+                "format": [],
+                "sortable": false,
+                "groupRows": false
+            },
+            {
+                "label": "Detalle",
+                "value": "attributes.descripcion",
+                "field": "descripcion",
+                "align": "left",
+                "format": [],
+                "sortable": false,
+                "groupRows": false
+            }
+        ],
+        "sort": []
+    },
+    "store": {
+        "url": "revision_respuestas",
+        "root": "data",
+        "limit": 100,
+        "query": {
+            "params": {
+                "informe_id": "10",
+                "prmprnpre_num": "2801441",
+                "tipo_credito": "5",
+                "calidad": "PRELIMINAR"
+            }
+        }
+    }
+}

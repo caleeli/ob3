@@ -127,8 +127,8 @@ class ApiStore implements StoreInterface {
         }
         const response = await fetch(url.toString(), { headers: headers });
         if (!(response.status >= 200 && response.status < 300)) {
-            const json = await response.json();
-            throw new Error(json.error || response.statusText);
+            const json = await response.json().catch(() => ({ error: response.statusText }));
+            throw json.error;
         }
         let result = await response.json();
         if (this.config.root) {

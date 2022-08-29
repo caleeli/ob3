@@ -339,6 +339,8 @@
 				})
 			);
 			editConfigFormHeader = editConfigFormHeader;
+		}).catch(()=>{
+			editConfigModelAttributes.splice(0);
 		});
 	}
 	function doToolbarAction(tool: CrudAction) {

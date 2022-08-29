@@ -3,8 +3,8 @@
 global $_PATH;
 
 $model = $_PATH[1];
-require "{$model}.php";
-$def = new $model;
+$class = require "{$model}.php";
+$def = new $class;
 
 return [
     'data' => $def,

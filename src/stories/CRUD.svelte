@@ -7,14 +7,16 @@
 	import { translation as __ } from '../lib/translations';
 	import type CrudAction from '../lib/CrudAction';
 	import type ConfigStore from '../lib/ConfigStore';
+	import type FormField from '../lib/FormField';
 
 	export let config: GridConfig;
 	export let store: StoreInterface;
 	export let toolbar: CrudAction[] = [];
 	export let rowActions: CrudAction[] = [];
 	export let configStore: ConfigStore | undefined;
+	export let form: FormField[][] = [];
 
-	let form: any[][];
+	let formPopup: any[][];
 	let open = false;
 	let confirmDelete = false;
 	let title = '';
@@ -40,16 +42,27 @@
 	}
 	function deleteRecord(event: { detail: any }) {
 		error = '';
+		if (!event.detail || (event.detail instanceof Array && !event.detail.length)) {
+			alertError('Please select a record to delete');
+			return;
+		}
 		original = event.detail;
 		confirmDelete = true;
 	}
 	async function confirmDeleteRecord() {
 		try {
-			await store.delete(original.id);
-			await store.refresh();
+			if (original instanceof Array) {
+				original.forEach(async (record) => {
+					await store.delete(record.id);
+					store.refresh();
+				});
+			} else {
+				await store.delete(original.id);
+				await store.refresh();
+			}
 			confirmDelete = false;
 		} catch (err: any) {
-			error = err.message;
+			alertError(err.message);
 		}
 	}
 	async function save() {
@@ -67,10 +80,13 @@
 			}
 			open = false;
 		} catch (err: any) {
-			// error_suffix to refresh the form after an error
-			error_suffix = error_suffix ? '' : ' ';
-			error = err.message + error_suffix;
+			alertError(err.message);
 		}
+	}
+	function alertError(message: string) {
+		// error_suffix to refresh the form after an error
+		error_suffix = error_suffix ? '' : ' ';
+		error = __(message) + error_suffix;
 	}
 	function cancel() {
 		open = false;
@@ -78,10 +94,10 @@
 	function doAction(payload: { [key: string]: CrudAction | any }) {
 		const tool = payload.tool;
 		if (tool.form && tool.initial) {
-			form = tool.form;
+			formPopup = tool.form;
 			add(JSON.parse(JSON.stringify(tool.initial)));
 		} else if (tool.form) {
-			form = tool.form;
+			formPopup = tool.form;
 			handler = tool.handler;
 			add({}, tool.label);
 		} else if (tool.action instanceof Function) {
@@ -100,7 +116,7 @@
 	function doRowAction(action: string, event: { detail: any }) {
 		const tool = rowActions.find((t) => t.action === action);
 		if (action === 'edit') {
-			form = (tool && tool.form) || [];
+			formPopup = (tool && tool.form) || [];
 			edit(event);
 		} else if (action === 'delete') {
 			deleteRecord(event);
@@ -109,7 +125,7 @@
 </script>
 
 <ContentDialog bind:open title={__(title)} class="content-dialog-max-size">
-	<Form content={form} border={false} data={record} {error} />
+	<Form content={formPopup} border={false} data={record} {error} />
 	<svelte:fragment slot="footer">
 		<Button variant="accent" on:click={save}>{__('Save')}</Button>
 		<Button on:click={cancel}>{__('Cancel')}</Button>
@@ -126,6 +142,14 @@
 		<Button on:click={() => (confirmDelete = false)}>{__('Cancel')}</Button>
 	</svelte:fragment>
 </ContentDialog>
+
+{#if error}
+	<InfoBar message={error} severity="caution" />
+{/if}
+
+{#if form && form.length}
+	<Form content={form} border={false} data={record} />
+{/if}
 
 <Grid
 	{config}

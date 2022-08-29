@@ -144,7 +144,9 @@
 	class={`${border ? 'section' : ''} ${blur ? 'blur-background' : ''}`}
 	on:submit|preventDefault={submit}
 >
-	<h2>{__(title)}</h2>
+	{#if title}
+		<h2>{__(title)}</h2>
+	{/if}
 	{#if error}
 		<InfoBar open={error != ''} message={__(error)} severity="caution" class="form-error" />
 	{/if}

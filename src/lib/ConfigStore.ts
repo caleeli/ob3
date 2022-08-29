@@ -18,8 +18,8 @@ class ConfigStore {
         return this.store.create({ id: this.id, data: this.config });
     }
 
-    async getModelMeta(model: string): Promise<any> {
-        const store = new ApiStore({ 
+    getModelMeta(model: string): Promise<any> {
+        const store = new ApiStore({
             url: 'edit_page_model_meta',
             root: 'data',
         });
