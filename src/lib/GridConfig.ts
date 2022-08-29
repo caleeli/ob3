@@ -5,6 +5,7 @@ class GridConfig {
 		value: string;
 		field?: string;
 		sortable?: boolean;
+		sorted?: 'asc' | 'desc';
 		align: 'left' | 'right' | 'center';
 		control?: 'text' | 'select' | 'checkbox' | 'radio' | 'date' | 'time' | 'datetime' | 'actions';
 		width?: string;

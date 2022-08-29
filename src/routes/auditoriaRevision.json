@@ -3,15 +3,6 @@
         "multiSelect": false,
         "headers": [
             {
-                "label": "ID",
-                "value": "id",
-                "field": "id",
-                "align": "left",
-                "format": [],
-                "sortable": false,
-                "groupRows": false
-            },
-            {
                 "label": "Group",
                 "value": "attributes.id_grupo",
                 "field": "id_grupo",
@@ -21,27 +12,9 @@
                 "groupRows": true
             },
             {
-                "label": "Number",
-                "value": "attributes.number",
-                "field": "number",
-                "align": "left",
-                "format": [],
-                "sortable": true,
-                "groupRows": false
-            },
-            {
                 "label": "Indice",
                 "value": "attributes.indice",
                 "field": "indice",
-                "align": "left",
-                "format": [],
-                "sortable": false,
-                "groupRows": false
-            },
-            {
-                "label": "tipo cred",
-                "value": "attributes.tipo_credito",
-                "field": "tipo_credito",
                 "align": "left",
                 "format": [],
                 "sortable": false,
@@ -55,9 +28,50 @@
                 "format": [],
                 "sortable": false,
                 "groupRows": false
+            },
+            {
+                "label": "Revisión",
+                "value": "attributes.revision",
+                "field": "revision",
+                "align": "left",
+                "format": [],
+                "sortable": false,
+                "groupRows": false
+            },
+            {
+                "label": "Observación",
+                "value": "attributes.observacion",
+                "field": "observacion",
+                "align": "left",
+                "format": [],
+                "sortable": false,
+                "groupRows": false
+            },
+            {
+                "label": "Tipo Observ",
+                "value": "attributes.tipo_observacion",
+                "field": "tipo_observacion",
+                "align": "left",
+                "format": [],
+                "sortable": false,
+                "groupRows": false
+            },
+            {
+                "label": "Riesgo Adi\/Control Int",
+                "value": "attributes.riesgo_adicional",
+                "field": "riesgo_adicional",
+                "align": "left",
+                "format": [],
+                "sortable": false,
+                "groupRows": false
             }
         ],
-        "sort": []
+        "sort": [
+            {
+                "field": "number",
+                "direction": "asc"
+            }
+        ]
     },
     "store": {
         "url": "revision_respuestas",

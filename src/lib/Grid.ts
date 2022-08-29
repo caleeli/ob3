@@ -14,8 +14,8 @@ class Grid {
 		this.config = config;
 		this.store = store;
 		// Initialize sort columns
-		this.sortBy = this.config.headers.filter((header: any) => header.groupRows)
-			.map((header: any) => ({ field: header.field, direction: 'asc' }));
+		this.sortBy = this.config.headers.filter((header: any) => header.groupRows || header.sorted)
+			.map((header: any) => ({ field: header.field, direction: header.sorted || 'asc' }));
 		this.config.sort.forEach((sortConfig: {
 			field: string;
 			direction: 'asc' | 'desc';

@@ -162,6 +162,27 @@
 		],
 		[
 			{
+				control: 'ComboBox',
+				label: 'Sort',
+				name: 'sorted',
+				options: [
+					{
+						name: '',
+						value: '',
+					},
+					{
+						name: 'Ascending',
+						value: 'asc',
+					},
+					{
+						name: 'Descending',
+						value: 'desc',
+					},
+				],
+			},
+		],
+		[
+			{
 				control: 'Button',
 				label: 'Duplicate',
 				variant: 'standard',
@@ -197,6 +218,42 @@
 				control: 'Checkbox',
 				label: 'Multi Select',
 				name: 'config.multiSelect',
+			},
+		],
+		[
+			{
+				control: 'TextBox',
+				label: 'Sort by',
+				name: 'config.sort',
+				getter(
+					field:
+						| {
+								field: string;
+								direction: 'asc' | 'desc';
+						  }[]
+						| undefined
+				) {
+					return field && field.map((f) => `${f.field} ${f.direction}`).join(',');
+				},
+				setter(
+					field:
+						| {
+								field: string;
+								direction: 'asc' | 'desc';
+						  }[]
+						| undefined,
+					value: any
+				) {
+					field = [];
+					if (value) {
+						field = value.split(',').map((s: string) => {
+							let [field, direction] = s.trim().split(' ');
+							direction = direction || 'asc';
+							return { field, direction };
+						});
+					}
+					return field;
+				},
 			},
 		],
 		[
@@ -329,19 +386,22 @@
 		configStore.save();
 	}
 	if (config && configStore) {
-		configStore.getModelMeta(store.config.url).then((model) => {
-			const keys = Object.keys(model.attributes);
-			editConfigModelAttributes.splice(0);
-			editConfigModelAttributes.push({ name: '', value: '' });
-			editConfigModelAttributes.push(
-				...keys.map((key) => {
-					return { name: key, value: key };
-				})
-			);
-			editConfigFormHeader = editConfigFormHeader;
-		}).catch(()=>{
-			editConfigModelAttributes.splice(0);
-		});
+		configStore
+			.getModelMeta(store.config.url)
+			.then((model) => {
+				const keys = Object.keys(model.attributes);
+				editConfigModelAttributes.splice(0);
+				editConfigModelAttributes.push({ name: '', value: '' });
+				editConfigModelAttributes.push(
+					...keys.map((key) => {
+						return { name: key, value: key };
+					})
+				);
+				editConfigFormHeader = editConfigFormHeader;
+			})
+			.catch(() => {
+				editConfigModelAttributes.splice(0);
+			});
 	}
 	function doToolbarAction(tool: CrudAction) {
 		if (isEditMode) {
@@ -507,6 +567,7 @@
 		border-top: 1px solid var(--fds-solid-background-secondary);
 		border-bottom: 1px solid var(--fds-solid-background-secondary);
 		padding: 0.5rem;
+		max-width: 40rem;
 	}
 	tr:hover td {
 		background-color: var(--fds-solid-background-tertiary);
