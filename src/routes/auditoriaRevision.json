@@ -114,7 +114,8 @@
                                 "name": "S",
                                 "value": "S"
                             }
-                        ]
+                        ],
+                        "searchValue": "S"
                     }
                 ],
                 [
@@ -127,18 +128,33 @@
                 ],
                 [
                     {
-                        "control": "TextBox",
+                        "control": "ComboBox",
                         "name": "attributes.tipo_observacion",
                         "label": "Tipo Observación",
-                        "placeholder": ""
+                        "placeholder": "",
+                        "dataSource": "comboStore('tipos_observacion')",
+                        "searchValue": "",
+                        "options": []
                     }
                 ],
                 [
                     {
-                        "control": "TextBox",
+                        "control": "ComboBox",
                         "name": "attributes.riesgo_adicional",
                         "label": "Riesgo Adicional\/Control Interno",
-                        "placeholder": ""
+                        "placeholder": "",
+                        "dataSource": "",
+                        "options": [
+                            {
+                                "name": "RA",
+                                "value": "RA"
+                            },
+                            {
+                                "name": "CI",
+                                "value": "CI"
+                            }
+                        ],
+                        "searchValue": "RA"
                     }
                 ]
             ]

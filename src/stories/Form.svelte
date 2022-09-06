@@ -13,6 +13,7 @@
 	import { edit_mode } from '../store';
 	import EditProperties from '../lib/EditProperties.svelte';
 	import type ConfigStore from '../lib/ConfigStore';
+	import { comboStore } from '../lib/helpers';
 
 	const dispatch = createEventDispatcher();
 
@@ -24,6 +25,10 @@
 	export let error = '';
 	export let configStore: ConfigStore | undefined = undefined;
 
+	// helpers used in: combo data source
+	const helpers = {
+		comboStore,
+	};
 	let inProgress: any[] = [];
 	let internalValues: { cell: FormField; value: any }[] = [];
 	let accessor = new Proxy(data, {
@@ -88,22 +93,29 @@
 		return true;
 	}
 	function loadOptions(cell: FormField) {
-		if (cell.store) {
-			let valueField = cell.storeValueField || 'id';
-			let nameField = cell.storeNameField || 'attributes.name';
-			let disabledField = cell.storeDisabledField || '';
-			cell.options = [];
-			if (cell.store instanceof ApiStore) {
-				cell.store.searchValue = cell.searchValue || '';
+		const cellConfig = Object.assign({}, cell);
+		if (cellConfig.dataSource) {
+			const fn = new Function(...Object.keys(helpers), `return ${cellConfig.dataSource}`);
+			Object.assign(cellConfig, fn(...Object.values(helpers)));
+		}
+		if (cellConfig.store) {
+			let valueField = cellConfig.storeValueField || 'id';
+			let nameField = cellConfig.storeNameField || 'attributes.name';
+			let disabledField = cellConfig.storeDisabledField || '';
+			let options: any[] = [];
+			if (cellConfig.store instanceof ApiStore) {
+				cellConfig.store.searchValue = cellConfig.searchValue || '';
 			}
-			cell.store.get().then((data) => {
-				cell.options = data.map((item) => {
+			cellConfig.store.get().then((data) => {
+				options = data.map((item) => {
 					return {
 						value: get(item, valueField),
 						name: String(get(item, nameField)),
 						disabled: disabledField && get(item, disabledField),
 					};
 				});
+				cell_runtime[indexOf(cell)].options = options;
+				cell_runtime = cell_runtime;
 				content = content;
 			});
 		}
@@ -126,7 +138,7 @@
 		// initialize options
 		content.forEach((row) => {
 			row.forEach((cell) => {
-				if (cell.control === 'ComboBox' && cell.store) {
+				if (cell.control === 'ComboBox' && (cell.store || cell.dataSource)) {
 					// reset search value
 					cell.searchValue = '';
 					loadOptions(cell);
@@ -204,6 +216,13 @@
 		],
 		[
 			{
+				control: 'TextBox',
+				name: 'dataSource',
+				label: 'Data source',
+			},
+		],
+		[
+			{
 				control: 'Button',
 				label: 'Remove',
 				variant: 'standard',
@@ -261,6 +280,17 @@
 			return;
 		}
 		configStore.save();
+	}
+	let cell_runtime: { cell: FormField; options: any[] }[] = [];
+	function indexOf(cell: FormField): number {
+		const index = cell_runtime.findIndex((cov) => cov.cell === cell);
+		if (index > -1) {
+			return index;
+		} else {
+			const newCov = { cell, options: cell.options || [] };
+			cell_runtime.push(newCov);
+			return cell_runtime.length - 1;
+		}
 	}
 </script>
 
@@ -335,7 +365,7 @@
 						</Checkbox>
 					</div>
 				{/if}
-				{#if cell.control === 'ComboBox' && cell.options && cell.name}
+				{#if cell.control === 'ComboBox' && cell.name}
 					<div
 						class={isEditMode ? 'editable' : ''}
 						on:click={(event) => editControl(event, cell)}
@@ -347,9 +377,8 @@
 						<ComboBox
 							id={cell.name}
 							placeholder={cell.placeholder || ''}
-							items={cell.options}
+							items={cell_runtime[indexOf(cell)].options}
 							class="w-100"
-							editable={true}
 							bind:searchValue={cell.searchValue}
 							bind:value={accessor[getName(cell)]}
 							on:keydown={(e) => comboBoxKeydown(e, cell)}
