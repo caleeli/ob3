@@ -31,8 +31,8 @@ class FormField {
     public storeValueField?: string;
     public storeNameField?: string;
     public storeDisabledField?: string;
-    public getter?: (field: any) => any;
-    public setter?: (field: any, value: any) => any;
+    public getter?: (field: any, data: any) => any;
+    public setter?: (field: any, value: any, data: any) => any;
     // internal properties
     public actionInProgress?: boolean = false;
     public searchValue?: string = '';

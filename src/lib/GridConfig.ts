@@ -1,4 +1,3 @@
-
 class GridConfig {
 	public headers: {
 		label: string;
@@ -18,6 +17,7 @@ class GridConfig {
 		direction: 'asc' | 'desc';
 	}[] = [];
 	public multiSelect?= false;
+	public onselect?: string;
 }
 
 export default GridConfig;

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, Checkbox, InfoBar, ProgressRing } from 'fluent-svelte';
+	import { Button, Checkbox, InfoBar } from 'fluent-svelte';
 	import { TextBox } from 'fluent-svelte';
 	import TextArea from '../lib/TextArea.svelte';
 	import { PersonPicture } from 'fluent-svelte';
@@ -10,6 +10,9 @@
 	import { createEventDispatcher } from 'svelte';
 	import ApiStore from '../lib/ApiStore';
 	import { onMount } from 'svelte';
+	import { edit_mode } from '../store';
+	import EditProperties from '../lib/EditProperties.svelte';
+	import type ConfigStore from '../lib/ConfigStore';
 
 	const dispatch = createEventDispatcher();
 
@@ -19,6 +22,8 @@
 	export let blur: boolean = false;
 	export let data: any = {};
 	export let error = '';
+	export let configStore: ConfigStore | undefined = undefined;
+
 	let inProgress: any[] = [];
 	let internalValues: { cell: FormField; value: any }[] = [];
 	let accessor = new Proxy(data, {
@@ -28,7 +33,7 @@
 				const cell = internalValues[index].cell;
 				const field = cell.name ? get(target, cell.name) : internalValues[index].value;
 				if (cell.getter) {
-					return cell.getter(field);
+					return cell.getter(field, data);
 				} else {
 					return field;
 				}
@@ -44,7 +49,7 @@
 					const cell = internalValues[index].cell;
 					if (cell.setter) {
 						const field = cell.name ? get(target, cell.name) : internalValues[index].value;
-						const result = cell.setter(field, value);
+						const result = cell.setter(field, value, data);
 						if (result && cell.name) {
 							set(target, cell.name, result);
 						}
@@ -57,6 +62,11 @@
 				return set(target, name, value);
 			}
 		},
+	});
+	let isEditMode = false;
+
+	edit_mode.subscribe((edit_mode) => {
+		isEditMode = !!configStore && edit_mode;
 	});
 	function submit() {
 		dispatch('submit', data);
@@ -73,7 +83,6 @@
 				error = err.message || err;
 			} finally {
 				inProgress = inProgress.filter((x) => x !== cell.action);
-				console.log(inProgress);
 			}
 		}
 		return true;
@@ -138,7 +147,129 @@
 			return '$' + String(internalValues.length - 1);
 		}
 	}
+	// EDIT MODE
+	let editConfigForm: FormField[][] = [];
+	let editConfigData = {};
+	let editConfig = false;
+	let editConfigFormControlProps: FormField[][] = [
+		[
+			{
+				control: 'ComboBox',
+				name: 'control',
+				label: 'Control',
+				options: [
+					{ name: 'TextBox', value: 'TextBox' },
+					{ name: 'ComboBox', value: 'ComboBox' },
+					{ name: 'CheckBox', value: 'CheckBox' },
+					{ name: 'Button', value: 'Button' },
+					{ name: 'TextArea', value: 'TextArea' },
+				],
+			},
+		],
+		[
+			{
+				control: 'TextBox',
+				name: 'name',
+				label: 'Name',
+			},
+		],
+		[
+			{
+				control: 'TextBox',
+				name: 'label',
+				label: 'Label',
+			},
+		],
+		[
+			{
+				control: 'TextBox',
+				name: 'options',
+				label: 'Options',
+				getter(field: any | undefined) {
+					return field && field.map((f: { value: any }) => f.value).join(',');
+				},
+				setter(field: any | undefined, value: any, data: any) {
+					if (data.control !== 'ComboBox') {
+						return;
+					}
+					field = [];
+					if (value) {
+						field = value.split(',').map((s: string) => {
+							return { name: s, value: s };
+						});
+					}
+					return field;
+				},
+			},
+		],
+		[
+			{
+				control: 'Button',
+				label: 'Remove',
+				variant: 'standard',
+				async action() {
+					const row = content.find((row) => row.find((cell) => cell === editConfigData));
+					if (row) {
+						const index = row.findIndex((cell) => cell === editConfigData);
+						row.splice(index, 1);
+						content = content;
+						editConfig = false;
+					}
+				},
+			},
+		],
+	];
+
+	function editControl(
+		event: (MouseEvent & { target: EventTarget & HTMLDivElement }) | any,
+		cell: FormField
+	) {
+		if (!(isEditMode && event.target && event.target.getAttribute('edit-config') === 'control')) {
+			return;
+		}
+		editConfig = true;
+		editConfigForm = editConfigFormControlProps;
+		editConfigData = cell;
+	}
+	function addControl(
+		event: (MouseEvent & { target: EventTarget & HTMLDivElement }) | any,
+		row: FormField[]
+	) {
+		if (!(isEditMode && event.target && event.target.getAttribute('edit-config') === 'row')) {
+			return;
+		}
+		row.push({
+			control: 'TextBox',
+			name: 'name',
+			label: 'Name',
+		});
+		content = content;
+	}
+	function addRowControl() {
+		content.push([
+			{
+				control: 'TextBox',
+				name: 'name',
+				label: 'Name',
+			},
+		]);
+		content = content;
+	}
+	function updateConfig() {
+		content = content;
+		if (!configStore) {
+			return;
+		}
+		configStore.save();
+	}
 </script>
+
+<EditProperties
+	form={editConfigForm}
+	data={editConfigData}
+	bind:open={editConfig}
+	on:save={updateConfig}
+/>
 
 <form
 	class={`${border ? 'section' : ''} ${blur ? 'blur-background' : ''}`}
@@ -151,10 +282,18 @@
 		<InfoBar open={error != ''} message={__(error)} severity="caution" class="form-error" />
 	{/if}
 	{#each content as row}
-		<div class="form-row">
+		<div
+			class={`form-row ${isEditMode ? 'editable-row' : ''}`}
+			on:click={(event) => addControl(event, row)}
+			edit-config="row"
+		>
 			{#each row as cell}
 				{#if cell.control === 'TextBox' && cell.name}
-					<div>
+					<div
+						class={isEditMode ? 'editable' : ''}
+						on:click={(event) => editControl(event, cell)}
+						edit-config="control"
+					>
 						<label for={cell.name}>
 							{__(cell.label || '')}
 						</label>
@@ -168,7 +307,11 @@
 					</div>
 				{/if}
 				{#if cell.control === 'TextArea' && cell.name}
-					<div>
+					<div
+						class={isEditMode ? 'editable' : ''}
+						on:click={(event) => editControl(event, cell)}
+						edit-config="control"
+					>
 						<label for={cell.name}>
 							{__(cell.label || '')}
 						</label>
@@ -182,14 +325,22 @@
 					</div>
 				{/if}
 				{#if cell.control === 'Checkbox'}
-					<div>
+					<div
+						class={isEditMode ? 'editable' : ''}
+						on:click={(event) => editControl(event, cell)}
+						edit-config="control"
+					>
 						<Checkbox id={cell.name} bind:checked={accessor[getName(cell)]}>
 							{__(cell.label || '')}
 						</Checkbox>
 					</div>
 				{/if}
 				{#if cell.control === 'ComboBox' && cell.options && cell.name}
-					<div>
+					<div
+						class={isEditMode ? 'editable' : ''}
+						on:click={(event) => editControl(event, cell)}
+						edit-config="control"
+					>
 						<label for={cell.name}>
 							{__(cell.label || '')}
 						</label>
@@ -227,6 +378,11 @@
 			{/each}
 		</div>
 	{/each}
+	{#if isEditMode}
+		<Button variant="hyperlink" on:click={addRowControl}>
+			{__('Add Row')}
+		</Button>
+	{/if}
 </form>
 
 <style>
@@ -270,5 +426,25 @@
 		position: sticky !important;
 		top: 0px;
 		z-index: 1;
+	}
+	div.editable {
+		cursor: crosshair !important;
+		position: relative;
+	}
+	div.editable::after {
+		content: '⚙️';
+		position: absolute;
+		bottom: 0rem;
+		right: 0rem;
+	}
+	div.editable-row {
+		cursor: crosshair !important;
+		position: relative;
+	}
+	div.editable-row::after {
+		content: '➕';
+		position: absolute;
+		bottom: 0rem;
+		right: 0rem;
 	}
 </style>

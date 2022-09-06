@@ -33,20 +33,20 @@
 		record = initial;
 		original = null;
 	}
-	function edit(event: { detail: any }) {
+	function edit(editRecord: any) {
 		error = '';
-		record = event.detail;
+		record = editRecord;
 		original = JSON.parse(JSON.stringify(record));
 		open = true;
 		title = 'Edit';
 	}
-	function deleteRecord(event: { detail: any }) {
+	function deleteRecord(record: any) {
 		error = '';
-		if (!event.detail || (event.detail instanceof Array && !event.detail.length)) {
+		if (!record || (record instanceof Array && !record.length)) {
 			alertError('Please select a record to delete');
 			return;
 		}
-		original = event.detail;
+		original = record;
 		confirmDelete = true;
 	}
 	async function confirmDeleteRecord() {
@@ -114,18 +114,21 @@
 		}
 	}
 	function doRowAction(action: string, event: { detail: any }) {
-		const tool = rowActions.find((t) => t.action === action);
+		const tool = event.detail.tool;
 		if (action === 'edit') {
 			formPopup = (tool && tool.form) || [];
-			edit(event);
+			edit(event.detail.selected);
 		} else if (action === 'delete') {
-			deleteRecord(event);
+			deleteRecord(event.detail.selected);
+		} else if (action === 'select') {
+			formPopup = (tool && tool.form) || [];
+			edit(event.detail.selected);
 		}
 	}
 </script>
 
 <ContentDialog bind:open title={__(title)} class="content-dialog-max-size">
-	<Form content={formPopup} border={false} data={record} {error} />
+	<Form content={formPopup} border={false} data={record} {error} {configStore} />
 	<svelte:fragment slot="footer">
 		<Button variant="accent" on:click={save}>{__('Save')}</Button>
 		<Button on:click={cancel}>{__('Cancel')}</Button>
@@ -156,8 +159,10 @@
 	{store}
 	{configStore}
 	{toolbar}
+	{rowActions}
 	on:edit={(event) => doRowAction('edit', event)}
 	on:delete={(event) => doRowAction('delete', event)}
+	on:select={(event) => doRowAction('select', event)}
 	on:toolbar={(event) => doAction(event.detail)}
 	bind:selected
 />

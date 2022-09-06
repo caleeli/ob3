@@ -10,8 +10,8 @@
 	import EditProperties from '../lib/EditProperties.svelte';
 	import type FormField from '../lib/FormField';
 	import type ConfigStore from '../lib/ConfigStore';
-	import type ApiStore from '$lib/ApiStore';
-	import type CrudAction from '$lib/CrudAction';
+	import type ApiStore from '../lib/ApiStore';
+	import type CrudAction from '../lib/CrudAction';
 	import { translation as __ } from '../lib/translations';
 
 	const dispatch = createEventDispatcher();
@@ -21,6 +21,7 @@
 	export let selected: any[] = [];
 	export let configStore: ConfigStore | undefined = undefined;
 	export let toolbar: CrudAction[] = [];
+	export let rowActions: CrudAction[] = [];
 
 	let grid = new Grid(config, store);
 	load();
@@ -45,7 +46,8 @@
 	}
 	async function doAction(action: string, row: number) {
 		const data = grid.getRowData(row);
-		dispatch(action, data);
+		const tool = toolbar.find((t) => t.action === action);
+		dispatch(action, { tool, selected: data });
 	}
 	async function loadNextPage() {
 		await grid.loadNextPage();
@@ -64,6 +66,10 @@
 			}
 		} else {
 			selected = [row];
+			if (config.onselect) {
+				const tool = rowActions.find((t) => t.action === config.onselect);
+				dispatch('select', { tool, selected: row });
+			}
 		}
 		grid = grid;
 	}
@@ -268,6 +274,24 @@
 						action: 'new',
 					});
 					updateConfig();
+				},
+			},
+			{
+				control: 'Button',
+				label: 'Add On Select Action',
+				variant: 'standard',
+				async action() {
+					if (!config.onselect) {
+						config.onselect = 'selected';
+						const hasSelctedAction = rowActions.find((a) => a.action === 'selected');
+						if (!hasSelctedAction) {
+							rowActions.push({
+								action: 'selected',
+								form: [],
+							});
+						}
+						updateConfig();
+					}
 				},
 			},
 		],

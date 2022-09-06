@@ -31,6 +31,7 @@
 		})
 	);
 	let toolbar: CrudAction[] = [];
+	let rowActions: CrudAction[] = page_config.rowActions || [];
 </script>
 
-<Crud {config} {store} {toolbar} {configStore} />
+<Crud {config} {store} {toolbar} {configStore} {rowActions} />

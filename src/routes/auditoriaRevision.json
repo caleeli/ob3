@@ -71,7 +71,8 @@
                 "field": "number",
                 "direction": "asc"
             }
-        ]
+        ],
+        "onselect": "review"
     },
     "store": {
         "url": "revision_respuestas",
@@ -79,11 +80,68 @@
         "limit": 100,
         "query": {
             "params": {
-                "informe_id": "10",
-                "prmprnpre_num": "2801441",
+                "informe_id": "1",
+                "prmprnpre_num": "24011953",
                 "tipo_credito": "5",
-                "calidad": "PRELIMINAR"
+                "calidad": "FINAL"
             }
         }
-    }
+    },
+    "rowActions": [
+        {
+            "action": "review",
+            "form": [
+                [
+                    {
+                        "control": "ComboBox",
+                        "label": "Revisión",
+                        "name": "attributes.revision",
+                        "placeholder": "",
+                        "options": [
+                            {
+                                "name": "N",
+                                "value": "N"
+                            },
+                            {
+                                "name": "NA",
+                                "value": "NA"
+                            },
+                            {
+                                "name": "PC",
+                                "value": "PC"
+                            },
+                            {
+                                "name": "S",
+                                "value": "S"
+                            }
+                        ]
+                    }
+                ],
+                [
+                    {
+                        "control": "TextArea",
+                        "name": "attributes.observacion",
+                        "label": "Observación",
+                        "placeholder": ""
+                    }
+                ],
+                [
+                    {
+                        "control": "TextBox",
+                        "name": "attributes.tipo_observacion",
+                        "label": "Tipo Observación",
+                        "placeholder": ""
+                    }
+                ],
+                [
+                    {
+                        "control": "TextBox",
+                        "name": "attributes.riesgo_adicional",
+                        "label": "Riesgo Adicional\/Control Interno",
+                        "placeholder": ""
+                    }
+                ]
+            ]
+        }
+    ]
 }
