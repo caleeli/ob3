@@ -3,7 +3,9 @@
 	import { Button } from 'fluent-svelte';
 	import { translation as __ } from '../lib/translations';
 	import { createEventDispatcher } from 'svelte';
+	import { page } from '$app/stores';
 
+	let isLogin = $page.url.pathname === '/';
 	export let user: { name: any } | null = null;
 
 	const dispatch = createEventDispatcher();
@@ -17,6 +19,7 @@
 	function onCreateAccount(event) {
 		dispatch('createAccount', event);
 	}
+	$: isLogin = $page.url.pathname === '/';
 </script>
 
 <header>
@@ -43,10 +46,10 @@
 					fill-opacity="0.4"
 				/>
 			</svg>
-			<h1>Acme</h1>
+			<h1>Auditoria</h1>
 		</div>
 		<div>
-			{#if user}
+			{#if user && !isLogin}
 				<span class="welcome">
 					{user.name}
 				</span>
@@ -59,5 +62,9 @@
 <style>
 	header {
 		height: var(--header-height);
+	}
+	header h1 {
+		display: inline-block;
+		color: #062c5a;
 	}
 </style>

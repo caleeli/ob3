@@ -2,7 +2,10 @@
 	import Header from '../stories/Header.svelte';
 	import { login, edit_mode } from '../store';
 	import Menu from '../lib/Menu.svelte';
+	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 
+	let isLogin = $page.url.pathname === '/';
 	let user: { name: any } | null = null;
 	let shiftKey: boolean = false;
 	let ctrlKey: boolean = false;
@@ -26,14 +29,19 @@
 		shiftKey = event.shiftKey;
 		ctrlKey = event.ctrlKey;
 	}
+	function logout() {
+		login.set(null);
+		goto('/');
+	}
+	$: isLogin = $page.url.pathname === '/';
 </script>
 
 <svelte:window on:keydown={handleKeydown} on:keyup={handleKeyup} />
 
-<Header {user} />
+<Header {user} on:logout={logout} />
 
 <main class={`${shiftKey ? 'shift-pressed' : ''} ${ctrlKey ? 'control-pressed' : ''}`}>
-	{#if user}
+	{#if user && !isLogin}
 		<Menu />
 	{/if}
 	<div class="content">
