@@ -15,6 +15,7 @@
 	export let rowActions: CrudAction[] = [];
 	export let configStore: ConfigStore | undefined;
 	export let form: FormField[][] = [];
+	export let data: any;
 
 	let formPopup: any[][];
 	let open = false;
@@ -151,7 +152,7 @@
 {/if}
 
 {#if form && form.length}
-	<Form content={form} border={false} data={record} />
+	<Form content={form} border={false} {data} {configStore} />
 {/if}
 
 <Grid

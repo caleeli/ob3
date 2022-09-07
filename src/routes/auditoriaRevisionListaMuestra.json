@@ -205,7 +205,7 @@
             "icon": "open",
             "label": "Revisar",
             "action": "",
-            "href": "auditoriaRevision?inf=${ selected.attributes.informe }&pre=${ selected.attributes.prmprnpre }&tc=${ selected.attributes.tipo_credito }&cal=${ selected.attributes.calidad }"
+            "href": "auditoriaRevision?inf=${ selected.attributes.informe }&pre=${ selected.attributes.prmprnpre }&tc=${ selected.attributes.tipo_credito }&cal=${ selected.attributes.calidad }&id=${ selected.attributes.id }"
         },
         {
             "icon": "delete",

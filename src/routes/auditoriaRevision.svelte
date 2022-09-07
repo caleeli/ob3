@@ -10,6 +10,7 @@
 	import page_config from './auditoriaRevision.json';
 	import ConfigStore from '../lib/ConfigStore';
 	import { page } from '$app/stores';
+	import type FormField from '../lib/FormField';
 
 	let configStore = new ConfigStore('auditoriaRevision', page_config);
 	let config: GridConfig = page_config.grid;
@@ -20,7 +21,6 @@
 				per_page: JSONApiPerPageHandler,
 				page: JSONApiPageHandler,
 				sort: JSONApiSortHandler,
-				//filter: [`informe(${$page.url.searchParams.get('inf')},${$page.url.searchParams.get('pre')},${$page.url.searchParams.get('tc')})`],
 				params: {
 					informe_id: $page.url.searchParams.get('inf'),
 					prmprnpre_num: $page.url.searchParams.get('pre'),
@@ -32,6 +32,22 @@
 	);
 	let toolbar: CrudAction[] = [];
 	let rowActions: CrudAction[] = page_config.rowActions || [];
+	let form: FormField[][] = page_config.form || [];
+	let data = {};
+	store
+		.show($page.url.searchParams.get('id'), {
+			params: {
+				informe_id: $page.url.searchParams.get('inf'),
+				prmprnpre_num: $page.url.searchParams.get('pre'),
+				tipo_credito: $page.url.searchParams.get('tc'),
+				calidad: $page.url.searchParams.get('cal'),
+			},
+		})
+		.then((data) => {
+			console.log(data);
+		}).catch((error) => {
+			console.error(error);
+		});
 </script>
 
-<Crud {config} {store} {toolbar} {configStore} {rowActions} />
+<Crud {config} {store} {toolbar} {configStore} {rowActions} {form} {data} />

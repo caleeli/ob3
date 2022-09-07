@@ -107,7 +107,7 @@ class ApiStore implements StoreInterface {
         }
         return this.array;
     }
-    async show(id: string | number, params?: any): Promise<any[]> {
+    async show(id: string | number | null, params?: any): Promise<any[]> {
         const url = new URL(this.config.url + '/' + id, backend_base);
         if (params) {
             Object.keys(params).forEach(key => {

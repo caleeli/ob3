@@ -159,5 +159,16 @@
                 ]
             ]
         }
+    ],
+    "form": [
+        [
+            {
+                "control": "TextBox",
+                "name": "attributes.prmprpre",
+                "label": "Nro Crédito",
+                "placeholder": "",
+                "dataSource": ""
+            }
+        ]
     ]
 }
