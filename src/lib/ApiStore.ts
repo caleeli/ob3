@@ -18,6 +18,7 @@ login.subscribe((data: { attributes: any; relationships: { token: string } } | n
 
 class ApiStore implements StoreInterface {
     private array: any[] = [];
+    private meta: any;
     public offset = 0;
     public limit = 10;
     public searchValue = '';
@@ -101,9 +102,10 @@ class ApiStore implements StoreInterface {
             const json = await response.json();
             throw new Error(json.error || response.statusText);
         }
-        this.array = await response.json();
+        const response_json = await response.json();
         if (this.config.root) {
-            this.array = get(this.array, this.config.root);
+            this.meta = get(response_json, 'meta');
+            this.array = get(response_json, this.config.root);
         }
         return this.array;
     }
@@ -154,6 +156,9 @@ class ApiStore implements StoreInterface {
     }
     setSort(sort: { field: string, direction: 'asc' | 'desc' }[]): void {
         this.sortBy = sort;
+    }
+    getMeta() {
+        return this.meta;
     }
 }
 

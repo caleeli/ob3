@@ -13,6 +13,7 @@
 	import type ApiStore from '../lib/ApiStore';
 	import type CrudAction from '../lib/CrudAction';
 	import { translation as __ } from '../lib/translations';
+	import { format } from 'sql-formatter';
 
 	const dispatch = createEventDispatcher();
 
@@ -225,8 +226,6 @@
 				label: 'Multi Select',
 				name: 'config.multiSelect',
 			},
-		],
-		[
 			{
 				control: 'TextBox',
 				label: 'Sort by',
@@ -260,6 +259,47 @@
 					}
 					return field;
 				},
+			},
+		],
+		[
+			{
+				control: 'TextArea',
+				label: 'Query',
+				name: '$query',
+				getter(field: string | undefined) {
+					const query = store.getMeta().query;
+					const params = { ...store.getMeta().params };
+					const keys = Object.keys(params);
+					keys.forEach((key) => {
+						params[key] = JSON.stringify(params[key]);
+					});
+					return format(query, {
+						language: 'plsql',
+						params,
+					});
+				},
+				setter(field: string | undefined, value: any) {
+					return;
+				},
+			},
+			/*{
+				control: 'TextArea',
+				label: 'Params',
+				name: '$params',
+				getter(field: string | undefined) {
+					return JSON.stringify(store.getMeta().params, null, 2);
+				},
+				setter(field: string | undefined, value: any) {
+					return;
+				},
+			},*/
+		],
+		[
+			{
+				control: 'Button',
+				label: 'Run Query',
+				variant: 'standard',
+				async action() {},
 			},
 		],
 		[
@@ -352,6 +392,20 @@
 				type: 'text',
 			},
 		],
+		[
+			{
+				control: 'Button',
+				label: 'Delete',
+				name: 'delete',
+				variant: 'standard',
+				async action() {
+					const editToolbarIndex = toolbar.indexOf(editConfigData);
+					toolbar.splice(editToolbarIndex, 1);
+					updateConfig();
+					editConfig = false;
+				},
+			},
+		],
 	];
 	let editConfigTitle = '';
 	let editConfig = false;
@@ -364,6 +418,7 @@
 	});
 	function updateConfig() {
 		config = config;
+		toolbar = toolbar;
 		load();
 		saveConfig();
 	}
@@ -437,7 +492,7 @@
 		dispatch('toolbar', { tool, selected: config.multiSelect ? selected : selected[0] });
 	}
 	// e.g. auditoriaRevision/${selected.id}
-	function href(tool: CrudAction) {
+	function href(tool: CrudAction, selected: any[]) {
 		if (!tool.href) {
 			return;
 		}
@@ -454,92 +509,104 @@
 	on:save={updateConfig}
 />
 
-<div class="toolbar">
-	{#each toolbar as tool}
-		<Button variant="hyperlink" on:click={() => doToolbarAction(tool)} href={href(tool, selected)}>
-			<i class={`icon icon-ic_fluent_${tool.icon}_16_regular`} />
-			{tool.label ? __(tool.label) : ''}
-		</Button>
-	{/each}
-	{#if isEditMode}
-		<Button on:click={editGridConfig}>⚙️</Button>
-	{/if}
-</div>
 <table>
-	<tr>
-		{#each config.headers as header, header_index}
-			<th
-				class={`${isEditMode ? 'editable' : ''} ${
-					dragOverIndex === header_index
-						? 'drag-over-' + (dragColumnIndex > dragOverIndex ? 'left' : 'right')
-						: ''
-				}`}
-				style={`text-align:${header.align || 'left'};`}
-				width={header.width || ''}
-				on:click={(e) => clickHeader(header, header_index, e)}
-				draggable={isEditMode}
-				on:dragstart={(e) => dragStartColumn(e, header_index)}
-				on:dragover={(e) => dragOverColumn(e, header_index)}
-				on:drop={() => dropColumn(header_index)}
-			>
-				{header.label}
-				<i
-					class={`icon icon-ic_fluent_arrow_sort_${
-						grid.getDirection(header.field) === 'desc' ? 'down' : 'up'
-					}_16_regular ${grid.getDirection(header.field) ? 'visible' : 'hidden'}`}
-				/>
+	<thead>
+		<tr>
+			<th class="toolbar" colspan={config.headers.length}>
+				<div class="toolbar">
+					{#each toolbar as tool}
+						<Button
+							variant="hyperlink"
+							on:click={() => doToolbarAction(tool)}
+							href={href(tool, selected)}
+						>
+							<i class={`icon icon-ic_fluent_${tool.icon}_16_regular`} />
+							{tool.label ? __(tool.label) : ''}
+						</Button>
+					{/each}
+					{#if isEditMode}
+						<Button on:click={editGridConfig}>⚙️</Button>
+					{/if}
+				</div>
 			</th>
-		{/each}
-	</tr>
-	{#if grid}
-		{#each grid.cell as data, row}
-			{#each config.headers as header, col}
-				{#if grid.cell[row] && header.groupRows && grid.firstInGroup(row, col)}
-					<tr>
-						<td
-							colspan={config.headers.length}
-							rowspan="1"
-							on:click={() => toggleRowGroup(col, grid.cell[row][col])}
-						>
-							<i
-								class={`icon icon-ic_fluent_${
-									grid.isCollapsed(row) ? 'chevron_right' : 'chevron_down'
-								}_20_regular`}
-							/>
-							{grid.formatted(row, col)}
-						</td>
-					</tr>
-				{/if}
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			{#each config.headers as header, header_index}
+				<th
+					class={`${isEditMode ? 'editable' : ''} ${
+						dragOverIndex === header_index
+							? 'drag-over-' + (dragColumnIndex > dragOverIndex ? 'left' : 'right')
+							: ''
+					}`}
+					style={`text-align:${header.align || 'left'};`}
+					width={header.width || ''}
+					on:click={(e) => clickHeader(header, header_index, e)}
+					draggable={isEditMode}
+					on:dragstart={(e) => dragStartColumn(e, header_index)}
+					on:dragover={(e) => dragOverColumn(e, header_index)}
+					on:drop={() => dropColumn(header_index)}
+				>
+					{header.label}
+					<i
+						class={`icon icon-ic_fluent_arrow_sort_${
+							grid.getDirection(header.field) === 'desc' ? 'down' : 'up'
+						}_16_regular ${grid.getDirection(header.field) ? 'visible' : 'hidden'}`}
+					/>
+				</th>
 			{/each}
-			<tr
-				class={`${selected.includes(grid.data[row]) ? 'active' : ''} ${
-					grid.isCollapsed(row) ? 'closed' : ''
-				}`}
-			>
+		</tr>
+		{#if grid}
+			{#each grid.cell as data, row}
 				{#each config.headers as header, col}
-					{#if grid.cell[row]}
-						<td
-							class={`${config.headers[col].groupRows ? 'grouped' : ''}`}
-							style={`text-align:${header.align || 'left'};`}
-							on:click={() => toggleSelect(grid.data[row])}
-						>
-							{#if header.control === 'actions'}
-								<div role="group">
-									{#each grid.formatted(row, col) as action}
-										<Button variant="hyperlink" on:click={() => doAction(action, row)}>
-											<i class={`icon icon-ic_fluent_${action}_16_regular`} />
-										</Button>
-									{/each}
-								</div>
-							{:else}
+					{#if grid.cell[row] && header.groupRows && grid.firstInGroup(row, col)}
+						<tr>
+							<td
+								colspan={config.headers.length}
+								rowspan="1"
+								on:click={() => toggleRowGroup(col, grid.cell[row][col])}
+							>
+								<i
+									class={`icon icon-ic_fluent_${
+										grid.isCollapsed(row) ? 'chevron_right' : 'chevron_down'
+									}_20_regular`}
+								/>
 								{grid.formatted(row, col)}
-							{/if}
-						</td>
+							</td>
+						</tr>
 					{/if}
 				{/each}
-			</tr>
-		{/each}
-	{/if}
+				<tr
+					class={`${selected.includes(grid.data[row]) ? 'active' : ''} ${
+						grid.isCollapsed(row) ? 'closed' : ''
+					}`}
+				>
+					{#each config.headers as header, col}
+						{#if grid.cell[row]}
+							<td
+								class={`${config.headers[col].groupRows ? 'grouped' : ''}`}
+								style={`text-align:${header.align || 'left'};`}
+								on:click={() => toggleSelect(grid.data[row])}
+							>
+								{#if header.control === 'actions'}
+									<div role="group">
+										{#each grid.formatted(row, col) as action}
+											<Button variant="hyperlink" on:click={() => doAction(action, row)}>
+												<i class={`icon icon-ic_fluent_${action}_16_regular`} />
+											</Button>
+										{/each}
+									</div>
+								{:else}
+									{grid.formatted(row, col)}
+								{/if}
+							</td>
+						{/if}
+					{/each}
+				</tr>
+			{/each}
+		{/if}
+	</tbody>
 </table>
 {#if grid.error}
 	<div class="error">{grid.error}</div>
@@ -571,7 +638,7 @@
 	th {
 		padding: 0.5rem;
 		position: sticky;
-		top: 0;
+		top: calc(30px + 1rem);
 		background-color: #fff;
 		white-space: nowrap;
 		z-index: 1;
@@ -631,10 +698,17 @@
 	th.drag-over-right {
 		border-right: 3px double var(--fds-solid-background-secondary);
 	}
-	.toolbar {
+	div.toolbar {
+		min-height: 30px;
 		display: flex;
 		align-items: center;
 		padding: 0.5rem;
 		background-color: var(--fds-solid-background-base);
+		z-index: 1;
+	}
+	th.toolbar {
+		position: sticky;
+		top: 0;
+		padding: 0px;
 	}
 </style>

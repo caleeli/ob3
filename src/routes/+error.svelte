@@ -1,25 +1,12 @@
-<script context="module" lang="ts">
-	export function load(data: { status: string; error: { message: string } }) {
-		return {
-			props: {
-				status: data.status,
-				error: data.error.message,
-			},
-		};
-	}
-</script>
-
 <script lang="ts">
 	import ConfigStore from '$lib/ConfigStore';
 
 	import { Button } from 'fluent-svelte';
 	import { translation as __ } from '../lib/translations';
-
-	export let status: string;
-	export let error: string;
+	import { page } from '$app/stores';
 
 	function createCRUDPage() {
-		const page_name = error.split('/', 2)[1];
+		const page_name = $page.url.pathname.split('/', 2)[1];
 		const store = new ConfigStore(page_name, {
 			grid: {
 				multiSelect: false,
@@ -40,14 +27,16 @@
 				query: [],
 			},
 		});
-        store.create();
+		store.create();
 	}
 </script>
 
 <main>
-	<h1>{status}: {error}</h1>
+	<h1>{$page.status}: {($page.error && $page.error.message) || ''}</h1>
 
-	{#if status == '404'}
-		<Button on:click={createCRUDPage}>{__('Create a CRUD page')}</Button>
+	{#if $page.status == 404}
+		<Button on:click={createCRUDPage}
+			>{__('Create a CRUD page')} for '{$page.url.pathname.split('/', 2)[1]}'</Button
+		>
 	{/if}
 </main>

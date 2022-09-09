@@ -35,7 +35,8 @@
                 "align": "center",
                 "groupRows": false,
                 "modelAttribute": "informe",
-                "sortable": false
+                "sortable": false,
+                "format": []
             },
             {
                 "label": "Monto desemb",
@@ -185,6 +186,16 @@
                 "label": "Asesor",
                 "value": "attributes.asesor",
                 "field": "asesor",
+                "align": "left",
+                "groupRows": false,
+                "modelAttribute": "informe",
+                "format": [],
+                "sortable": false
+            },
+            {
+                "label": "tipo_credito",
+                "value": "attributes.tipo_credito",
+                "field": "tipo_credito",
                 "align": "left",
                 "groupRows": false,
                 "modelAttribute": "informe",

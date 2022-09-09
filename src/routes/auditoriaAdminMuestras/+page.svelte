@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type CrudAction from '../lib/CrudAction';
+	import type CrudAction from '$lib/CrudAction';
 	import ApiStore, {
 		JSONApiPageHandler,
 		JSONApiPerPageHandler,
 		JSONApiSortHandler,
-	} from '../lib/ApiStore';
-	import type GridConfig from '../lib/GridConfig';
-	import Crud from '../stories/CRUD.svelte';
+	} from '$lib/ApiStore';
+	import type GridConfig from '$lib/GridConfig';
+	import Crud from '../../stories/CRUD.svelte';
 
 	let config: GridConfig = {
 		multiSelect: false,

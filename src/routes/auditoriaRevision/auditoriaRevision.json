@@ -15,7 +15,7 @@
                 "label": "Indice",
                 "value": "attributes.indice",
                 "field": "indice",
-                "align": "left",
+                "align": "center",
                 "format": [],
                 "sortable": false,
                 "groupRows": false
@@ -83,7 +83,7 @@
                 "informe_id": "1",
                 "prmprnpre_num": "24011953",
                 "tipo_credito": "5",
-                "calidad": "FINAL"
+                "calidad": "PRELIMINAR"
             }
         }
     },
@@ -115,7 +115,8 @@
                                 "value": "S"
                             }
                         ],
-                        "searchValue": "S"
+                        "searchValue": "PC",
+                        "dataSource": ""
                     }
                 ],
                 [
@@ -123,7 +124,8 @@
                         "control": "TextArea",
                         "name": "attributes.observacion",
                         "label": "Observación",
-                        "placeholder": ""
+                        "placeholder": "",
+                        "dataSource": ""
                     }
                 ],
                 [

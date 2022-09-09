@@ -1,15 +1,7 @@
 <script lang="ts">
-	import type CrudAction from '../lib/CrudAction';
-	import type FormField from '../lib/FormField';
-	import Form from '../stories/Form.svelte';
-	import ApiStore, {
-		JSONApiPageHandler,
-		JSONApiPerPageHandler,
-		JSONApiSortHandler,
-	} from '../lib/ApiStore';
-	import type GridConfig from '../lib/GridConfig';
-	import Crud from '../stories/CRUD.svelte';
-	import { comboStore } from '../lib/helpers';
+	import type FormField from '$lib/FormField';
+	import Form from '../../stories/Form.svelte';
+	import { comboStore } from '$lib/helpers';
 
 	let content: FormField[][] = [
 		[
@@ -43,13 +35,13 @@
 		[
 			{
 				control: 'ComboBox',
-				label: 'Elaborado por (Desde)',
+				label: 'Elaborado por (desde)',
 				name: 'elaborado_desde',
 				...comboStore('users'),
 			},
 			{
 				control: 'ComboBox',
-				label: 'Elaborado por (Hasta)',
+				label: 'Elaborado por (hasta)',
 				name: 'elaborado_hasta',
 				...comboStore('users'),
 			},
@@ -66,6 +58,17 @@
 				label: 'Tipo de Informe',
 				name: 'tipo_informe',
 				...comboStore('tipos_informe'),
+			},
+		],
+		[
+			{
+				control: 'ComboBox',
+				label: 'Agencia',
+				name: 'agencia',
+				...comboStore('agencias'),
+			},
+			{
+				control: 'Empty',
 			},
 		],
 		[

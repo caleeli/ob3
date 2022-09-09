@@ -44,6 +44,7 @@ class Muestra
     public $filters = [
     ];
     public $where = [
+        'and tipo_credito <= 9',
     ];
 }
 

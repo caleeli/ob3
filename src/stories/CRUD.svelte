@@ -15,7 +15,7 @@
 	export let rowActions: CrudAction[] = [];
 	export let configStore: ConfigStore | undefined;
 	export let form: FormField[][] = [];
-	export let data: any;
+	export let data: any = null;
 
 	let formPopup: any[][];
 	let open = false;

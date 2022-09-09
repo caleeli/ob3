@@ -1,16 +1,16 @@
 <script lang="ts">
-	import type CrudAction from '../lib/CrudAction';
+	import type CrudAction from '$lib/CrudAction';
 	import ApiStore, {
 		JSONApiPageHandler,
 		JSONApiPerPageHandler,
 		JSONApiSortHandler,
-	} from '../lib/ApiStore';
-	import type GridConfig from '../lib/GridConfig';
-	import Crud from '../stories/CRUD.svelte';
+	} from '$lib/ApiStore';
+	import type GridConfig from '$lib/GridConfig';
+	import Crud from '../../stories/CRUD.svelte';
 	import page_config from './auditoriaRevision.json';
-	import ConfigStore from '../lib/ConfigStore';
+	import ConfigStore from '$lib/ConfigStore';
 	import { page } from '$app/stores';
-	import type FormField from '../lib/FormField';
+	import type FormField from '$lib/FormField';
 
 	let configStore = new ConfigStore('auditoriaRevision', page_config);
 	let config: GridConfig = page_config.grid;
@@ -45,7 +45,8 @@
 		})
 		.then((data) => {
 			console.log(data);
-		}).catch((error) => {
+		})
+		.catch((error) => {
 			console.error(error);
 		});
 </script>

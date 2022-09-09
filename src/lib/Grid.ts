@@ -7,6 +7,7 @@ class Grid {
 	public collapsed: any[][] = [];
 	public data: any[] = [];
 	public store: StoreInterface;
+	public meta: { query: string; params: any } = { query: "", params: {} };
 	public error = "";
 	public sortBy: { field: string, direction: 'asc' | 'desc' }[] = [];
 	// Constructor
@@ -56,6 +57,7 @@ class Grid {
 	public async load() {
 		try {
 			const data = await this.store.get(0);
+			this.meta = this.store.getMeta();
 			this.cleanCells();
 			this.hydrate(data);
 		} catch (error) {
@@ -76,6 +78,7 @@ class Grid {
 
 	public async loadNextPage() {
 		const data = await this.store.getNextPage();
+		this.meta = this.store.getMeta();
 		this.hydrate(data);
 	}
 

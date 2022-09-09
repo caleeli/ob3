@@ -2,6 +2,7 @@
 interface StoreInterface {
 
     get(offset?: number): Promise<any[]>;
+    getMeta(): any;
     getNextPage(): Promise<any[]>;
     length(): Promise<number>;
     sort(sort: { field: string, direction: 'asc' | 'desc' }[]): Promise<any[]>;

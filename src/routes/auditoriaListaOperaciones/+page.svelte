@@ -1,14 +1,14 @@
 <script lang="ts">
-	import type CrudAction from '../lib/CrudAction';
+	import type CrudAction from '$lib/CrudAction';
 	import ApiStore, {
 		JSONApiPageHandler,
 		JSONApiPerPageHandler,
 		JSONApiSortHandler,
-	} from '../lib/ApiStore';
-	import type GridConfig from '../lib/GridConfig';
-	import Crud from '../stories/CRUD.svelte';
+	} from '$lib/ApiStore';
+	import type GridConfig from '$lib/GridConfig';
+	import Crud from '../../stories/CRUD.svelte';
 	import page_config from './auditoriaListaOperaciones.json';
-	import ConfigStore from '../lib/ConfigStore';
+	import ConfigStore from '$lib/ConfigStore';
 
 	let configStore = new ConfigStore('auditoriaListaOperaciones', page_config);
 	let config: GridConfig = page_config.grid;

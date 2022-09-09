@@ -2,7 +2,7 @@
 
 class TiposObservacion
 {
-    public $table = 'combo_tipo_obser';
+    public $table = 'ci_tipo_obser';
     public $id = 'valor';
     public $attributes = [
         'name' => 'descripcion',

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type FormField from '../lib/FormField';
-	import Form from '../stories/Form.svelte';
-	import { comboStore } from '../lib/helpers';
+	import type FormField from '$lib/FormField';
+	import Form from '../../stories/Form.svelte';
+	import { comboStore } from '$lib/helpers';
 
 	let content: FormField[][] = [
 		[
@@ -35,13 +35,13 @@
 		[
 			{
 				control: 'ComboBox',
-				label: 'Elaborado por (desde)',
+				label: 'Elaborado por (Desde)',
 				name: 'elaborado_desde',
 				...comboStore('users'),
 			},
 			{
 				control: 'ComboBox',
-				label: 'Elaborado por (hasta)',
+				label: 'Elaborado por (Hasta)',
 				name: 'elaborado_hasta',
 				...comboStore('users'),
 			},
@@ -59,17 +59,6 @@
 				name: 'tipo_informe',
 				...comboStore('tipos_informe'),
 			},
-		],
-		[
-			{
-				control: 'ComboBox',
-				label: 'Agencia',
-				name: 'agencia',
-				...comboStore('agencias'),
-			},
-			{
-				control: 'Empty',
-			}
 		],
 		[
 			{

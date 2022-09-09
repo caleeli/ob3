@@ -1,7 +1,3 @@
-<script lang="ts">
-	import Menu from '../lib/Menu.svelte';
-</script>
-
 <div class="logo">
 	<svg
 		width="256"
