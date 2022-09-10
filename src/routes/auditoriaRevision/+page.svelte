@@ -33,22 +33,20 @@
 	let toolbar: CrudAction[] = [];
 	let rowActions: CrudAction[] = page_config.rowActions || [];
 	let form: FormField[][] = page_config.form || [];
-	let data = {};
-	store
-		.show($page.url.searchParams.get('id'), {
-			params: {
-				informe_id: $page.url.searchParams.get('inf'),
-				prmprnpre_num: $page.url.searchParams.get('pre'),
-				tipo_credito: $page.url.searchParams.get('tc'),
-				calidad: $page.url.searchParams.get('cal'),
-			},
+	let formStore = new ApiStore(
+		Object.assign(page_config.formStore, {
+			root: 'data',
 		})
-		.then((data) => {
-			console.log(data);
+	);
+	let data = {};
+	formStore
+		.show($page.url.searchParams.get('pre'), {})
+		.then((response) => {
+			data = response;
 		})
 		.catch((error) => {
 			console.error(error);
 		});
 </script>
 
-<Crud {config} {store} {toolbar} {configStore} {rowActions} {form} {data} />
+<Crud {config} {store} {toolbar} {configStore} {rowActions} {form} {data} {formStore} />

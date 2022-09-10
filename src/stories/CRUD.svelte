@@ -8,6 +8,7 @@
 	import type CrudAction from '../lib/CrudAction';
 	import type ConfigStore from '../lib/ConfigStore';
 	import type FormField from '../lib/FormField';
+	import type ApiStore from '$lib/ApiStore';
 
 	export let config: GridConfig;
 	export let store: StoreInterface;
@@ -15,6 +16,7 @@
 	export let rowActions: CrudAction[] = [];
 	export let configStore: ConfigStore | undefined;
 	export let form: FormField[][] = [];
+	export let formStore: ApiStore | undefined = undefined;
 	export let data: any = null;
 
 	let formPopup: any[][];
@@ -152,7 +154,7 @@
 {/if}
 
 {#if form && form.length}
-	<Form content={form} border={false} {data} {configStore} />
+	<Form content={form} border={false} {data} store={formStore} {configStore} />
 {/if}
 
 <Grid

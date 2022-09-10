@@ -81,8 +81,8 @@
         "query": {
             "params": {
                 "informe_id": "1",
-                "prmprnpre_num": "24011953",
-                "tipo_credito": "5",
+                "prmprnpre_num": "24010684",
+                "tipo_credito": "1",
                 "calidad": "PRELIMINAR"
             }
         }
@@ -166,11 +166,32 @@
         [
             {
                 "control": "TextBox",
-                "name": "attributes.prmprpre",
-                "label": "Nro Crédito",
-                "placeholder": "",
+                "name": "attributes.prmprnpre",
+                "label": "Num. Préstamo"
+            },
+            {
+                "control": "TextBox",
+                "name": "attributes.prmprfdes",
+                "label": "Fecha desembolso",
+                "dataSource": ""
+            },
+            {
+                "control": "TextBox",
+                "name": null,
+                "label": "Name",
+                "dataSource": ""
+            },
+            {
+                "control": "TextBox",
+                "name": "informe_id",
+                "label": "Informe",
                 "dataSource": ""
             }
         ]
-    ]
+    ],
+    "formStore": {
+        "url": "operaciones",
+        "root": "data",
+        "query": []
+    }
 }

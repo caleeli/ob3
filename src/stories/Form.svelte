@@ -23,6 +23,7 @@
 	export let blur: boolean = false;
 	export let data: any = {};
 	export let error = '';
+	export let store: ApiStore | undefined = undefined;
 	export let configStore: ConfigStore | undefined = undefined;
 
 	// helpers used in: combo data source
@@ -43,7 +44,7 @@
 					return field;
 				}
 			} else {
-				return get(target, name);
+				return get(data, name);
 			}
 		},
 		set: (target, name, value) => {
@@ -62,9 +63,9 @@
 				} else {
 					throw new Error(`Invalid internal value index: ${index}`);
 				}
-				return target;
+				return data;
 			} else {
-				return set(target, name, value);
+				return set(data, name, value);
 			}
 		},
 	});
@@ -163,6 +164,7 @@
 	let editConfigForm: FormField[][] = [];
 	let editConfigData = {};
 	let editConfig = false;
+	let editConfigModelAttributes: { name: string; value: string }[] = [];
 	let editConfigFormControlProps: FormField[][] = [
 		[
 			{
@@ -180,9 +182,11 @@
 		],
 		[
 			{
-				control: 'TextBox',
+				control: 'ComboBox',
 				name: 'name',
 				label: 'Name',
+				options: editConfigModelAttributes,
+				editable: true,
 			},
 		],
 		[
@@ -231,7 +235,11 @@
 					if (row) {
 						const index = row.findIndex((cell) => cell === editConfigData);
 						row.splice(index, 1);
-						content = content;
+						if (row.length === 0) {
+							const rowIndex = content.findIndex((r) => r === row);
+							content.splice(rowIndex, 1);
+						}
+						updateConfig();
 						editConfig = false;
 					}
 				},
@@ -272,7 +280,7 @@
 				label: 'Name',
 			},
 		]);
-		content = content;
+		updateConfig();
 	}
 	function updateConfig() {
 		content = content;
@@ -291,6 +299,27 @@
 			cell_runtime.push(newCov);
 			return cell_runtime.length - 1;
 		}
+	}
+	if (store && configStore) {
+		configStore
+			.getModelMeta(store.config.url)
+			.then((model) => {
+				const keys = Object.keys(model.attributes);
+				editConfigModelAttributes.splice(0);
+				editConfigModelAttributes.push({ name: '', value: '' });
+				editConfigModelAttributes.push(
+					...keys.map((key) => {
+						return { name: `attributes.${key}`, value: `attributes.${key}` };
+					})
+				);
+				editConfigFormControlProps = editConfigFormControlProps;
+			})
+			.catch(() => {
+				editConfigModelAttributes.splice(0);
+			});
+	}
+	$: if (data) {
+		accessor = accessor;
 	}
 </script>
 
@@ -379,10 +408,12 @@
 							placeholder={cell.placeholder || ''}
 							items={cell_runtime[indexOf(cell)].options}
 							class="w-100"
+							editable={cell.editable || false}
 							bind:searchValue={cell.searchValue}
 							bind:value={accessor[getName(cell)]}
 							on:keydown={(e) => comboBoxKeydown(e, cell)}
 							on:select={() => comboBoxSelected(cell, cell.name && accessor[getName(cell)])}
+							on:input={() => {if (cell.editable) accessor[getName(cell)] = cell.searchValue} }
 						/>
 					</div>
 				{/if}

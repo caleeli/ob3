@@ -3,7 +3,7 @@
 class Operaciones
 {
     public $table = 'operaciones';
-    public $id = 'id';
+    public $id = 'prmprnpre';
     public $attributes = [
         'prmprnpre' => 'prmprnpre',
         'gbagenomb' => 'gbagenomb',

@@ -25,6 +25,7 @@ class FormField {
         name: string;
         disabled?: boolean;
     }[];
+    public editable?= false;
     public rows?: number;
     public action?: (() => Promise<void>) | ((value?: any) => Promise<void>);
     public store?: StoreInterface | ApiStore;
