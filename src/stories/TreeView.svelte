@@ -175,6 +175,9 @@
 	li > div:hover {
 		background-color: var(--fds-solid-background-tertiary);
 	}
+	li > div.selected:hover {
+		background-color: hsla(var(--fds-accent-dark-1), 30%);
+	}
 	.no-arrow {
 		padding-left: 1rem;
 	}
