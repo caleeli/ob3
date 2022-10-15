@@ -154,7 +154,7 @@
 {/if}
 
 {#if form && form.length}
-	<Form content={form} border={false} {data} store={formStore} {configStore} />
+	<Form content={form} border={false} {data} store={formStore} {configStore} margin="1rem" />
 {/if}
 
 <Grid

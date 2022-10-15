@@ -6,13 +6,9 @@
 
 	const dispatch = createEventDispatcher();
 
-	// class property
-	let className = '';
-	export { className as class };
 	export let store: StoreInterface;
 	export let root_node: string = 'root';
 	export let is_root = true;
-	export let show_root = true;
 	export let editable = false;
 	export let tree: TreeNode = {
 		label: '',
@@ -20,7 +16,7 @@
 		selected: false,
 		icon: '',
 		open: true,
-		color: 'black',
+		color: 'black'
 	};
 	export let root: TreeNode = {
 		label: '',
@@ -28,7 +24,7 @@
 		selected: false,
 		icon: '',
 		open: true,
-		color: 'black',
+		color: 'black'
 	};
 	export let converter: (
 		currentRow: any,
@@ -45,7 +41,7 @@
 		building: 'box-open',
 		processor: 'microchip',
 		call_processor: 'download',
-		import: 'file-import',
+		import: 'file-import'
 	};
 	const toggleExpansion = (node: TreeNode) => {
 		node.open = !node.open;
@@ -77,7 +73,7 @@
 		store.get().then((data) => {
 			root = row2node(
 				{
-					id: root_node,
+					id: root_node
 				},
 				data
 			);
@@ -86,25 +82,21 @@
 	}
 </script>
 
-<ul class={`${is_root ? 'root' : 'child'} ${className}`}>
+<ul class={is_root ? 'root' : 'child'}>
 	<!-- transition:slide -->
 	<li>
 		{#if tree.children && tree.children.length > 0}
 			<div on:click={() => toggleExpansion(tree)} class={`${(tree.selected && 'selected') || ''}`}>
-				{#if !is_root || show_root}
-					<i
-						class={`icon icon-ic_fluent_${tree.open ? 'chevron_down' : 'chevron_right'}_20_regular`}
-					/>
-				{/if}
+				<i
+					class={`icon icon-ic_fluent_${tree.open ? 'chevron_down' : 'chevron_right'}_20_regular`}
+				/>
 				{#if editable}
 					<input type="checkbox" on:click|stopPropagation bind:checked={tree.selected} />
 				{/if}
-				{#if !is_root || show_root}
-					<i
-						class={`icon icon-ic_fluent_${icons[tree.icon] || tree.icon}_20_regular`}
-						style={`color: ${tree.color};`}
-					/>
-				{/if}
+				<i
+					class={`icon icon-ic_fluent_${icons[tree.icon] || tree.icon}_20_regular`}
+					style={`color: ${tree.color};`}
+				/>
 				{#if editable}
 					<input
 						class="node-name"
@@ -118,13 +110,7 @@
 			</div>
 			{#if tree.open}
 				{#each tree.children as child}
-					<svelte:self
-						bind:tree={child}
-						is_root={false}
-						class={!show_root ? 'hide-line' : ''}
-						bind:root
-						on:select
-					/>
+					<svelte:self bind:tree={child} is_root={false} bind:root on:select />
 				{/each}
 			{/if}
 		{:else}
@@ -185,9 +171,5 @@
 	}
 	.selected {
 		background-color: hsla(var(--fds-accent-dark-1), 20%);
-	}
-	.hide-line {
-		border-left: none !important;
-		padding-left: 0px !important;
 	}
 </style>

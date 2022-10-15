@@ -572,7 +572,10 @@
 										grid.isCollapsed(row) ? 'chevron_right' : 'chevron_down'
 									}_20_regular`}
 								/>
-								{grid.formatted(row, col)}
+								<b>
+									{config.headers[col].label}:
+									{grid.formatted(row, col)}
+								</b>
 							</td>
 						</tr>
 					{/if}
@@ -644,7 +647,7 @@
 		z-index: 1;
 	}
 	th:hover {
-		background-color: var(--fds-solid-background-base);
+		background-color: var(--fds-solid-background-tertiary);
 		-webkit-user-select: none;
 		-khtml-user-select: none;
 		-moz-user-select: -moz-none;

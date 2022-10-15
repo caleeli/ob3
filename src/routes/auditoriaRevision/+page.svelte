@@ -11,6 +11,7 @@
 	import ConfigStore from '$lib/ConfigStore';
 	import { page } from '$app/stores';
 	import type FormField from '$lib/FormField';
+	import { feel } from '$lib/helpers';
 
 	let configStore = new ConfigStore('auditoriaRevision', page_config);
 	let config: GridConfig = page_config.grid;
@@ -40,7 +41,7 @@
 	);
 	let data = {};
 	formStore
-		.show($page.url.searchParams.get('pre'), {})
+		.show(feel(page_config.formStore.currentId, $page), {})
 		.then((response) => {
 			data = response;
 		})

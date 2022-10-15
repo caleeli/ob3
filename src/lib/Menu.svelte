@@ -8,8 +8,8 @@
 		root: 'data',
 		query: {
 			per_page: 200,
-			sort: 'position'
-		}
+			sort: 'position',
+		},
 	});
 
 	/**
@@ -30,7 +30,7 @@
 			open: true,
 			icon: children.length ? 'folder' : 'app_generic',
 			color: children.length ? 'orangered' : 'steelblue',
-			data: currentRow
+			data: currentRow,
 		};
 	}
 	function gotoPage(event) {
@@ -39,7 +39,7 @@
 </script>
 
 <div class="menu">
-	<TreeView {store} converter={menu2node} on:select={gotoPage} />
+	<TreeView {store} converter={menu2node} on:select={gotoPage} show_root={false} is_root={true} />
 </div>
 
 <style>
@@ -49,6 +49,6 @@
 		padding-right: 1rem;
 		overflow: auto;
 		height: 100%;
-		width: 25rem;
+		width: 35rem;
 	}
 </style>

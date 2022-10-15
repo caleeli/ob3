@@ -81,9 +81,9 @@
         "query": {
             "params": {
                 "informe_id": "1",
-                "prmprnpre_num": "24010684",
+                "prmprnpre_num": "24010623",
                 "tipo_credito": "1",
-                "calidad": "PRELIMINAR"
+                "calidad": "FINAL"
             }
         }
     },
@@ -167,12 +167,13 @@
             {
                 "control": "TextBox",
                 "name": "attributes.prmprnpre",
-                "label": "Num. Préstamo"
+                "label": "Num. Préstamo",
+                "dataSource": ""
             },
             {
                 "control": "TextBox",
                 "name": "attributes.prmprfdes",
-                "label": "Fecha desembolso",
+                "label": "Fecha Desembolso",
                 "dataSource": ""
             },
             {
@@ -183,15 +184,96 @@
             },
             {
                 "control": "TextBox",
-                "name": "informe_id",
+                "name": "attributes.informe",
                 "label": "Informe",
+                "dataSource": ""
+            }
+        ],
+        [
+            {
+                "control": "TextBox",
+                "name": "attributes.gbagecage",
+                "label": "Num Cliente",
+                "dataSource": ""
+            },
+            {
+                "control": "TextBox",
+                "name": "attributes.fec_cierre",
+                "label": "Fecha Cierre",
+                "dataSource": ""
+            },
+            {
+                "control": "TextBox",
+                "name": "attributes.calidad",
+                "label": "Calidad",
+                "dataSource": ""
+            }
+        ],
+        [
+            {
+                "control": "TextBox",
+                "name": "attributes.gbagenomb",
+                "label": "Nombre Cliente",
+                "dataSource": ""
+            },
+            {
+                "control": "TextBox",
+                "name": "attributes.mora",
+                "label": "Días Mora",
+                "dataSource": ""
+            },
+            {
+                "control": "TextBox",
+                "name": "attributes.plaza",
+                "label": "Sucursal",
+                "dataSource": ""
+            }
+        ],
+        [
+            {
+                "control": "TextBox",
+                "name": "attributes.ncreditos",
+                "label": "Cantidad Créditos",
+                "dataSource": ""
+            },
+            {
+                "control": "TextBox",
+                "name": "attributes.estado",
+                "label": "Estado Deuda",
+                "dataSource": ""
+            },
+            {
+                "control": "TextBox",
+                "name": "attributes.elaborado_por",
+                "label": "Elaborado por",
+                "dataSource": ""
+            }
+        ],
+        [
+            {
+                "control": "TextBox",
+                "name": "attributes.asesor",
+                "label": "Oficial Actual",
+                "dataSource": ""
+            },
+            {
+                "control": "TextBox",
+                "name": "attributes.prmprplzo",
+                "label": "Plazo",
+                "dataSource": ""
+            },
+            {
+                "control": "TextBox",
+                "name": "attributes.tipoinf",
+                "label": "Tipo Informe",
                 "dataSource": ""
             }
         ]
     ],
     "formStore": {
-        "url": "operaciones",
+        "url": "muestra",
         "root": "data",
-        "query": []
+        "query": [],
+        "currentId": "$url.id"
     }
 }

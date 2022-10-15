@@ -1,4 +1,5 @@
 <script lang="ts">
+	import "fluent-svelte/theme.css";
 	import Header from '../stories/Header.svelte';
 	import { login, edit_mode } from '../store';
 	import Menu from '../lib/Menu.svelte';
@@ -50,7 +51,8 @@
 </main>
 
 <style>
-	@import url('https://unpkg.com/fluent-svelte/theme.css');
+	/* @import url('https://unpkg.com/fluent-svelte/theme.css'); */
+	@import url('../lib/theme.css');
 	:root {
 		--header-height: 6rem;
 	}

@@ -25,7 +25,7 @@ class ApiStore implements StoreInterface {
     public sortBy: { field: string, direction: 'asc' | 'desc' }[] = []
     private listeners: ((data: any[]) => void)[] = [];
 
-    constructor(public config: { url: string, root?: string, query?: any, limit?: number }) { }
+    constructor(public config: { url: string, root?: string, query?: any, limit?: number; currentId?: any; }) { }
     async refresh(): Promise<any> {
         const data = await this.get(0);
         this.listeners.forEach((callback: (arg0: any[]) => any) => callback(data));

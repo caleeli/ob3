@@ -3,7 +3,7 @@
 	import { TextBox } from 'fluent-svelte';
 	import TextArea from '../lib/TextArea.svelte';
 	import { PersonPicture } from 'fluent-svelte';
-	import { ComboBox } from 'fluent-svelte';
+	import ComboBox from '../lib/ComboBox.svelte';
 	import { get, set } from 'lodash';
 	import type FormField from '../lib/FormField';
 	import { translation as __ } from '../lib/translations';
@@ -25,6 +25,7 @@
 	export let error = '';
 	export let store: ApiStore | undefined = undefined;
 	export let configStore: ConfigStore | undefined = undefined;
+	export let margin = "0px";
 
 	// helpers used in: combo data source
 	const helpers = {
@@ -186,7 +187,7 @@
 				name: 'name',
 				label: 'Name',
 				options: editConfigModelAttributes,
-				editable: true,
+				editable: false,
 			},
 		],
 		[
@@ -246,6 +247,22 @@
 			},
 		],
 	];
+	let editConfigFormProps: FormField[][] = [
+		[
+			{
+				control: 'TextBox',
+				label: 'Model URL',
+				name: 'store.config.url',
+			},
+		],
+		[
+			{
+				control: 'TextBox',
+				label: 'Curretn ID',
+				name: 'store.config.currentId',
+			},
+		],
+	];
 
 	function editControl(
 		event: (MouseEvent & { target: EventTarget & HTMLDivElement }) | any,
@@ -300,6 +317,13 @@
 			return cell_runtime.length - 1;
 		}
 	}
+	function editFormConfig() {
+		editConfig = true;
+		editConfigForm = editConfigFormProps;
+		editConfigData = {
+			store
+		};
+	}
 	if (store && configStore) {
 		configStore
 			.getModelMeta(store.config.url)
@@ -309,7 +333,8 @@
 				editConfigModelAttributes.push({ name: '', value: '' });
 				editConfigModelAttributes.push(
 					...keys.map((key) => {
-						return { name: `attributes.${key}`, value: `attributes.${key}` };
+						const value = String(get(data, `attributes.${key}`)).substring(0, 10);
+						return { name: `attributes.${key} (${value})`, value: `attributes.${key}` };
 					})
 				);
 				editConfigFormControlProps = editConfigFormControlProps;
@@ -332,8 +357,12 @@
 
 <form
 	class={`${border ? 'section' : ''} ${blur ? 'blur-background' : ''}`}
+	style={`margin: ${margin};`}
 	on:submit|preventDefault={submit}
 >
+	{#if isEditMode}
+		<Button on:click={editFormConfig}>⚙️</Button>
+	{/if}
 	{#if title}
 		<h2>{__(title)}</h2>
 	{/if}
