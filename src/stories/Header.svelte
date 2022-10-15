@@ -60,9 +60,6 @@
 </header>
 
 <style>
-	header {
-		height: var(--header-height);
-	}
 	header h1 {
 		display: inline-block;
 		color: #062c5a;
