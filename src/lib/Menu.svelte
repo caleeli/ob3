@@ -27,7 +27,7 @@
 			label: currentRow.attributes?.text || '',
 			children,
 			selected: false,
-			open: true,
+			open: !Boolean(currentRow.attributes?.text),
 			icon: children.length ? 'folder' : 'app_generic',
 			color: children.length ? 'orangered' : 'steelblue',
 			data: currentRow,

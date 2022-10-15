@@ -186,6 +186,10 @@
 		display: inline-block;
 		/* transition: transform 200ms; */
 	}
+	li div {
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
 	.selected {
 		background-color: hsla(var(--fds-accent-dark-1), 20%);
 	}
