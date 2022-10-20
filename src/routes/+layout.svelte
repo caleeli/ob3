@@ -1,5 +1,5 @@
 <script lang="ts">
-	import "fluent-svelte/theme.css";
+	import 'fluent-svelte/theme.css';
 	import Header from '../stories/Header.svelte';
 	import { login, edit_mode } from '../store';
 	import Menu from '../lib/Menu.svelte';
@@ -39,7 +39,7 @@
 
 <svelte:window on:keydown={handleKeydown} on:keyup={handleKeyup} />
 
-<Header {user} on:logout={logout} />
+<Header {user} on:logout={logout} {isLogin} />
 
 <main class={`${shiftKey ? 'shift-pressed' : ''} ${ctrlKey ? 'control-pressed' : ''}`}>
 	{#if user && !isLogin}

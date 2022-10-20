@@ -5,6 +5,12 @@ class ArrayStore implements StoreInterface {
 
     constructor(private array: any[]) {
     }
+    getMeta() {
+        return {};
+    }
+    show(id: string | number, params?: any): Promise<any[]> {
+        throw new Error("Method not implemented.");
+    }
     setSort(sort: { field: string, direction: 'asc' | 'desc' }[]): void {
         console.warn("Method not implemented.");
     }

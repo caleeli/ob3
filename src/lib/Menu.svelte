@@ -11,6 +11,7 @@
 			sort: 'position',
 		},
 	});
+	let short = true;
 
 	/**
 	 * @param {any} currentRow
@@ -23,23 +24,43 @@
 		const children = allRows
 			.filter((/** @type {any} */ row_i) => row_i.attributes.parent == currentRow.id)
 			.map((/** @type {any} */ row) => converter(row, allRows));
+		const label = currentRow.attributes?.text || '';
+		// reemplazar acentos: á a, é e, í i, ó o, ú u
+		const icon = label
+			.toLowerCase()
+			.replace(/á/g, 'a')
+			.replace(/é/g, 'e')
+			.replace(/í/g, 'i')
+			.replace(/ó/g, 'o')
+			.replace(/ú/g, 'u')
+			.replace(/ /g, '_')
+			.replace(/_de_/, '_');
 		return {
-			label: currentRow.attributes?.text || '',
+			label,
 			children,
 			selected: false,
 			open: !Boolean(currentRow.attributes?.text),
-			icon: children.length ? 'folder' : 'app_generic',
+			icon,
 			color: children.length ? 'orangered' : 'steelblue',
 			data: currentRow,
 		};
 	}
-	function gotoPage(event) {
-		goto(event.detail.attributes.page);
+	function gotoPage(event: { detail: { attributes: { page: string | URL } } }) {
+		if (event.detail.attributes) {
+			goto(event.detail.attributes.page);
+		}
 	}
 </script>
 
-<div class="menu">
-	<TreeView {store} converter={menu2node} on:select={gotoPage} show_root={false} is_root={true} />
+<div class={`menu ${short ? 'short' : ''}`}>
+	<TreeView
+		{store}
+		converter={menu2node}
+		on:select={gotoPage}
+		show_root={false}
+		is_root={true}
+		{short}
+	/>
 </div>
 
 <style>
@@ -50,5 +71,15 @@
 		overflow: auto;
 		height: 100%;
 		width: 35rem;
+		-ms-overflow-style: none; /* IE and Edge */
+		scrollbar-width: none; /* Firefox */
+	}
+	/* Hide scrollbar for Chrome, Safari and Opera */
+	.menu::-webkit-scrollbar {
+		display: none;
+	}
+	.short {
+		padding-right: 0px;
+		width: 3rem;
 	}
 </style>
