@@ -3,9 +3,8 @@
 	import { Button } from 'fluent-svelte';
 	import { translation as __ } from '../lib/translations';
 	import { createEventDispatcher } from 'svelte';
-	import { page } from '$app/stores';
 
-	let isLogin = $page.url.pathname === '/';
+	export let isLogin = false;
 	export let user: { name: any } | null = null;
 
 	const dispatch = createEventDispatcher();
@@ -19,7 +18,6 @@
 	function onCreateAccount(event) {
 		dispatch('createAccount', event);
 	}
-	$: isLogin = $page.url.pathname === '/';
 </script>
 
 <header>
