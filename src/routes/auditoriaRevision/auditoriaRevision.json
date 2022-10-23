@@ -1,279 +1,279 @@
 {
-    "grid": {
-        "multiSelect": false,
-        "headers": [
-            {
-                "label": "Group",
-                "value": "attributes.id_grupo",
-                "field": "id_grupo",
-                "align": "left",
-                "format": [],
-                "sortable": false,
-                "groupRows": true
-            },
-            {
-                "label": "Indice",
-                "value": "attributes.indice",
-                "field": "indice",
-                "align": "center",
-                "format": [],
-                "sortable": false,
-                "groupRows": false
-            },
-            {
-                "label": "Detalle",
-                "value": "attributes.descripcion",
-                "field": "descripcion",
-                "align": "left",
-                "format": [],
-                "sortable": false,
-                "groupRows": false
-            },
-            {
-                "label": "Revisión",
-                "value": "attributes.revision",
-                "field": "revision",
-                "align": "left",
-                "format": [],
-                "sortable": false,
-                "groupRows": false
-            },
-            {
-                "label": "Observación",
-                "value": "attributes.observacion",
-                "field": "observacion",
-                "align": "left",
-                "format": [],
-                "sortable": false,
-                "groupRows": false
-            },
-            {
-                "label": "Tipo Observ",
-                "value": "attributes.tipo_observacion",
-                "field": "tipo_observacion",
-                "align": "left",
-                "format": [],
-                "sortable": false,
-                "groupRows": false
-            },
-            {
-                "label": "Riesgo Adi\/Control Int",
-                "value": "attributes.riesgo_adicional",
-                "field": "riesgo_adicional",
-                "align": "left",
-                "format": [],
-                "sortable": false,
-                "groupRows": false
-            }
-        ],
-        "sort": [
-            {
-                "field": "number",
-                "direction": "asc"
-            }
-        ],
-        "onselect": "review"
-    },
-    "store": {
-        "url": "revision_respuestas",
-        "root": "data",
-        "limit": 100,
-        "query": {
-            "params": {
-                "informe_id": "1",
-                "prmprnpre_num": "24010623",
-                "tipo_credito": "1",
-                "calidad": "FINAL"
-            }
-        }
-    },
-    "rowActions": [
-        {
-            "action": "review",
-            "form": [
-                [
-                    {
-                        "control": "ComboBox",
-                        "label": "Revisión",
-                        "name": "attributes.revision",
-                        "placeholder": "",
-                        "options": [
-                            {
-                                "name": "N",
-                                "value": "N"
-                            },
-                            {
-                                "name": "NA",
-                                "value": "NA"
-                            },
-                            {
-                                "name": "PC",
-                                "value": "PC"
-                            },
-                            {
-                                "name": "S",
-                                "value": "S"
-                            }
-                        ],
-                        "searchValue": "PC",
-                        "dataSource": ""
-                    }
-                ],
-                [
-                    {
-                        "control": "TextArea",
-                        "name": "attributes.observacion",
-                        "label": "Observación",
-                        "placeholder": "",
-                        "dataSource": ""
-                    }
-                ],
-                [
-                    {
-                        "control": "ComboBox",
-                        "name": "attributes.tipo_observacion",
-                        "label": "Tipo Observación",
-                        "placeholder": "",
-                        "dataSource": "comboStore('tipos_observacion')",
-                        "searchValue": "",
-                        "options": []
-                    }
-                ],
-                [
-                    {
-                        "control": "ComboBox",
-                        "name": "attributes.riesgo_adicional",
-                        "label": "Riesgo Adicional\/Control Interno",
-                        "placeholder": "",
-                        "dataSource": "",
-                        "options": [
-                            {
-                                "name": "RA",
-                                "value": "RA"
-                            },
-                            {
-                                "name": "CI",
-                                "value": "CI"
-                            }
-                        ],
-                        "searchValue": "RA"
-                    }
-                ]
-            ]
-        }
-    ],
-    "form": [
-        [
-            {
-                "control": "TextBox",
-                "name": "attributes.prmprnpre",
-                "label": "Num. Préstamo",
-                "dataSource": ""
-            },
-            {
-                "control": "TextBox",
-                "name": "attributes.prmprfdes",
-                "label": "Fecha Desembolso",
-                "dataSource": ""
-            },
-            {
-                "control": "TextBox",
-                "name": null,
-                "label": "Name",
-                "dataSource": ""
-            },
-            {
-                "control": "TextBox",
-                "name": "attributes.informe",
-                "label": "Informe",
-                "dataSource": ""
-            }
-        ],
-        [
-            {
-                "control": "TextBox",
-                "name": "attributes.gbagecage",
-                "label": "Num Cliente",
-                "dataSource": ""
-            },
-            {
-                "control": "TextBox",
-                "name": "attributes.fec_cierre",
-                "label": "Fecha Cierre",
-                "dataSource": ""
-            },
-            {
-                "control": "TextBox",
-                "name": "attributes.calidad",
-                "label": "Calidad",
-                "dataSource": ""
-            }
-        ],
-        [
-            {
-                "control": "TextBox",
-                "name": "attributes.gbagenomb",
-                "label": "Nombre Cliente",
-                "dataSource": ""
-            },
-            {
-                "control": "TextBox",
-                "name": "attributes.mora",
-                "label": "Días Mora",
-                "dataSource": ""
-            },
-            {
-                "control": "TextBox",
-                "name": "attributes.plaza",
-                "label": "Sucursal",
-                "dataSource": ""
-            }
-        ],
-        [
-            {
-                "control": "TextBox",
-                "name": "attributes.ncreditos",
-                "label": "Cantidad Créditos",
-                "dataSource": ""
-            },
-            {
-                "control": "TextBox",
-                "name": "attributes.estado",
-                "label": "Estado Deuda",
-                "dataSource": ""
-            },
-            {
-                "control": "TextBox",
-                "name": "attributes.elaborado_por",
-                "label": "Elaborado por",
-                "dataSource": ""
-            }
-        ],
-        [
-            {
-                "control": "TextBox",
-                "name": "attributes.asesor",
-                "label": "Oficial Actual",
-                "dataSource": ""
-            },
-            {
-                "control": "TextBox",
-                "name": "attributes.prmprplzo",
-                "label": "Plazo",
-                "dataSource": ""
-            },
-            {
-                "control": "TextBox",
-                "name": "attributes.tipoinf",
-                "label": "Tipo Informe",
-                "dataSource": ""
-            }
-        ]
-    ],
-    "formStore": {
-        "url": "muestra",
-        "root": "data",
-        "query": [],
-        "currentId": "$url.id"
-    }
+	"grid": {
+		"multiSelect": false,
+		"headers": [
+			{
+				"label": "Group",
+				"value": "attributes.id_grupo",
+				"field": "id_grupo",
+				"align": "left",
+				"format": [],
+				"sortable": false,
+				"groupRows": true
+			},
+			{
+				"label": "Indice",
+				"value": "attributes.indice",
+				"field": "indice",
+				"align": "center",
+				"format": [],
+				"sortable": false,
+				"groupRows": false
+			},
+			{
+				"label": "Detalle",
+				"value": "attributes.descripcion",
+				"field": "descripcion",
+				"align": "left",
+				"format": [],
+				"sortable": false,
+				"groupRows": false
+			},
+			{
+				"label": "Revisión",
+				"value": "attributes.revision",
+				"field": "revision",
+				"align": "left",
+				"format": [],
+				"sortable": false,
+				"groupRows": false
+			},
+			{
+				"label": "Observación",
+				"value": "attributes.observacion",
+				"field": "observacion",
+				"align": "left",
+				"format": [],
+				"sortable": false,
+				"groupRows": false
+			},
+			{
+				"label": "Tipo Observ",
+				"value": "attributes.tipo_observacion",
+				"field": "tipo_observacion",
+				"align": "left",
+				"format": [],
+				"sortable": false,
+				"groupRows": false
+			},
+			{
+				"label": "Riesgo Adi/Control Int",
+				"value": "attributes.riesgo_adicional",
+				"field": "riesgo_adicional",
+				"align": "left",
+				"format": [],
+				"sortable": false,
+				"groupRows": false
+			}
+		],
+		"sort": [
+			{
+				"field": "number",
+				"direction": "asc"
+			}
+		],
+		"onselect": "review"
+	},
+	"store": {
+		"url": "revision_respuestas",
+		"root": "data",
+		"limit": 100,
+		"query": {
+			"params": {
+				"informe_id": "1",
+				"prmprnpre_num": "24010623",
+				"tipo_credito": "1",
+				"calidad": "FINAL"
+			}
+		}
+	},
+	"rowActions": [
+		{
+			"action": "review",
+			"form": [
+				[
+					{
+						"control": "ComboBox",
+						"label": "Revisión",
+						"name": "attributes.revision",
+						"placeholder": "",
+						"options": [
+							{
+								"name": "N",
+								"value": "N"
+							},
+							{
+								"name": "NA",
+								"value": "NA"
+							},
+							{
+								"name": "PC",
+								"value": "PC"
+							},
+							{
+								"name": "S",
+								"value": "S"
+							}
+						],
+						"searchValue": "PC",
+						"dataSource": ""
+					}
+				],
+				[
+					{
+						"control": "TextArea",
+						"name": "attributes.observacion",
+						"label": "Observación",
+						"placeholder": "",
+						"dataSource": ""
+					}
+				],
+				[
+					{
+						"control": "ComboBox",
+						"name": "attributes.tipo_observacion",
+						"label": "Tipo Observación",
+						"placeholder": "",
+						"dataSource": "comboStore('tipos_observacion')",
+						"searchValue": "",
+						"options": []
+					}
+				],
+				[
+					{
+						"control": "ComboBox",
+						"name": "attributes.riesgo_adicional",
+						"label": "Riesgo Adicional/Control Interno",
+						"placeholder": "",
+						"dataSource": "",
+						"options": [
+							{
+								"name": "RA",
+								"value": "RA"
+							},
+							{
+								"name": "CI",
+								"value": "CI"
+							}
+						],
+						"searchValue": "RA"
+					}
+				]
+			]
+		}
+	],
+	"form": [
+		[
+			{
+				"control": "TextBox",
+				"name": "attributes.prmprnpre",
+				"label": "Num. Préstamo",
+				"dataSource": ""
+			},
+			{
+				"control": "TextBox",
+				"name": "attributes.prmprfdes",
+				"label": "Fecha Desembolso",
+				"dataSource": ""
+			},
+			{
+				"control": "TextBox",
+				"name": null,
+				"label": "Name",
+				"dataSource": ""
+			},
+			{
+				"control": "TextBox",
+				"name": "attributes.informe",
+				"label": "Informe",
+				"dataSource": ""
+			}
+		],
+		[
+			{
+				"control": "TextBox",
+				"name": "attributes.gbagecage",
+				"label": "Num Cliente",
+				"dataSource": ""
+			},
+			{
+				"control": "TextBox",
+				"name": "attributes.fec_cierre",
+				"label": "Fecha Cierre",
+				"dataSource": ""
+			},
+			{
+				"control": "TextBox",
+				"name": "attributes.calidad",
+				"label": "Calidad",
+				"dataSource": ""
+			}
+		],
+		[
+			{
+				"control": "TextBox",
+				"name": "attributes.gbagenomb",
+				"label": "Nombre Cliente",
+				"dataSource": ""
+			},
+			{
+				"control": "TextBox",
+				"name": "attributes.mora",
+				"label": "Días Mora",
+				"dataSource": ""
+			},
+			{
+				"control": "TextBox",
+				"name": "attributes.plaza",
+				"label": "Sucursal",
+				"dataSource": ""
+			}
+		],
+		[
+			{
+				"control": "TextBox",
+				"name": "attributes.ncreditos",
+				"label": "Cantidad Créditos",
+				"dataSource": ""
+			},
+			{
+				"control": "TextBox",
+				"name": "attributes.estado",
+				"label": "Estado Deuda",
+				"dataSource": ""
+			},
+			{
+				"control": "TextBox",
+				"name": "attributes.elaborado_por",
+				"label": "Elaborado por",
+				"dataSource": ""
+			}
+		],
+		[
+			{
+				"control": "TextBox",
+				"name": "attributes.asesor",
+				"label": "Oficial Actual",
+				"dataSource": ""
+			},
+			{
+				"control": "TextBox",
+				"name": "attributes.prmprplzo",
+				"label": "Plazo",
+				"dataSource": ""
+			},
+			{
+				"control": "TextBox",
+				"name": "attributes.tipoinf",
+				"label": "Tipo Informe",
+				"dataSource": ""
+			}
+		]
+	],
+	"formStore": {
+		"url": "muestra",
+		"root": "data",
+		"query": [],
+		"currentId": "$url.id"
+	}
 }

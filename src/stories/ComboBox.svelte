@@ -16,7 +16,7 @@
 		selected: false,
 		icon: '',
 		open: true,
-		color: 'black'
+		color: 'black',
 	};
 	export let root: TreeNode = {
 		label: '',
@@ -24,7 +24,7 @@
 		selected: false,
 		icon: '',
 		open: true,
-		color: 'black'
+		color: 'black',
 	};
 	export let converter: (
 		currentRow: any,
@@ -41,7 +41,7 @@
 		building: 'box-open',
 		processor: 'microchip',
 		call_processor: 'download',
-		import: 'file-import'
+		import: 'file-import',
 	};
 	const toggleExpansion = (node: TreeNode) => {
 		node.open = !node.open;
@@ -73,7 +73,7 @@
 		store.get().then((data) => {
 			root = row2node(
 				{
-					id: root_node
+					id: root_node,
 				},
 				data
 			);

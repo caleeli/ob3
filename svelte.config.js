@@ -9,19 +9,17 @@ const config = {
 	// for more information about preprocessors
 	preprocess: preprocess({
 		postcss: {
-			plugins: [
-				autoprefixer
-			]
-		  },
-		  sass: {
+			plugins: [autoprefixer],
+		},
+		sass: {
 			sync: true,
 			implementation: sass,
-		  },
+		},
 	}),
 
 	kit: {
-		adapter: adapter()
-	}
+		adapter: adapter(),
+	},
 };
 
 export default config;

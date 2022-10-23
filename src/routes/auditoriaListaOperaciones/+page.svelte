@@ -71,7 +71,7 @@
 			],
 			async handler(record: any, selected: any[]) {
 				console.log(record, selected);
-				const api = new ApiStore({url: 'muestra'});
+				const api = new ApiStore({ url: 'muestra' });
 				const res = await api.get();
 				console.log(res);
 			},

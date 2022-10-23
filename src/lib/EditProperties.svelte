@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, ContentDialog, InfoBar } from 'fluent-svelte';
+	import { Button, ContentDialog } from 'fluent-svelte';
 	import Form from '../stories/Form.svelte';
 	import { translation as __ } from '../lib/translations';
 	import type FormField from './FormField';
@@ -12,8 +12,7 @@
 	export let data: any = {};
 	export let title = '';
 
-	let error = '',
-		error_suffix = '';
+	let error = '';
 	async function save() {
 		dispatch('save', data);
 		open = false;

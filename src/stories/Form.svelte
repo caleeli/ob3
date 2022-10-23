@@ -25,7 +25,7 @@
 	export let error = '';
 	export let store: ApiStore | undefined = undefined;
 	export let configStore: ConfigStore | undefined = undefined;
-	export let margin = "0px";
+	export let margin = '0px';
 
 	// helpers used in: combo data source
 	const helpers = {
@@ -321,7 +321,7 @@
 		editConfig = true;
 		editConfigForm = editConfigFormProps;
 		editConfigData = {
-			store
+			store,
 		};
 	}
 	if (store && configStore) {
@@ -442,7 +442,9 @@
 							bind:value={accessor[getName(cell)]}
 							on:keydown={(e) => comboBoxKeydown(e, cell)}
 							on:select={() => comboBoxSelected(cell, cell.name && accessor[getName(cell)])}
-							on:input={() => {if (cell.editable) accessor[getName(cell)] = cell.searchValue} }
+							on:input={() => {
+								if (cell.editable) accessor[getName(cell)] = cell.searchValue;
+							}}
 						/>
 					</div>
 				{/if}

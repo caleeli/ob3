@@ -12,16 +12,18 @@
 	let element: Element;
 	let percent: number;
 	let observer: IntersectionObserver;
-	let unobserve = () => {};
+	let unobserve = () => {
+		// do nothing
+	};
 	let intersectionObserverSupport = false;
 	const dispatch = createEventDispatcher();
 
 	function intersectPercent(entries: any[]) {
 		entries.forEach((entry): void => {
 			percent = Math.round(Math.ceil(entry.intersectionRatio * 100));
-            if (percent === 100) {
-                dispatch('complete', {});
-            }
+			if (percent === 100) {
+				dispatch('complete', {});
+			}
 		});
 	}
 
@@ -37,7 +39,7 @@
 
 		const options = {
 			rootMargin: `${top}px ${right}px ${bottom}px ${left}px`,
-			threshold: stepsToThreshold(steps)
+			threshold: stepsToThreshold(steps),
 		};
 
 		if (intersectionObserverSupport) {

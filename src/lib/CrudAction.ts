@@ -1,7 +1,7 @@
-import type FormField from "./FormField";
+import type FormField from './FormField';
 
 class CrudAction {
-	public icon?= 'add';
+	public icon? = 'add';
 	public label?: string;
 	public href?: string | undefined;
 	public action?: string | (() => void) | undefined;

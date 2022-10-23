@@ -1,12 +1,12 @@
 {
-    "transform_response": [
-        {
-            "action": "json_api"
-        },
-        {
-            "action": "jwt_token",
-            "condition": "data.relationships.token",
-            "target": "data.relationships.token"
-        }
-    ]
+	"transform_response": [
+		{
+			"action": "json_api"
+		},
+		{
+			"action": "jwt_token",
+			"condition": "data.relationships.token",
+			"target": "data.relationships.token"
+		}
+	]
 }

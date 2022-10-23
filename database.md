@@ -43,6 +43,7 @@
 | con_mora           | varchar(11)   | YES  |     |         |                |
 | gasto              | varchar(128)  | YES  |     |         |                |
 | acbccccic          | int(11)       | YES  |     |         |                |
+
 ## muestra
 
 | Field          | Type          | Null | Key | Default    | Extra          |

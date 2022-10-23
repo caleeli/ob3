@@ -1,41 +1,16 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import { get_current_component } from 'svelte/internal';
-	// import { externalMouseEvents, createEventForwarder } from '../lib/internal';
 
 	import TextBoxButton from 'fluent-svelte/TextBox/TextBoxButton.svelte';
-
-	type TextInputTypes =
-		| 'text'
-		| 'number'
-		| 'search'
-		| 'password'
-		| 'email'
-		| 'tel'
-		| 'url'
-		| 'date'
-		| 'datetime-local'
-		| 'month'
-		| 'time'
-		| 'week';
 
 	/** The input's current value. */
 	export let value: any = '';
 
-	/** Determiness the input type of the textbox. */
-	export let type: TextInputTypes = 'text';
-
 	/** The initial placeholder text displayed if no value is present. */
-	export let placeholder: string = undefined;
+	export let placeholder: string;
 
 	/** Determines whether a text clear button is present. */
 	export let clearButton = true;
-
-	/** Determines whether a search button is present when `type` is set to "search". */
-	export let searchButton = true;
-
-	/** Determines whether a password reveal button is present when `type` is set to "password". */
-	export let revealButton = true;
 
 	/** Determines whether the textbox can be typed in or not. */
 	export let readonly = false;
@@ -59,12 +34,6 @@
 	/** Obtains a bound DOM reference to the TextBox's clear button element. Only available if `clearButton` is set to true, `readonly` is set to false, and a `value` is present. */
 	export let clearButtonElement: HTMLButtonElement = null;
 
-	/** Obtains a bound DOM reference to the TextBox's search button element. Only available if `type` is set to `search`. */
-	export let searchButtonElement: HTMLButtonElement = null;
-
-	/** Obtains a bound DOM reference to the TextBox's reveal button element. Only available if `type` is set to `password`. */
-	export let revealButtonElement: HTMLButtonElement = null;
-
 	const dispatch = createEventDispatcher();
 
 	function handleClear(event) {
@@ -73,32 +42,12 @@
 		value = '';
 	}
 
-	function handleSearch(event) {
-		dispatch('search', event);
-		inputElement.focus();
-	}
-
-	function handleReveal(event) {
-		inputElement.focus();
-		inputElement.setAttribute('type', 'text');
-		dispatch('reveal', event);
-		let revealButtonMouseDown = true;
-		const hidePassword = () => {
-			if (!revealButtonMouseDown) return;
-			inputElement.focus();
-			revealButtonMouseDown = false;
-			inputElement.setAttribute('type', 'password');
-			window.removeEventListener('mouseup', hidePassword);
-		};
-		window.addEventListener('mouseup', hidePassword);
-	}
-
 	const inputProps = {
 		class: 'text-area',
 		disabled: disabled || undefined,
 		readonly: readonly || undefined,
 		placeholder: placeholder || undefined,
-		...$$restProps
+		...$$restProps,
 	};
 </script>
 

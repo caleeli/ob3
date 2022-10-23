@@ -1,7 +1,7 @@
 {
-    "transform_response": [
-        {
-            "action": "json_api"
-        }
-    ]
+	"transform_response": [
+		{
+			"action": "json_api"
+		}
+	]
 }

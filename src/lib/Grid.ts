@@ -1,5 +1,5 @@
-import type GridConfig from "./GridConfig";
-import type StoreInterface from "./StoreInterface";
+import type GridConfig from './GridConfig';
+import type StoreInterface from './StoreInterface';
 
 class Grid {
 	private config: GridConfig;
@@ -7,20 +7,18 @@ class Grid {
 	public collapsed: any[][] = [];
 	public data: any[] = [];
 	public store: StoreInterface;
-	public meta: { query: string; params: any } = { query: "", params: {} };
-	public error = "";
-	public sortBy: { field: string, direction: 'asc' | 'desc' }[] = [];
+	public meta: { query: string; params: any } = { query: '', params: {} };
+	public error = '';
+	public sortBy: { field: string; direction: 'asc' | 'desc' }[] = [];
 	// Constructor
 	constructor(config: GridConfig, store: StoreInterface) {
 		this.config = config;
 		this.store = store;
 		// Initialize sort columns
-		this.sortBy = this.config.headers.filter((header: any) => header.groupRows || header.sorted)
+		this.sortBy = this.config.headers
+			.filter((header: any) => header.groupRows || header.sorted)
 			.map((header: any) => ({ field: header.field, direction: header.sorted || 'asc' }));
-		this.config.sort.forEach((sortConfig: {
-			field: string;
-			direction: 'asc' | 'desc';
-		}) => {
+		this.config.sort.forEach((sortConfig: { field: string; direction: 'asc' | 'desc' }) => {
 			const col = this.sortBy.find((col): boolean => col.field === sortConfig.field);
 			if (col) {
 				col.direction = sortConfig.direction;
@@ -32,7 +30,9 @@ class Grid {
 	}
 
 	public async toggleSort(field: string) {
-		const isGrouped = this.config.headers.find((header: any) => header.groupRows && header.field === field);
+		const isGrouped = this.config.headers.find(
+			(header: any) => header.groupRows && header.field === field
+		);
 		const col = this.sortBy.find((col): boolean => col.field === field);
 		if (!col) {
 			this.sortBy.push({ field, direction: 'asc' });
@@ -46,7 +46,7 @@ class Grid {
 		this.hydrate(data);
 	}
 
-	public getDirection(field: string | undefined): "asc" | "desc" | null {
+	public getDirection(field: string | undefined): 'asc' | 'desc' | null {
 		const col = this.sortBy.find((col): boolean => col.field === field);
 		if (!col) {
 			return null;
@@ -97,24 +97,28 @@ class Grid {
 			this.error = String(error);
 			console.error(error);
 		}
-
 	}
 
 	public formatted(row: number, col: number) {
 		let value = this.cell[row][col];
 		if (value === undefined || value === null) {
-			return "";
+			return '';
 		}
-		if (!this.config || !this.config.headers || !this.config.headers[col] || !this.config.headers[col].format) {
+		if (
+			!this.config ||
+			!this.config.headers ||
+			!this.config.headers[col] ||
+			!this.config.headers[col].format
+		) {
 			return value;
 		}
-		const formatters: { [functionName: string]: ((value: any) => string) } = {
-			"currency": this.currency,
+		const formatters: { [functionName: string]: (value: any) => string } = {
+			currency: this.currency,
 		};
 		this.config.headers[col].format?.forEach((format: string | ((value: any) => string)) => {
-			if (typeof format === "string" && formatters[format]) {
+			if (typeof format === 'string' && formatters[format]) {
 				value = formatters[format](value);
-			} else if (typeof format === "function") {
+			} else if (typeof format === 'function') {
 				value = format(value);
 			} else {
 				throw new Error(`Unknown format: ${format}`);
@@ -125,7 +129,10 @@ class Grid {
 
 	private calcValue(header: any, dataRow: any): string {
 		const properties = Object.keys(dataRow);
-		return (new Function(...properties, 'return ' + header.value)).apply(this, Object.values(dataRow));
+		return new Function(...properties, 'return ' + header.value).apply(
+			this,
+			Object.values(dataRow)
+		);
 	}
 
 	public firstInGroup(row: number, col: number): boolean {
@@ -176,7 +183,7 @@ class Grid {
 
 	public currency(number: number | bigint) {
 		return new Intl.NumberFormat('es-BO', {
-			minimumFractionDigits: 2
+			minimumFractionDigits: 2,
 		}).format(number);
 	}
 

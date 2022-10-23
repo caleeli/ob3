@@ -13,33 +13,33 @@
 				control: 'TextBox',
 				type: 'text',
 				name: 'username',
-				placeholder: __('Username')
-			}
+				placeholder: __('Username'),
+			},
 		],
 		[
 			{
 				control: 'TextBox',
 				type: 'password',
 				name: 'password',
-				placeholder: __('Password')
-			}
+				placeholder: __('Password'),
+			},
 		],
 		[
 			{
 				control: 'Button',
 				variant: 'accent',
-				label: __('Login')
-			}
-		]
+				label: __('Login'),
+			},
+		],
 	];
 	let blur = true;
 	let data = {
 		username: '',
-		password: ''
+		password: '',
 	};
 	let api = new ApiStore({
 		url: 'http://localhost/projects/callizaya2/public/api.php/ob3/login',
-		root: 'data'
+		root: 'data',
 	});
 	let error = '';
 	async function submit(data: { detail: { username: any; password: any } }) {
@@ -47,8 +47,8 @@
 			const token = await api.create({
 				attributes: {
 					username: data.detail.username,
-					password: data.detail.password
-				}
+					password: data.detail.password,
+				},
 			});
 			login.set(token);
 			goto('/dashboard');

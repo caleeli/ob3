@@ -9,14 +9,8 @@
 
 	const dispatch = createEventDispatcher();
 
-	function onLogin(event) {
-		dispatch('login', event);
-	}
 	function onLogout(event) {
 		dispatch('logout', event);
-	}
-	function onCreateAccount(event) {
-		dispatch('createAccount', event);
 	}
 </script>
 

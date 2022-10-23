@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { createEventDispatcher, tick } from "svelte";
-	import { get_current_component, onMount } from "svelte/internal";
+	import { createEventDispatcher, tick } from 'svelte';
+	import { get_current_component, onMount } from 'svelte/internal';
 
-	import { createEventForwarder, externalMouseEvents, uid } from "fluent-svelte/internal";
+	import { createEventForwarder, externalMouseEvents, uid } from 'fluent-svelte/internal';
 
-	import ComboBoxItem from "fluent-svelte/ComboBox/ComboBoxItem.svelte";
-	import Button from "fluent-svelte/Button/Button.svelte";
-	import TextBox from "fluent-svelte/TextBox/TextBox.svelte";
-	import TextBoxButton from "fluent-svelte/TextBox/TextBoxButton.svelte";
+	import ComboBoxItem from 'fluent-svelte/ComboBox/ComboBoxItem.svelte';
+	import Button from 'fluent-svelte/Button/Button.svelte';
+	import TextBox from 'fluent-svelte/TextBox/TextBox.svelte';
+	import TextBoxButton from 'fluent-svelte/TextBox/TextBoxButton.svelte';
 
 	interface Item {
 		name: string;
@@ -22,7 +22,7 @@
 	export let searchValue: any = undefined;
 
 	/** The initial placeholder text displayed if no item is currently selected. */
-	export let placeholder = "";
+	export let placeholder = '';
 
 	/** Array of objects representing the dropdown items. */
 	export let items: Item[] = [];
@@ -37,7 +37,7 @@
 	export let open = false;
 
 	/** Specifies a custom class name for the outer combobox container. */
-	let className = "";
+	let className = '';
 	export { className as class };
 
 	/** Obtains a bound DOM reference to the ComboBox's value input element. */
@@ -56,20 +56,20 @@
 	export let buttonElement: HTMLButtonElement = null;
 
 	const forwardEvents = createEventForwarder(get_current_component(), [
-		"open",
-		"close",
-		"select",
-		"change",
-		"input",
-		"beforeinput",
-		"keydown"
+		'open',
+		'close',
+		'select',
+		'change',
+		'input',
+		'beforeinput',
+		'keydown',
 	]);
 	const dispatch = createEventDispatcher();
-	const buttonId = uid("fds-combo-box-button-");
-	const dropdownId = uid("fds-combo-box-dropdown-");
+	const buttonId = uid('fds-combo-box-button-');
+	const dropdownId = uid('fds-combo-box-dropdown-');
 
-	$: selectableItems = items.filter(item => !item.disabled);
-	$: selection = items.find(i => i.value === value);
+	$: selectableItems = items.filter((item) => !item.disabled);
+	$: selection = items.find((i) => i.value === value);
 	$: if (menuElement && menuElement.children.length > 0 && !editable) {
 		if (selection) {
 			(<HTMLLIElement>menuElement.children[items.indexOf(selection)]).focus();
@@ -79,18 +79,18 @@
 	}
 	$: if (items.length > 0) {
 		if (open) {
-			dispatch("open");
+			dispatch('open');
 		} else {
-			dispatch("close");
+			dispatch('close');
 		}
 	}
-	$: dispatch("select", selection);
+	$: dispatch('select', selection);
 	$: menuGrowDirection =
 		!selection || items[items.indexOf(selection)] === items[Math.floor(items.length / 2)]
-			? "center"
+			? 'center'
 			: items.indexOf(selection) < items.indexOf(items[Math.floor(items.length / 2)])
-			? "top"
-			: "bottom";
+			? 'top'
+			: 'bottom';
 
 	let inputFocused = false;
 	let itemHeight = 36;
@@ -136,26 +136,22 @@
 		const editableClosed = editable && !open;
 
 		// Conditions for closing the menu.
-		if (key === "Tab" || key === "Esc" || key === "Escape") open = false;
+		if (key === 'Tab' || key === 'Esc' || key === 'Escape') open = false;
 
 		// Oh boy, here we go...
-		if (
-			key === "ArrowDown" &&
-			!editableClosed &&
-			!(items.indexOf(selection) >= items.length - 1)
-		) {
+		if (key === 'ArrowDown' && !editableClosed && !(items.indexOf(selection) >= items.length - 1)) {
 			value = selectableItems[selectableItems.indexOf(selection) + 1].value; // If down arrow is pressed, check current selection and move to next non-disabled item.
 			searchValue = selectableItems[selectableItems.indexOf(selection) + 1].name;
-		} else if (key === "ArrowUp" && !editableClosed && !(items.indexOf(selection) <= 0)) {
+		} else if (key === 'ArrowUp' && !editableClosed && !(items.indexOf(selection) <= 0)) {
 			value = selectableItems[selectableItems.indexOf(selection) - 1].value; // Do the same with up arrow.
 			searchValue = selectableItems[selectableItems.indexOf(selection) - 1].name;
-		} else if (key === "Home") {
+		} else if (key === 'Home') {
 			value = selectableItems[0].value; // If home is pressed, move to first non-disabled item.
 			searchValue = selectableItems[0].name;
-		} else if (key === "End") {
+		} else if (key === 'End') {
 			value = selectableItems[selectableItems.length - 1].value; // If end is pressed, move to last non-disabled item.
 			searchValue = selectableItems[selectableItems.length - 1].name;
-		} else if (open && (key === "Enter" || key === " ")) {
+		} else if (open && (key === 'Enter' || key === ' ')) {
 			event.preventDefault();
 			selectItem(selection); // Select item when the enter/space key is pressed and the menu is open
 		} else if (searchInputElement && document.activeElement !== searchInputElement) {
@@ -163,11 +159,11 @@
 		}
 
 		// Prevent the browser's default scrolling behavior for these keys
-		if (key === "ArrowDown" || key === "ArrowUp" || key === "Home" || key === "End")
+		if (key === 'ArrowDown' || key === 'ArrowUp' || key === 'Home' || key === 'End')
 			event.preventDefault();
 
 		// Keybindings for opening the menu when in editable mode using arrow keys
-		if (key === "ArrowDown" || (key === "ArrowUp" && editable)) {
+		if (key === 'ArrowDown' || (key === 'ArrowUp' && editable)) {
 			if (open) {
 				await tick();
 				searchInputElement?.select(); // Select text when an item is chosen.
@@ -187,13 +183,13 @@
 	}
 
 	function handleInput(event: InputEvent | CustomEvent) {
-		const match = selectableItems.find(i =>
+		const match = selectableItems.find((i) =>
 			i.name.toLowerCase().startsWith(searchValue.toLowerCase())
 		);
 
 		if (!match) value = null;
 
-		if (match && (<InputEvent>event).inputType === "insertText" && searchValue.trim() !== "") {
+		if (match && (<InputEvent>event).inputType === 'insertText' && searchValue.trim() !== '') {
 			searchInputElement.value = match.name;
 			searchInputElement.setSelectionRange(searchValue.length, match.name.length);
 		}
@@ -221,7 +217,7 @@ When the combo box is closed, it either displays the current selection or is emp
 -->
 <div
 	use:forwardEvents
-	use:externalMouseEvents={{ type: "mousedown" }}
+	use:externalMouseEvents={{ type: 'mousedown' }}
 	class="combo-box {className}"
 	class:disabled
 	class:editable
@@ -241,7 +237,7 @@ When the combo box is closed, it either displays the current selection or is emp
 			aria-autocomplete="both"
 			aria-controls={dropdownId}
 			aria-expanded={open}
-			aria-haspopup={open ? "listbox" : undefined}
+			aria-haspopup={open ? 'listbox' : undefined}
 			bind:value={searchValue}
 			bind:inputElement={searchInputElement}
 			on:keydown={handleKeyboardNavigation}
@@ -285,7 +281,7 @@ When the combo box is closed, it either displays the current selection or is emp
 			class="combo-box-button"
 			id={buttonId}
 			aria-labelledby={buttonId}
-			aria-haspopup={open ? "listbox" : undefined}
+			aria-haspopup={open ? 'listbox' : undefined}
 			aria-controls={dropdownId}
 			on:keydown={handleKeyboardNavigation}
 			on:keydown
@@ -322,9 +318,7 @@ When the combo box is closed, it either displays the current selection or is emp
 					? undefined
 					: `${dropdownId}-item-${items.indexOf(selection)}`}
 				role="listbox"
-				class="combo-box-dropdown direction-{!editable
-					? menuGrowDirection ?? 'center'
-					: 'top'}"
+				class="combo-box-dropdown direction-{!editable ? menuGrowDirection ?? 'center' : 'top'}"
 				style="--fds-menu-offset: {menuOffset}px;"
 			>
 				{#each items as item, i}
@@ -356,7 +350,7 @@ When the combo box is closed, it either displays the current selection or is emp
 </div>
 
 <style lang="scss">
-	@use "fluent-svelte/ComboBox/ComboBox";
+	@use 'fluent-svelte/ComboBox/ComboBox';
 	.combo-box-dropdown {
 		max-height: 180px;
 	}

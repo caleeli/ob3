@@ -77,7 +77,7 @@
 	function clickHeader(
 		header: any,
 		header_index: number,
-		e: MouseEvent & { currentTarget: EventTarget & HTMLTableHeaderCellElement }
+		e: MouseEvent & { currentTarget: EventTarget }
 	) {
 		if (isEditMode) {
 			// check if ctrl is pressed
@@ -266,7 +266,7 @@
 				control: 'TextArea',
 				label: 'Query',
 				name: '$query',
-				getter(field: string | undefined) {
+				getter() {
 					const query = store.getMeta().query;
 					const params = { ...store.getMeta().params };
 					const keys = Object.keys(params);
@@ -278,7 +278,7 @@
 						params,
 					});
 				},
-				setter(field: string | undefined, value: any) {
+				setter() {
 					return;
 				},
 			},
@@ -299,7 +299,9 @@
 				control: 'Button',
 				label: 'Run Query',
 				variant: 'standard',
-				async action() {},
+				async action() {
+					// do nothing
+				},
 			},
 		],
 		[

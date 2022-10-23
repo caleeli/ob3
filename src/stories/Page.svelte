@@ -13,6 +13,5 @@
 />
 
 {#if user}
-  <p>Hello, {user.name}</p>
-{:else}
+	<p>Hello, {user.name}</p>
 {/if}

@@ -163,8 +163,7 @@
 			sort: JSONApiSortHandler,
 		},
 	});
-	let toolbar: CrudAction[] = [
-	];
+	let toolbar: CrudAction[] = [];
 </script>
 
 <Crud {config} {store} {toolbar} />

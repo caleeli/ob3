@@ -39,7 +39,7 @@
 			label,
 			children,
 			selected: false,
-			open: !Boolean(currentRow.attributes?.text),
+			open: !currentRow.attributes?.text,
 			icon,
 			color: children.length ? 'orangered' : 'steelblue',
 			data: currentRow,
