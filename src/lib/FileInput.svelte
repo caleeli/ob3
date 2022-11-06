@@ -1,10 +1,15 @@
 <script lang="ts">
 	import { translation as __ } from '../lib/translations';
+	import type ApiStore from './ApiStore';
 	import Icon from './Icon.svelte';
 	export let name = '';
 	export let placeholder = '';
 	export let label = '';
+	export let multiple = false;
+	export let value: { filename: any } | null = null;
+	export let store: ApiStore;
 	let hoverButton = false;
+	let error = '';
 
 	function hover(
 		event:
@@ -26,6 +31,22 @@
 			hoverButton = false;
 		}
 	}
+	async function loadFile(event: { target: { files: File[] } } | any) {
+		if (multiple) {
+			// store.postFiles(event.target.files);
+		} else {
+			if (!event.target.files[0]) {
+				return;
+			}
+			try {
+				error = '';
+				const file = await store.postFile(event.target.files[0]);
+				value = file.attributes;
+			} catch (e: any | Error) {
+				error = e.message;
+			}
+		}
+	}
 </script>
 
 <div>
@@ -38,8 +59,14 @@
 			type="file"
 			on:mousemove={hover}
 			on:mouseleave={() => (hoverButton = false)}
+			on:change={loadFile}
 		/>
-		<input class="text-box" {placeholder} type="text" />
+		<input
+			class={`text-box ${error ? 'error' : ''}`}
+			{placeholder}
+			type="text"
+			value={error || (value && value.filename ? value.filename : '')}
+		/>
 		<div class="text-box-underline" />
 		<div class="text-box-buttons">
 			<button class="text-box-button" type="button" aria-label={__('Browse')}>
@@ -150,5 +177,8 @@
 	}
 	.text-box-file {
 		opacity: 0;
+	}
+	.error {
+		color: var(--fds-system-critical) !important;
 	}
 </style>

@@ -1,3 +1,4 @@
+import ApiStore from '../lib/ApiStore';
 import FileInput from '../lib/FileInput.svelte';
 
 export default {
@@ -24,4 +25,7 @@ SimpleUpload.args = {
 	label: 'Upload file',
 	name: 'upload',
 	placeholder: 'Select a file',
+	store: new ApiStore({
+		url: 'upload',
+	}),
 };

@@ -1,6 +1,7 @@
 import type StoreInterface from './StoreInterface';
 import { get, set } from 'lodash';
 import { login } from '../store';
+import BaseStore from './BaseStore';
 const backend_base = import.meta.env.VITE_BACKEND_URL;
 
 let headers = {
@@ -16,25 +17,19 @@ login.subscribe((data: { attributes: any; relationships: { token: string } } | n
 	}
 });
 
-class ApiStore implements StoreInterface {
+class ApiStore extends BaseStore implements StoreInterface {
 	private array: any[] = [];
 	private meta: any;
-	public offset = 0;
 	public limit = 10;
 	public searchValue = '';
-	public sortBy: { field: string; direction: 'asc' | 'desc' }[] = [];
-	private listeners: ((data: any[]) => void)[] = [];
 
 	constructor(
 		public config: { url: string; root?: string; query?: any; limit?: number; currentId?: any }
-	) {}
-	async refresh(): Promise<any> {
-		const data = await this.get(0);
-		this.listeners.forEach((callback: (arg0: any[]) => any) => callback(data));
-		return data;
-	}
-	onrefresh(callback: (data: any[]) => void): void {
-		this.listeners.push(callback);
+	) {
+		super();
+		if (config.root === undefined) {
+			config.root = 'data';
+		}
 	}
 	async create(record: any): Promise<any> {
 		const url = new URL(this.config.url, backend_base);
@@ -118,6 +113,9 @@ class ApiStore implements StoreInterface {
 		if (this.config.root) {
 			this.meta = get(response_json, 'meta');
 			this.array = get(response_json, this.config.root);
+		} else {
+			this.meta = {};
+			this.array = response_json;
 		}
 		return this.array;
 	}
@@ -173,6 +171,25 @@ class ApiStore implements StoreInterface {
 	}
 	getMeta() {
 		return this.meta;
+	}
+	async postFile(file: File, params?: any): Promise<any> {
+		const url = new URL(this.config.url, backend_base);
+		const formData = new FormData();
+		formData.append('file', file);
+		// formData.append('data[attributes][file]', 'file');
+		const response = await fetch(url.toString(), {
+			method: 'POST',
+			body: formData,
+		});
+		if (!(response.status >= 200 && response.status < 300)) {
+			const json = await response.json();
+			throw new Error(json.error || response.statusText);
+		}
+		let result = await response.json();
+		if (this.config.root) {
+			result = get(result, this.config.root);
+		}
+		return result;
 	}
 }
 
