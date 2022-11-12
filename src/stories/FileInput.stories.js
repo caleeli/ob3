@@ -15,8 +15,7 @@ export default {
 const Template = (args) => ({
 	Component: FileInput,
 	props: args,
-	on: {
-	},
+	on: {},
 });
 
 // More on args: https://storybook.js.org/docs/svelte/writing-stories/args

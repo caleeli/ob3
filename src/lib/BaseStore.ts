@@ -1,6 +1,4 @@
-
 abstract class BaseStore {
-
 	public offset = 0;
 	public sortBy: { field: string; direction: 'asc' | 'desc' }[] = [];
 	protected listeners: ((data: any[]) => void)[] = [];

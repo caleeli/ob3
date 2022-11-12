@@ -12,15 +12,10 @@ module.exports = {
 			name: '@storybook/addon-coverage',
 			options: {
 				istanbul: {
-					include: [
-						'src/**/*.svelte',
-						'src/**/*.js',
-						'src/**/*.ts',
-						"**/stories/**"
-					]
-				}
-			}
-		}
+					include: ['src/**/*.svelte', 'src/**/*.js', 'src/**/*.ts', '**/stories/**'],
+				},
+			},
+		},
 	],
 	framework: '@storybook/svelte',
 	core: {
@@ -36,14 +31,14 @@ module.exports = {
 		return mergeConfig(config, {
 			// customize the Vite config here
 			build: {
-				sourcemap: true
+				sourcemap: true,
 			},
 			plugins: [
 				istanbul({
 					exclude: constants.defaultExclude,
-					extension: constants.defaultExtensions
-				})
-			]
+					extension: constants.defaultExtensions,
+				}),
+			],
 		});
 	},
 };
