@@ -12,7 +12,7 @@ export default {
 		return content.map((row) => row.map((field: any) => new FormField(field)));
 	},
 
-	data(_config: any): any {
+	data(): any {
 		return {};
 	},
 

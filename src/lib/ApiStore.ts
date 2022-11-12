@@ -172,11 +172,10 @@ class ApiStore extends BaseStore implements StoreInterface {
 	getMeta() {
 		return this.meta;
 	}
-	async postFile(file: File, params?: any): Promise<any> {
+	async postFile(file: File): Promise<any> {
 		const url = new URL(this.config.url, backend_base);
 		const formData = new FormData();
 		formData.append('file', file);
-		// formData.append('data[attributes][file]', 'file');
 		const response = await fetch(url.toString(), {
 			method: 'POST',
 			body: formData,
