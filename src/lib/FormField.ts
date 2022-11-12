@@ -16,16 +16,16 @@ class FormField {
 		| 'month'
 		| 'time'
 		| 'week' = 'text';
-	public name? = '';
-	public label? = '';
-	public placeholder? = '';
+	public name?= '';
+	public label?= '';
+	public placeholder?= '';
 	public variant?: 'standard' | 'accent' | 'hyperlink';
 	public options?: {
 		value: any;
 		name: string;
 		disabled?: boolean;
 	}[];
-	public editable? = false;
+	public editable?= false;
 	public rows?: number;
 	public action?: (() => Promise<void>) | ((value?: any) => Promise<void>);
 	public store?: StoreInterface | ApiStore;
@@ -38,5 +38,9 @@ class FormField {
 	// internal properties
 	public actionInProgress?: boolean = false;
 	public searchValue?: string = '';
+
+	constructor(field: any) {
+		Object.assign(this, field);
+	}
 }
 export default FormField;

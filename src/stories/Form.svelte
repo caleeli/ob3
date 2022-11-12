@@ -393,8 +393,7 @@
 							bind:value={accessor[getName(cell)]}
 						/>
 					</div>
-				{/if}
-				{#if cell.control === 'TextArea' && cell.name}
+				{:else if cell.control === 'TextArea' && cell.name}
 					<div
 						class={isEditMode ? 'editable' : ''}
 						on:click={(event) => editControl(event, cell)}
@@ -411,8 +410,7 @@
 							bind:value={accessor[getName(cell)]}
 						/>
 					</div>
-				{/if}
-				{#if cell.control === 'Checkbox'}
+				{:else if cell.control === 'Checkbox'}
 					<div
 						class={isEditMode ? 'editable' : ''}
 						on:click={(event) => editControl(event, cell)}
@@ -422,8 +420,7 @@
 							{__(cell.label || '')}
 						</Checkbox>
 					</div>
-				{/if}
-				{#if cell.control === 'ComboBox' && cell.name}
+				{:else if cell.control === 'ComboBox' && cell.name}
 					<div
 						class={isEditMode ? 'editable' : ''}
 						on:click={(event) => editControl(event, cell)}
@@ -447,8 +444,7 @@
 							}}
 						/>
 					</div>
-				{/if}
-				{#if cell.control === 'Button'}
+				{:else if cell.control === 'Button'}
 					<Button
 						variant={cell.variant || 'standard'}
 						on:click={() => buttonAction(cell)}
@@ -456,14 +452,11 @@
 					>
 						{__(cell.label)}
 					</Button>
-				{/if}
-				{#if cell.control === 'Avatar' && cell.name}
+				{:else if cell.control === 'Avatar' && cell.name}
 					<PersonPicture size={64} src={accessor[getName(cell)]} />
-				{/if}
-				{#if cell.control === 'Header'}
+				{:else if cell.control === 'Header'}
 					<h3>{__(cell.label)}</h3>
-				{/if}
-				{#if cell.control === 'Empty'}
+				{:else if cell.control === 'Empty'}
 					<div>&nbsp;</div>
 				{/if}
 			{/each}

@@ -1,25 +1,19 @@
 import type StoreInterface from './StoreInterface';
 import { get } from 'lodash';
+import BaseStore from './BaseStore';
 
-class ArrayStore implements StoreInterface {
-	constructor(private array: any[]) {}
+class ArrayStore extends BaseStore implements StoreInterface {
+	constructor(private array: any[]) {
+		super();
+	}
 	getMeta() {
 		return {};
 	}
 	show(id: string | number, params?: any): Promise<any[]> {
-		throw new Error('Method not implemented.', params);
-	}
-	setSort(sort: { field: string; direction: 'asc' | 'desc' }[]): void {
-		console.warn('Method not implemented.', sort);
+		throw new Error('Method "show" not implemented.', params);
 	}
 	delete(id: string | number): Promise<any> {
-		throw new Error('Method not implemented.', id);
-	}
-	onrefresh(callback: (data: any[]) => void): void {
-		console.warn('Method not implemented.', callback);
-	}
-	refresh(): Promise<any> {
-		throw new Error('Method not implemented.');
+		throw new Error('Method "delete" not implemented.', id);
 	}
 	create(record: any): Promise<any> {
 		throw new Error('Method not implemented.', record);

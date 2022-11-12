@@ -491,7 +491,7 @@
 			editConfigData = tool;
 			return;
 		}
-		dispatch('toolbar', { tool, selected: config.multiSelect ? selected : selected[0] });
+		dispatch('toolbar', { tool, selected: config.multiSelect ? selected : selected[0], store });
 	}
 	// e.g. auditoriaRevision/${selected.id}
 	function href(tool: CrudAction, selected: any[]) {

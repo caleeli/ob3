@@ -1,6 +1,6 @@
 <?php
 
-$path = $argv[1] ?? 'auditoriaListaOperaciones.var';
+$path = $argv[1] ?? 'auditoriaListaOperaciones';
 
 class Result
 {
@@ -16,7 +16,7 @@ class Parser
 
     private $path;
     protected $props = [];
-    public $result = new Result;
+    public $result = null;
 
     protected function __construct($path, $props, Result $result)
     {
@@ -25,12 +25,13 @@ class Parser
         $this->result = $result;
     }
 
-    public static function fromFile($path, Result $result = new Result): Parser
+    public static function fromFile($path): Parser
     {
-        $props = eval('return ' . file_get_contents(self::base . $path) . ';');
+        $result = new Result();
+        $props = eval('return ' . file_get_contents(self::base . $path . '.var') . ';');
         $template = $props['_template'];
         $class = preg_replace('/\W/', '', $template);
-        return $class($path, $props, $result);
+        return new $class($path, $props, $result);
     }
 
     public function get($key)
@@ -38,34 +39,103 @@ class Parser
         return $this->props[$key];
     }
 
-    public function parse(): Result
+    public function parse()
     {
         return $this->result;
+    }
+
+    protected function parseStore()
+    {
+        return [];
     }
 }
 
 class tpl_H11 extends Parser
 {
-    public function parse(): Result
+    public function parse()
     {
         $form = Parser::fromFile($this->get('regionA1'));
         $grid = Parser::fromFile($this->get('regionA2'));
-        $this->result->form = $form->parse();
-        $this->result->grid = $grid->parse();
-        return $this->result;
+        return [
+            [$form->parse()],
+            [$grid->parse()],
+        ];
     }
 }
 
-class ide_form
+class ide_form extends Parser
 {
-    public function parse(): Result
+    public function parse()
     {
+        $title = $this->get('title');
+        $store = $this->parseStore();
         $fieldset = Parser::fromFile($this->get('regionA1'));
-        // $result->formStore = $this->get('store');
-        return $fieldset->parse();
+        return [
+            'component' => 'Form',
+            'name' => $this->get('_name'),
+            'title' => $title,
+            'content' => $fieldset->parse(),
+            'store' => $store,
+        ];
     }
 }
 
-$result = new Result;
-$parser = Parser::fromFile($path, $result);`
-echo json_encode($parser->parse(), JSON_PRETTY_PRINT);
+class ide_grilla extends Parser
+{
+    public function parse()
+    {
+        $fields = explode("\n", $this->get('fields'));
+        $headers = [];
+        foreach ($fields as $i => $field) {
+            $headers[$i] = [
+                'field' => $field,
+                'value' => 'attributes.' . $field,
+            ];
+        }
+        $columns = explode("\n", $this->get('columns'));
+        foreach ($columns as $i => $column) {
+            $column = explode(',', $column);
+            $headers[$i] = [
+                'label' => $column[0],
+                // 'width' => $column[1],
+                'align' => $column[2] ?? 'left',
+            ];
+        }
+        return [
+            'component' => 'Grid',
+            'config' => [
+                'headers' => $headers,
+            ],
+            'store' => $this->parseStore(),
+        ];
+    }
+}
+
+class ide_fieldset extends Parser
+{
+    const controls = [
+        'textfield' => 'TextBox',
+        'object' => 'ComboBox',
+    ];
+
+    public function parse()
+    {
+        $fields = explode("\n", $this->get('fields'));
+        $result = [];
+        foreach ($fields as $i => $field) {
+            $field = explode(',', $field);
+            $control = self::controls[$field[2] ?? 'textfield'];
+            $result[$i] = [[
+                'control' => $control,
+                'name' => "attributes." . $field[0],
+                'label' => $field[1],
+                'placeholder' => "",
+            ]];
+        }
+        return $result;
+    }
+}
+
+$parser = Parser::fromFile($path);
+$result = $parser->result;
+echo json_encode($parser->parse(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);

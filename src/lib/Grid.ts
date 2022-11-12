@@ -66,6 +66,7 @@ class Grid {
 	}
 
 	public async loadFromData(data: any[]) {
+		console.log('entro');
 		this.data.splice(0);
 		this.cleanCells();
 		this.hydrate(data);

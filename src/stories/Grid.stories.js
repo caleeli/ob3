@@ -109,6 +109,14 @@ FromApi.args = {
 	store: new ApiStore({
 		url: 'https://random-data-api.com/api/users/random_user?size=5',
 	}),
+	toolbar: [
+		// @todo
+		// {
+		// 	label: 'Refresh',
+		// 	icon: 'refresh',
+		// 	action: ({ store }) => { console.log(store); store.refresh()},
+		// },
+	],
 };
 
 export const PokemonApi = Template.bind({});

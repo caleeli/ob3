@@ -2,7 +2,7 @@
 	import icons from '../lib/icons';
 
 	export let icon: string;
-	export let color: string;
+	export let color: string = 'currentColor';
 
 	let fluent_icons: { [key: string]: string } = {
 		undefined: 'home',
