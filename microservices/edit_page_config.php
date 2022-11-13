@@ -4,7 +4,7 @@ global $_PATH;
 
 if ($_SERVER['REQUEST_METHOD']==='POST') {
     $name = $_POST['id'];
-    $configFile = __DIR__ . '/../src/routes/' . $name . '.json';
+    $configFile = __DIR__ . '/../src/routes/' . $name . '/config.json';
     $codeFile = __DIR__ . '/../src/routes/' . $name . '.svelte';
     $config = json_encode($_POST['data'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     $code = <<<CODE
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
 
 if ($_SERVER['REQUEST_METHOD']==='PUT') {
     $id = $_PATH[1];
-    $configFile = __DIR__ . '/../src/routes/' . $_PATH[1] . '/' . $_PATH[1] . '.json';
+    $configFile = __DIR__ . '/../src/routes/' . $_PATH[1] . '/config.json';
     $config = json_encode($_POST['data'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     file_put_contents($configFile, $config);
 }

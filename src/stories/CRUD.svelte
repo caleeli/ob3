@@ -3,7 +3,7 @@
 	import type GridConfig from '../lib/GridConfig';
 	import type StoreInterface from '../lib/StoreInterface';
 	import Form from './Form.svelte';
-	import Grid from './Grid.svelte';
+	import Grid from '../lib/Grid.svelte';
 	import { translation as __ } from '../lib/translations';
 	import type CrudAction from '../lib/CrudAction';
 	import type ConfigStore from '../lib/ConfigStore';

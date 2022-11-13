@@ -1,18 +1,18 @@
 <script lang="ts">
 	import type GridConfig from 'src/lib/GridConfig';
-	import Grid from '../lib/Grid';
+	import Grid from './Grid';
 	import '../lib/icons/FluentSystemIcons-Regular.css';
 	import { Button } from 'fluent-svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { edit_mode } from '../store';
-	import type StoreInterface from '../lib/StoreInterface';
-	import Visibility from '../lib/Visibility.svelte';
-	import EditProperties from '../lib/EditProperties.svelte';
-	import type FormField from '../lib/FormField';
-	import type ConfigStore from '../lib/ConfigStore';
-	import type ApiStore from '../lib/ApiStore';
-	import type CrudAction from '../lib/CrudAction';
-	import { translation as __ } from '../lib/translations';
+	import type StoreInterface from './StoreInterface';
+	import Visibility from './Visibility.svelte';
+	import EditProperties from './EditProperties.svelte';
+	import type FormField from './FormField';
+	import type ConfigStore from './ConfigStore';
+	import type ApiStore from './ApiStore';
+	import type CrudAction from './CrudAction';
+	import { translation as __ } from './translations';
 	import { format } from 'sql-formatter';
 
 	const dispatch = createEventDispatcher();
@@ -267,8 +267,9 @@
 				label: 'Query',
 				name: '$query',
 				getter() {
-					const query = store.getMeta().query;
-					const params = { ...store.getMeta().params };
+					const meta = store.getMeta();
+					const query = meta ? meta.query : "";
+					const params = meta ? { ...meta.params } : {};
 					const keys = Object.keys(params);
 					keys.forEach((key) => {
 						params[key] = JSON.stringify(params[key]);
@@ -612,24 +613,30 @@
 			{/each}
 		{/if}
 	</tbody>
+	<tfoot>
+		<tr>
+			<td colspan={config.headers.length}>
+				{#if grid.error}
+					<div class="error">{grid.error}</div>
+				{/if}
+				
+				<Visibility
+					steps={100}
+					let:percent
+					let:unobserve
+					let:intersectionObserverSupport
+					on:complete={loadNextPage}
+				>
+					{#if !intersectionObserverSupport}
+						<div />
+					{:else}
+						<div>...</div>
+					{/if}
+				</Visibility>
+			</td>
+		</tr>
+	</tfoot>
 </table>
-{#if grid.error}
-	<div class="error">{grid.error}</div>
-{/if}
-
-<Visibility
-	steps={100}
-	let:percent
-	let:unobserve
-	let:intersectionObserverSupport
-	on:complete={loadNextPage}
->
-	{#if !intersectionObserverSupport}
-		<div />
-	{:else}
-		<div>...</div>
-	{/if}
-</Visibility>
 
 <style>
 	table {

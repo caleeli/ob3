@@ -7,15 +7,16 @@ class ConfigStore {
 	constructor(private id: string, private config: any) {
 		this.store = new ApiStore({
 			url: 'edit_page_config',
+			root: 'data',
 		});
 	}
 
 	async save(): Promise<any> {
-		return this.store.update(this.id, { data: this.config });
+		return this.store.update(this.id, this.config);
 	}
 
 	async create(): Promise<any> {
-		return this.store.create({ id: this.id, data: this.config });
+		return this.store.create(this.config);
 	}
 
 	getModelMeta(model: string): Promise<any> {

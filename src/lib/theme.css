@@ -388,3 +388,25 @@
 		--active-window-shadow: 0px 32px 64px hsla(0, 0%, 0%, 0.56), 0px 2px 21px hsla(0, 0%, 0%, 0.55);
 	}
 }
+
+/* Grid system */
+.row {
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: row;
+}
+.column {
+	display: flex;
+	flex-direction: column;
+}
+.cell {
+	display: flex;
+	flex-direction: row;
+	flex-grow: 1;
+}
+.cell > div {
+	flex-grow: 1;
+}
+.cell > table {
+	flex-grow: 1;
+}

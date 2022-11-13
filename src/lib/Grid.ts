@@ -18,14 +18,16 @@ class Grid {
 		this.sortBy = this.config.headers
 			.filter((header: any) => header.groupRows || header.sorted)
 			.map((header: any) => ({ field: header.field, direction: header.sorted || 'asc' }));
-		this.config.sort.forEach((sortConfig: { field: string; direction: 'asc' | 'desc' }) => {
-			const col = this.sortBy.find((col): boolean => col.field === sortConfig.field);
-			if (col) {
-				col.direction = sortConfig.direction;
-			} else {
-				this.sortBy.push({ field: sortConfig.field, direction: sortConfig.direction });
-			}
-		});
+		if (this.config.sort) {
+			this.config.sort.forEach((sortConfig: { field: string; direction: 'asc' | 'desc' }) => {
+				const col = this.sortBy.find((col): boolean => col.field === sortConfig.field);
+				if (col) {
+					col.direction = sortConfig.direction;
+				} else {
+					this.sortBy.push({ field: sortConfig.field, direction: sortConfig.direction });
+				}
+			});
+		}
 		store.setSort(this.sortBy);
 	}
 

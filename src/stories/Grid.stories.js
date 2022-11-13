@@ -1,6 +1,6 @@
 import ApiStore, { JSONApiSortHandler } from '../lib/ApiStore';
 import ArrayStore from '../lib/ArrayStore';
-import Grid from './Grid.svelte';
+import Grid from '../lib/Grid.svelte';
 
 export default {
 	title: 'Example/Grid',

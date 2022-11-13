@@ -12,12 +12,20 @@ class GridConfig {
 		class?: string;
 		groupRows?: boolean;
 	}[] = [];
-	public sort: {
+	public sort?: {
 		field: string;
 		direction: 'asc' | 'desc';
 	}[] = [];
 	public multiSelect? = false;
 	public onselect?: string;
+
+	// Constructor
+	constructor(config: any) {
+		this.headers = config.headers;
+		this.sort = config.sort;
+		this.multiSelect = config.multiSelect;
+		this.onselect = config.onselect;
+	}
 }
 
 export default GridConfig;

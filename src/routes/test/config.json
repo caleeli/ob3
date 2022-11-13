@@ -1,0 +1,51 @@
+{
+    "grid_10": {
+        "headers": [
+            {
+                "label": "Acciones",
+                "value": "[\"ver\"]",
+                "control": "actions",
+                "align": "center"
+            },
+            {
+                "label": " Asignación",
+                "value": "asignacion",
+                "sortable": true,
+                "field": "asignacion",
+                "align": "left"
+            },
+            {
+                "label": "Codigo Documento",
+                "value": "codigo_documento",
+                "sortable": true,
+                "field": "codigo_documento",
+                "align": "left"
+            },
+            {
+                "label": " Modalidad",
+                "value": "modalidad",
+                "sortable": true,
+                "field": "modalidad",
+                "align": "left"
+            },
+            {
+                "label": " Fecha del documento",
+                "value": "fecha_del_documento",
+                "sortable": true,
+                "field": "fecha_del_documento",
+                "align": "left"
+            },
+            {
+                "label": " Estado",
+                "value": "estado",
+                "sortable": true,
+                "field": "estado",
+                "align": "left"
+            }
+        ]
+    },
+    "gridStore_10": {
+        "url": "users",
+        "root": "data"
+    }
+}
