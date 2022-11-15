@@ -7,9 +7,9 @@ if (!isset($_POST['data'])) {
     throw new Exception('Missing data');
 }
 
-$name = 'test';
-
 $data = $_POST['data'];
+$name = $data['attributes']['name'] ?? 'test';
+$selected = $data['attributes']['selected'] ?? [];
 $filepath = $_ENV['STORAGE_PATH'] . '/' . $data['attributes']['filename'];
 $balsamic = new Balsamic($filepath, $name);
 $folder = $_ENV['FRONTEND_PAGES_PATH'] . '/' . $name;
@@ -19,4 +19,4 @@ if (!file_exists($folder)) {
 }
 // create file
 $filename = $folder . '/+page.svelte';
-$balsamic->toSvelte($filename);
+$balsamic->toSvelte($filename, $selected);

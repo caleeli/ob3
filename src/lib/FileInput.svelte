@@ -2,6 +2,9 @@
 	import { translation as __ } from '../lib/translations';
 	import type ApiStore from './ApiStore';
 	import Icon from './Icon.svelte';
+	import { createEventDispatcher } from 'svelte';
+
+	const dispatch = createEventDispatcher();
 	export let name = '';
 	export let placeholder = '';
 	export let label = '';
@@ -42,6 +45,8 @@
 				error = '';
 				const file = await store.postFile(event.target.files[0]);
 				value = file.attributes;
+				// dispatch event change
+				dispatch("change", value);
 			} catch (e: any | Error) {
 				error = e.message;
 			}

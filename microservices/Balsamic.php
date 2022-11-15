@@ -2,8 +2,17 @@
 
 class Balsamic
 {
+    private $resources = [];
     private $configPage;
     private $name;
+    private $layoutLeft = 0; // 100;
+    private $layoutTop = 0; // 116;
+    private $handlers = [];
+
+    /**
+     * @var DOMElement
+     */
+    private $popup;
 
     public function __construct($sqlite_file, $name)
     {
@@ -12,23 +21,56 @@ class Balsamic
         $this->preview = false;
         $this->withLayout = false;
         $this->windowWidth = 1182;
-        $this->layoutLeft = 100;
-        $this->layoutTop = 116;
         // open sqlite file and set utf8 encoding
         $this->connection = new PDO('sqlite:' . $sqlite_file);
         $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
-    public function toSvelte($filename)
+    public function getWireframesList()
+    {
+        $statement = $this->connection->prepare('SELECT * FROM RESOURCES');
+        $statement->execute();
+        $resources = $statement->fetchAll(PDO::FETCH_ASSOC);
+        $wireframes = [];
+        foreach ($resources as $resource) {
+            $id = $resource['ID'];
+            $branch = $resource['BRANCHID'];
+            $attributes = json_decode($resource['ATTRIBUTES'], true);
+            // skip trashed
+            if ($attributes['trashed']) {
+                continue;
+            }
+            if ($attributes['kind'] === 'mockup') {
+                $wireframes[] = [
+                    'id' => $id,
+                    'branch' => $branch,
+                    'name' => $attributes['name'],
+                    'order' => $attributes['order'],
+                ];
+            }
+        }
+        // sort by order
+        usort($wireframes, function ($a, $b) {
+            return $a['order'] > $b['order'];
+        });
+        return $wireframes;
+    }
+
+    public function toSvelte($filename, array $selected)
     {
         $this->preview = true;
         ob_start();
-        $this->printSvelteScreen();
+        $this->printSvelteScreen($selected);
         $svelteScreen = ob_get_clean();
         // save configPage.json
         $configPage = $this->getConfigPage();
         $configPageFilename = dirname($filename) . '/config.json';
         file_put_contents($configPageFilename, json_encode($configPage, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        // create default empty handler.ts
+        $handlerFilename = dirname($filename) . '/handler.ts';
+        if (!file_exists($handlerFilename)) {
+            file_put_contents($handlerFilename, 'export default function handler(action: string, data: any) { console.log(action, data); }');
+        }
         // save page.svelte
         file_put_contents($filename, $svelteScreen);
         // run prettier at $_ENV['FRONTEND_HOME'];
@@ -63,12 +105,13 @@ class Balsamic
         exec("$filenameRun");
     }
 
-    public function printSvelteScreen()
+    public function printSvelteScreen(array $selected)
     {
         // Select all the rows in the RESOURCES table
         $statement = $this->connection->prepare('SELECT * FROM RESOURCES');
         $statement->execute();
         $resources = $statement->fetchAll(PDO::FETCH_ASSOC);
+        $this->resources = $resources;
 
         $svelteScreen = new DOMDocument();
         // Add <script lang="ts"> to the document
@@ -79,20 +122,24 @@ class Balsamic
         // Config Object
         $this->configPage = new StdClass;
 
+        $isPopup = false;
         foreach ($resources as $resource) {
+            if ($selected && !in_array($resource['ID'], $selected)) {
+                continue;
+            }
             $id = $resource['ID'];
-            $branch = $resource['BRANCHID'];
-            $attributes = json_decode($resource['ATTRIBUTES']);
+            $attributes = json_decode($resource['ATTRIBUTES'], true);
+            $name = $attributes['name'];
             $data = $resource['DATA'];
             if (substr($data, 0, 1) == '{') {
                 $data = json_decode($data, true);
             }
 
             // Print resource
-            $this->debug($id . ' - ' . $branch . "\n");
+            $this->debug($id . ' - ' . $name . "\n");
             // Add <!-- $id --> to the document
             $svelteScreen->appendChild($svelteScreen->createTextNode("\n"));
-            $comment = $svelteScreen->createComment($id . ' - ' . $branch);
+            $comment = $svelteScreen->createComment($id . ' - ' . $name);
             $svelteScreen->appendChild($comment);
             $svelteScreen->appendChild($svelteScreen->createTextNode("\n"));
 
@@ -102,20 +149,37 @@ class Balsamic
                 $mockup = $data['mockup'];
                 $controls = $mockup['controls'];
                 $controlList = [];
+                $enabled = !$isPopup;
                 foreach ($controls['control'] as $control) {
-                    $controlList[] = $control;
+                    // add reference to resource
+                    $control['resourceID'] = $id;
+                    if ($isPopup && !$enabled) {
+                        if ($control['typeID'] === 'FieldSet') {
+                            $enabled = true;
+                        } else {
+                            continue;
+                        }
+                    }
+                    if (!isset($controlList[$control['ID']])) {
+                        $controlList[$control['ID']] = $control;
+                    }
                 }
-                $controlList = $this->detectHorizontalMerges($controlList);
-                foreach ($controlList as $control) {
-                    $controlType = $control['typeID'];
-                    // debug($controlType . ": " . json_encode($control, JSON_UNESCAPED_UNICODE));
-                }
-                $slots = $this->normalizeSizePosition($controlList);
-                // debug(json_encode($slots, JSON_UNESCAPED_UNICODE));
-                $this->slots2WebComponents($slots, $svelteScreen, $this->configPage);
             }
+
+            $controlList = array_values($controlList);
+            $controlList = $this->detectHorizontalMerges($controlList);
+            foreach ($controlList as $control) {
+                $controlType = $control['typeID'];
+                // debug($controlType . ": " . json_encode($control, JSON_UNESCAPED_UNICODE));
+            }
+            $slots = $this->normalizeSizePosition($controlList);
+            // debug(json_encode($slots, JSON_UNESCAPED_UNICODE));
+            $this->slots2WebComponents($slots, $svelteScreen, $this->configPage);
+
+            // the next resources are popups
+            $isPopup = true;
             // only first resource
-            if ($this->preview) {
+            if (!$selected) {
                 break;
             }
         }
@@ -198,13 +262,14 @@ class Balsamic
     {
         $maxColumns = 2;
         $columnWidth = $this->windowWidth / $maxColumns;
-        $rowHeight = 32;
+        $rowHeight = 24;
         $slots = [[]];
         foreach ($controls as $i => $control) {
             $x = $control['x'] - $this->layoutLeft;
             $y = $control['y'] - $this->layoutTop;
             if ($x < 0 || $y < 0) {
                 // skip controls outside the layout
+                error_log("Control outside the layout: " . json_encode($control));
                 continue;
             }
             $w = $control['w'] ?? $control['measuredW'];
@@ -264,9 +329,16 @@ class Balsamic
 
     public function slots2WebComponents($rows, DomDocument $svelteScreen, $configObject)
     {
+        $this->popup = null;
         foreach ($rows as $row) {
             $divRow = $svelteScreen->createElement('div');
             $divRow->setAttribute('class', 'row');
+            if (!$this->popup) {
+                $root = $svelteScreen;
+            } else {
+                $root = $this->popup;
+            }
+            $root->appendChild($divRow);
             foreach ($row as $column) {
                 $divCol = $svelteScreen->createElement('div');
                 $divCol->setAttribute('class', 'cell');
@@ -279,15 +351,35 @@ class Balsamic
                         $this->$controlType($control, $control['properties'], $divCol, $configObject);
                     } elseif (method_exists($this, $controlTypeFn)) {
                         $this->$controlTypeFn($control, $control['properties'], $divCol, $configObject);
+                    } else {
+                        error_log('Unknown control type: ' . $controlType);
                     }
                     $divCol->appendChild($svelteScreen->createTextNode("\n"));
                 }
             }
-            $svelteScreen->appendChild($divRow);
-            // $svelteScreen->appendChild($svelteScreen->createTextNode("\n"));
+            $root->appendChild($svelteScreen->createTextNode("\n"));
         }
     }
 
+    private function getResourceById($id)
+    {
+        foreach ($this->resources as $resource) {
+            if ($resource['ID'] == $id) {
+                return $resource;
+            }
+        }
+        return null;
+    }
+
+    private function getResourceName($id)
+    {
+        $resource = $this->getResourceById($id);
+        if ($resource) {
+            $attributes = json_decode($resource['ATTRIBUTES'], true);
+            return $attributes['name'];
+        }
+        return null;
+    }
 
     ////
     public function AppBar($controlPosition, $controlProperties, DOMElement $svelteScreen)
@@ -393,22 +485,44 @@ class Balsamic
     public function DataGrid($control, $controlProperties, DOMElement $svelteScreen, $configObject)
     {
         $this->debug($controlProperties);
+        // names and IDs
+        $gridUniqueName = "grid{$control['ID']}";
+        $gridStoreUniqueName = "gridStore{$control['ID']}";
+
         $node = $svelteScreen->ownerDocument->createElement('Grid');
         $svelteScreen->appendChild($node);
         // parse balsamic datagrid properties
         $table = explode("\n", $controlProperties['text']);
         // get headers
         $headers = [];
+        $actionTriggers = [];
         $headersLine = explode(",", $table[0]);
         $firstRow = explode(",", $table[1]);
         foreach ($headersLine as $i => $header) {
             $row = $firstRow[$i];
+            // is sortable?
+            $sortable = preg_match('/\s+\^$|\s+\^v$|\s+v$/', $header, $match) > 0;
+            if ($sortable) {
+                $header = substr($header, 0, -strlen($match[0]));
+            }
+            $header = trim($header);
             $isActions = preg_match('/^Actions|^Acciones/', $header);
             $field = $this->convertLabel2Variable($header);
             if ($isActions) {
                 // parse actions: [action] [action] ...
-                $actions = preg_match_all('/\[(.*?)\]/', $row, $matches);
+                $actions = preg_match_all('/\[(.*?)\](?:\(([\w-]+)\))?/', $row, $matches);
                 $actions = $matches[1];
+                $links = $matches[2];
+                error_log(json_encode($links));
+                foreach ($links as $j => $link) {
+                    $action = $actions[$j];
+                    if ($link) {
+                        $resourceName = $this->getPopupNameFor($link);
+                        $linkHandlerName = $gridUniqueName . ucfirst($this->convertLabel2Variable($link));
+                        $this->addOpenLinkAction($linkHandlerName, $resourceName);
+                        $actionTriggers["on:$action"] = '{(e) => handler("' . $linkHandlerName . '", e.detail)}';
+                    }
+                }
                 $headers[] = [
                     'label' => $header,
                     'value' => json_encode($actions, JSON_UNESCAPED_UNICODE),
@@ -422,14 +536,13 @@ class Balsamic
                     'sortable' => true,
                     'field' => $field,
                     'align' => 'left',
+                    'sortable' => $sortable,
                 ];
             }
         }
         $config = [
             'headers' => $headers,
         ];
-        $gridUniqueName = "grid_{$control['ID']}";
-        $gridStoreUniqueName = "gridStore_{$control['ID']}";
         $configObject->$gridUniqueName = $config;
         $configObject->$gridStoreUniqueName = [
             'url' => 'users',
@@ -438,6 +551,10 @@ class Balsamic
         $node->setAttribute('config', '{new GridConfig(config.' . $gridUniqueName . ')}');
         $node->setAttribute('store', '{new ApiStore(config.' . $gridStoreUniqueName . ')}');
         $node->setAttribute('configStore', '{configStore}');
+        $node->setAttribute('on:action', '{(e) => handler(e.detail.action, e.detail)}');
+        // foreach($actionTriggers as $event => $handler) {
+        //     $node->setAttribute($event, $handler);
+        // }
         // add code to script
         $script = $svelteScreen->ownerDocument->getElementsByTagName('script')->item(0);
         $this->addUniqueScriptCode($script, 'import Grid  from "$lib/Grid.svelte";');
@@ -445,8 +562,65 @@ class Balsamic
         $this->addUniqueScriptCode($script, 'import config from "./config.json";');
         $this->addUniqueScriptCode($script, 'import ConfigStore from "$lib/ConfigStore";');
         $this->addUniqueScriptCode($script, 'import GridConfig from "$lib/GridConfig";');
-
+        $this->addUniqueScriptCode($script, 'import handler from "./handler";');
         $this->addUniqueScriptCode($script, 'let configStore = new ConfigStore("' . $this->name . '", config);');
+    }
+
+    private function addOpenLinkAction($handlerName, $popupName)
+    {
+        $this->handlers[$handlerName] = [
+            'name' => $handlerName,
+            'code' => "openPopup('{$popupName}');",
+        ];
+    }
+
+    private function ComboBox($control, $controlProperties, DOMElement $svelteScreen, $configObject)
+    {
+        // error_log(json_encode($control));
+        $node = $svelteScreen->ownerDocument->createElement('ComboBox');
+        $svelteScreen->appendChild($node);
+        $name = $this->convertLabel2Variable($controlProperties['text']);
+
+        // add code to script
+        $script = $svelteScreen->ownerDocument->getElementsByTagName('script')->item(0);
+        $this->addUniqueScriptCode($script, 'import ComboBox from "$lib/ComboBox.svelte";');
+    }
+
+    private function Label($control, $controlProperties, DOMElement $svelteScreen, $configObject)
+    {
+        // error_log(json_encode($control));
+        $node = $svelteScreen->ownerDocument->createElement('label');
+        $node->nodeValue = $controlProperties['text'];
+        $svelteScreen->appendChild($node);
+    }
+
+    // <ContentDialog bind:open={confirmDelete} title={__('Delete')} size="max">
+    public function FieldSet($control, $controlProperties, DOMElement $div, $configObject)
+    {
+        // error_log(json_encode($control));
+        $node = $div->ownerDocument->createElement('ContentDialog');
+        $label = $controlProperties['text'];
+        $name = $this->getPopupNameFor($control['resourceID']);
+        $node->setAttribute('bind:open', '{' . $name . '.open}');
+        $node->setAttribute('title', '{__(' . json_encode($label, JSON_UNESCAPED_UNICODE) . ')}');
+        $node->setAttribute('size', 'max');
+        $node->appendChild($div->ownerDocument->createTextNode("\n"));
+        $screen = $div->parentNode->parentNode;
+        $screen->appendChild($node);
+        $screen->removeChild($div->parentNode);
+        // add code to script
+        $script = $div->ownerDocument->getElementsByTagName('script')->item(0);
+        $this->addUniqueScriptCode($script, 'import { ContentDialog } from "fluent-svelte";');
+        $this->addUniqueScriptCode($script, 'let ' . $name . ' = {open: false};');
+        // move children to dialog
+        $this->popup = $node;
+    }
+
+    private function getPopupNameFor($resourceID)
+    {
+        $name = $this->getResourceName($resourceID);
+        $name = 'popup' . ucfirst($this->convertLabel2Variable($name));
+        return $name;
     }
 
     public function convertLabel2Variable($label)
@@ -463,6 +637,10 @@ class Balsamic
         $label = preg_replace('/_$/', '', $label);
         // lowercase
         $label = strtolower($label);
+        // camel case
+        $label = preg_replace_callback('/_([a-z])/', function ($matches) {
+            return strtoupper($matches[1]);
+        }, $label);
         return $label;
     }
     public function normalize($string)

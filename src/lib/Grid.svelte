@@ -49,6 +49,7 @@
 		const data = grid.getRowData(row);
 		const tool = toolbar.find((t) => t.action === action);
 		dispatch(action, { tool, selected: data });
+		dispatch("action", { action, tool, selected: data });
 	}
 	async function loadNextPage() {
 		await grid.loadNextPage();
@@ -600,6 +601,7 @@
 										{#each grid.formatted(row, col) as action}
 											<Button variant="hyperlink" on:click={() => doAction(action, row)}>
 												<i class={`icon icon-ic_fluent_${action}_16_regular`} />
+												{__(action)}
 											</Button>
 										{/each}
 									</div>
