@@ -22,27 +22,23 @@
 		url: 'upload_balsamic',
 	})}
 	on:change={(e) => {
-		name = e.detail.upload_name.substring(0, e.detail.upload_name.length - 5);
+		name = ''; //e.detail.upload_name.substring(0, e.detail.upload_name.length - 5);
 		wireframes = e.detail.wireframes;
 	}}
 />
 
-<label for="name">{__('Name')}:</label>
-<TextBox id="name" bind:value={name} placeholder={__('name')} />
-
 <h4>{__('Wireframes')}:</h4>
 {#each wireframes as wireframe}
-	<Checkbox
-		value={wireframe.id}
-		bind:checked={wireframe.selected}
-	>
+	<Checkbox value={wireframe.id} bind:checked={wireframe.selected}>
 		{wireframe.name}
 	</Checkbox>
 	<br />
 {/each}
 
+<label for="name">{__('Name')}:</label>
+<TextBox id="name" bind:value={name} placeholder={__('name')} />
 <Button
-	disabled={!subir_archivo}
+	disabled={!subir_archivo || !name}
 	on:click={() => {
 		new ApiStore({
 			url: 'process_balsamic',

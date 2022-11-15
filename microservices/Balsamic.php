@@ -8,6 +8,7 @@ class Balsamic
     private $layoutLeft = 0; // 100;
     private $layoutTop = 0; // 116;
     private $handlers = [];
+    private $screenData = [];
 
     /**
      * @var DOMElement
@@ -62,9 +63,15 @@ class Balsamic
         ob_start();
         $this->printSvelteScreen($selected);
         $svelteScreen = ob_get_clean();
-        // save configPage.json
+        // save/merge configPage.json
         $configPage = $this->getConfigPage();
+        $configPage = json_decode(json_encode($configPage), true);
         $configPageFilename = dirname($filename) . '/config.json';
+        // recursive merge
+        if (file_exists($configPageFilename)) {
+            $configPage = $this->merge($configPage, json_decode(file_get_contents($configPageFilename), true));
+        }
+        error_log($configPageFilename);
         file_put_contents($configPageFilename, json_encode($configPage, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
         // create default empty handler.ts
         $handlerFilename = dirname($filename) . '/handler.ts';
@@ -79,6 +86,27 @@ class Balsamic
         $command = 'npm run format-file -- --write ' . escapeshellarg($filename);
         $this->runWithNode($command, $_ENV['NODE_VERSION'] ?? '');
         chdir($cwdir);
+    }
+
+    private function merge($base, $previous)
+    {
+        if (is_array($previous)) {
+            $sameSize = count($base) === count($previous);
+            foreach ($previous as $key => $value) {
+                if (!isset($base[$key])) {
+                    continue;
+                }
+                if (is_numeric($key) && !$sameSize) {
+                    continue;
+                }
+                if (is_array($value) && is_array($base[$key])) {
+                    $base[$key] = $this->merge($base[$key], $value);
+                } elseif (!is_array($value) && !is_array($base[$key])) {
+                    $base[$key] = $value;
+                }
+            }
+        }
+        return $base;
     }
 
     private function getConfigPage()
@@ -183,6 +211,16 @@ class Balsamic
                 break;
             }
         }
+
+        // add screen data
+        $script = $svelteScreen->getElementsByTagName('script')->item(0);
+        $script->appendChild($svelteScreen->createTextNode("\n"));
+        $data = "let data = {\n";
+        foreach ($this->screenData as $key => $value) {
+            $data .= "\t" . $key . ': ' . $value . ",\n";
+        }
+        $data .= "};\n";
+        $script->appendChild($svelteScreen->createTextNode($data));
 
         if ($this->preview) {
             $html = $svelteScreen->saveHTML();
@@ -422,7 +460,7 @@ class Balsamic
         $name = $controlProperties['text'];
         $name = preg_replace('/[^a-zA-Z0-9]+/', '_', $name);
         $label = '{__(' . json_encode($controlProperties['text'], JSON_UNESCAPED_UNICODE) . ')}';
-        $node->setAttribute('bind:value', '{'.$name.'}');
+        $node->setAttribute('bind:value', '{data.'.$name.'}');
         $node->setAttribute('placeholder', $label);
         $node->setAttribute('store', '{fileStore}');
         $svelteScreen->appendChild($node);
@@ -431,7 +469,8 @@ class Balsamic
         $this->addUniqueScriptCode($script, 'import { translation as __ } from "$lib/translations";');
         $this->addUniqueScriptCode($script, 'import FileInput from "$lib/FileInput.svelte";');
         $this->addUniqueScriptCode($script, 'import fileStore from "$lib/FileStore";');
-        $this->addUniqueScriptCode($script, "let {$name}:{ filename: null };");
+        // $this->addUniqueScriptCode($script, "let {$name}:{ filename: null };");
+        $this->addScreenData($name, '{ filename: null }');
     }
 
     public function addUniqueScriptCode(DOMElement $script, $line)
@@ -473,12 +512,13 @@ class Balsamic
         $name = preg_replace('/[^a-zA-Z0-9]+/', '_', $name);
         $label = '{__(' . json_encode($controlProperties['text'], JSON_UNESCAPED_UNICODE) . ')}';
         $svelteScreen->appendChild($node);
-        $node->setAttribute('bind:value', '{'.$name.'}');
+        $node->setAttribute('bind:value', '{data.'.$name.'}');
         $node->setAttribute('placeholder', $label);
         // add code to script
         $script = $svelteScreen->ownerDocument->getElementsByTagName('script')->item(0);
         $this->addUniqueScriptCode($script, 'import { TextBox } from "fluent-svelte";');
-        $this->addUniqueScriptCode($script, "let {$name}:string;");
+        // $this->addUniqueScriptCode($script, "let {$name}:string;");
+        $this->addScreenData($name, '""');
     }
 
     ////
@@ -513,16 +553,15 @@ class Balsamic
                 $actions = preg_match_all('/\[(.*?)\](?:\(([\w-]+)\))?/', $row, $matches);
                 $actions = $matches[1];
                 $links = $matches[2];
-                error_log(json_encode($links));
-                foreach ($links as $j => $link) {
-                    $action = $actions[$j];
-                    if ($link) {
-                        $resourceName = $this->getPopupNameFor($link);
-                        $linkHandlerName = $gridUniqueName . ucfirst($this->convertLabel2Variable($link));
-                        $this->addOpenLinkAction($linkHandlerName, $resourceName);
-                        $actionTriggers["on:$action"] = '{(e) => handler("' . $linkHandlerName . '", e.detail)}';
-                    }
-                }
+                // foreach ($links as $j => $link) {
+                //     $action = $actions[$j];
+                //     if ($link) {
+                //         $resourceName = $this->getPopupNameFor($link);
+                //         $linkHandlerName = $gridUniqueName . ucfirst($this->convertLabel2Variable($link));
+                //         $this->addOpenLinkAction($linkHandlerName, $resourceName);
+                //         $actionTriggers["on:$action"] = '{(e) => data = handler("' . $linkHandlerName . '", e.detail, data)}';
+                //     }
+                // }
                 $headers[] = [
                     'label' => $header,
                     'value' => json_encode($actions, JSON_UNESCAPED_UNICODE),
@@ -551,7 +590,7 @@ class Balsamic
         $node->setAttribute('config', '{new GridConfig(config.' . $gridUniqueName . ')}');
         $node->setAttribute('store', '{new ApiStore(config.' . $gridStoreUniqueName . ')}');
         $node->setAttribute('configStore', '{configStore}');
-        $node->setAttribute('on:action', '{(e) => handler(e.detail.action, e.detail)}');
+        $node->setAttribute('on:action', '{(e) => data = handler(e.detail.action, e.detail, data)}');
         // foreach($actionTriggers as $event => $handler) {
         //     $node->setAttribute($event, $handler);
         // }
@@ -572,6 +611,11 @@ class Balsamic
             'name' => $handlerName,
             'code' => "openPopup('{$popupName}');",
         ];
+    }
+
+    private function addScreenData($name, $value)
+    {
+        $this->screenData[$name] = $value;
     }
 
     private function ComboBox($control, $controlProperties, DOMElement $svelteScreen, $configObject)
@@ -601,7 +645,7 @@ class Balsamic
         $node = $div->ownerDocument->createElement('ContentDialog');
         $label = $controlProperties['text'];
         $name = $this->getPopupNameFor($control['resourceID']);
-        $node->setAttribute('bind:open', '{' . $name . '.open}');
+        $node->setAttribute('bind:open', '{data.' . $name . '.open}');
         $node->setAttribute('title', '{__(' . json_encode($label, JSON_UNESCAPED_UNICODE) . ')}');
         $node->setAttribute('size', 'max');
         $node->appendChild($div->ownerDocument->createTextNode("\n"));
@@ -611,7 +655,8 @@ class Balsamic
         // add code to script
         $script = $div->ownerDocument->getElementsByTagName('script')->item(0);
         $this->addUniqueScriptCode($script, 'import { ContentDialog } from "fluent-svelte";');
-        $this->addUniqueScriptCode($script, 'let ' . $name . ' = {open: false};');
+        // $this->addUniqueScriptCode($script, 'let ' . $name . ' = {open: false};');
+        $this->addScreenData($name, json_encode(['open' => false]));
         // move children to dialog
         $this->popup = $node;
     }
