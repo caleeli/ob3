@@ -38,7 +38,7 @@
 		password: '',
 	};
 	let api = new ApiStore({
-		url: 'http://localhost/projects/callizaya2/public/api.php/ob3/login',
+		url: 'login',
 		root: 'data',
 	});
 	let error = '';
