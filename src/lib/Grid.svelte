@@ -16,6 +16,7 @@
 	import { format } from 'sql-formatter';
 
 	const dispatch = createEventDispatcher();
+	const adminer_url = import.meta.env.VITE_ADMINER_URL;
 
 	export let config: GridConfig;
 	export let store: StoreInterface | ApiStore;
@@ -49,7 +50,7 @@
 		const data = grid.getRowData(row);
 		const tool = toolbar.find((t) => t.action === action);
 		dispatch(action, { tool, selected: data });
-		dispatch("action", { action, tool, selected: data });
+		dispatch('action', { action, tool, selected: data });
 	}
 	async function loadNextPage() {
 		await grid.loadNextPage();
@@ -94,6 +95,7 @@
 	let editConfigData = {};
 	let editConfigForm: FormField[][] = [];
 	let editConfigModelAttributes: { name: string; value: string }[] = [];
+	let editConfigModelTable: string;
 	let editConfigFormHeader: FormField[][] = [
 		[
 			{
@@ -220,6 +222,17 @@
 				label: 'Model URL',
 				name: 'store.config.url',
 			},
+			{
+				control: 'Button',
+				label: 'Adminer',
+				variant: 'hyperlink',
+				async action() {
+					const table = editConfigModelTable;
+					const model = store.config.url;
+					const url = `${adminer_url}&model=${table}&name=${model}`;
+					window.open(url, '_blank');
+				},
+			},
 		],
 		[
 			{
@@ -259,83 +272,6 @@
 						});
 					}
 					return field;
-				},
-			},
-		],
-		[
-			{
-				control: 'TextArea',
-				label: 'Query',
-				name: '$query',
-				getter() {
-					const meta = store.getMeta();
-					const query = meta ? meta.query : "";
-					const params = meta ? { ...meta.params } : {};
-					const keys = Object.keys(params);
-					keys.forEach((key) => {
-						params[key] = JSON.stringify(params[key]);
-					});
-					return format(query, {
-						language: 'plsql',
-						params,
-					});
-				},
-				setter() {
-					return;
-				},
-			},
-			/*{
-				control: 'TextArea',
-				label: 'Params',
-				name: '$params',
-				getter(field: string | undefined) {
-					return JSON.stringify(store.getMeta().params, null, 2);
-				},
-				setter(field: string | undefined, value: any) {
-					return;
-				},
-			},*/
-		],
-		[
-			{
-				control: 'Button',
-				label: 'Run Query',
-				variant: 'standard',
-				async action() {
-					// do nothing
-				},
-			},
-		],
-		[
-			{
-				control: 'Button',
-				label: 'Add Toolbar Button',
-				variant: 'standard',
-				async action() {
-					toolbar.push({
-						icon: 'add',
-						label: 'New Button',
-						action: 'new',
-					});
-					updateConfig();
-				},
-			},
-			{
-				control: 'Button',
-				label: 'Add On Select Action',
-				variant: 'standard',
-				async action() {
-					if (!config.onselect) {
-						config.onselect = 'selected';
-						const hasSelctedAction = rowActions.find((a) => a.action === 'selected');
-						if (!hasSelctedAction) {
-							rowActions.push({
-								action: 'selected',
-								form: [],
-							});
-						}
-						updateConfig();
-					}
 				},
 			},
 		],
@@ -481,6 +417,7 @@
 					})
 				);
 				editConfigFormHeader = editConfigFormHeader;
+				editConfigModelTable = model.table;
 			})
 			.catch(() => {
 				editConfigModelAttributes.splice(0);
@@ -621,7 +558,7 @@
 				{#if grid.error}
 					<div class="error">{grid.error}</div>
 				{/if}
-				
+
 				<Visibility
 					steps={100}
 					let:percent
