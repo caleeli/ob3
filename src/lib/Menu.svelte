@@ -2,6 +2,9 @@
 	import ApiStore from './ApiStore';
 	import TreeView from '../stories/TreeView.svelte';
 	import { goto } from '$app/navigation';
+	import Icon from './Icon.svelte';
+	import { Button } from 'fluent-svelte';
+	import { translation as __ } from './translations';
 
 	let store = new ApiStore({
 		url: 'menus',
@@ -54,6 +57,7 @@
 
 <div class={`menu ${short ? 'short' : ''}`}>
 	<TreeView
+		class="menu-tree"
 		{store}
 		converter={menu2node}
 		on:select={gotoPage}
@@ -61,18 +65,23 @@
 		is_root={true}
 		{short}
 	/>
+	<Button class="collapse-button" on:click={() => (short = !short)}>
+		<Icon class="center-icon" icon={short ? 'chevron_double_right' : 'chevron_double_left'} />
+		{short ? '' : __('Collapse')}
+	</Button>
 </div>
 
 <style>
 	.menu {
 		height: 100%;
 		border-right: 3px double var(--fds-control-alt-fill-tertiary);
-		padding-right: 1rem;
 		overflow: auto;
 		height: 100%;
 		width: 35rem;
 		-ms-overflow-style: none; /* IE and Edge */
 		scrollbar-width: none; /* Firefox */
+		display: flex;
+		flex-direction: column;
 	}
 	/* Hide scrollbar for Chrome, Safari and Opera */
 	.menu::-webkit-scrollbar {
@@ -81,5 +90,11 @@
 	.short {
 		padding-right: 0px;
 		width: 3rem;
+	}
+	:global(.center-icon) {
+		margin-top: 0.3em;
+	}
+	:global(.menu-tree) {
+		flex-grow: 1;
 	}
 </style>

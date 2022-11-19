@@ -10,7 +10,7 @@
 	// class property
 	let className = '';
 	export { className as class };
-	export let store: StoreInterface;
+	export let store: StoreInterface | null = null;
 	export let root_node: string = 'root';
 	export let is_root = true;
 	export let show_root = true;
@@ -116,6 +116,7 @@
 						is_root={false}
 						class={!show_root ? 'hide-line' : ''}
 						{short}
+						{converter}
 						bind:root
 						on:select
 					/>

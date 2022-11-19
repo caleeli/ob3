@@ -3,6 +3,8 @@
 
 	export let icon: string;
 	export let color: string = 'currentColor';
+	let className: string = '';
+	export { className as class };
 
 	let fluent_icons: { [key: string]: string } = {
 		undefined: 'home',
@@ -23,7 +25,7 @@
 	<svelte:component this={svg_icon.component} />
 {:else}
 	<i
-		class={`icon icon-ic_fluent_${fluent_icons[icon] || icon}_20_regular`}
+		class={`icon icon-ic_fluent_${fluent_icons[icon] || icon}_20_regular ${className}`}
 		style={`color: ${color};`}
 	/>
 {/if}
