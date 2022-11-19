@@ -30,6 +30,13 @@ class ApiStore extends BaseStore implements StoreInterface {
 		if (config.root === undefined) {
 			config.root = 'data';
 		}
+		if (config.query === undefined) {
+			config.query = {
+				per_page: JSONApiPerPageHandler,
+				page: JSONApiPageHandler,
+				sort: JSONApiSortHandler,
+			};
+		}
 	}
 	async create(record: any): Promise<any> {
 		const url = new URL(this.config.url, backend_base);
