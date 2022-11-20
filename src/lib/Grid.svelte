@@ -227,9 +227,8 @@
 				label: 'Adminer',
 				variant: 'hyperlink',
 				async action() {
-					const table = editConfigModelTable;
 					const model = store.config.url;
-					const url = `${adminer_url}&model=${table}&name=${model}`;
+					const url = `${adminer_url}&model=${model}&name=${model}`;
 					window.open(url, '_blank');
 				},
 			},

@@ -14,7 +14,7 @@
 			sort: 'position',
 		},
 	});
-	let short = false;
+	let short = true;
 
 	/**
 	 * @param {any} currentRow
