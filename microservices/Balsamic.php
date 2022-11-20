@@ -436,6 +436,9 @@ class Balsamic
         $node = $svelteScreen->ownerDocument->createElement('h2');
         $node->nodeValue = '{__(' . json_encode($controlProperties['text'], JSON_UNESCAPED_UNICODE) . ')}';
         $svelteScreen->appendChild($node);
+        // add code to script
+        $script = $svelteScreen->ownerDocument->getElementsByTagName('script')->item(0);
+        $this->addUniqueScriptCode($script, 'import { translation as __ } from "$lib/translations";');
     }
 
     ////
@@ -636,6 +639,9 @@ class Balsamic
         $node = $svelteScreen->ownerDocument->createElement('label');
         $node->nodeValue = $controlProperties['text'];
         $svelteScreen->appendChild($node);
+        // add code to script
+        $script = $svelteScreen->ownerDocument->getElementsByTagName('script')->item(0);
+        $this->addUniqueScriptCode($script, 'import { translation as __ } from "$lib/translations";');
     }
 
     // <ContentDialog bind:open={confirmDelete} title={__('Delete')} size="max">

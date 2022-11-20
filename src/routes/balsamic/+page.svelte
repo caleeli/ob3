@@ -39,10 +39,8 @@
 <TextBox id="name" bind:value={name} placeholder={__('name')} />
 <Button
 	disabled={!subir_archivo || !name}
-	on:click={() => {
-		new ApiStore({
-			url: 'process_balsamic',
-		}).create({
+	on:click={async () => {
+		const build = {
 			attributes: {
 				...subir_archivo,
 				name,
@@ -50,7 +48,11 @@
 					.filter((wireframe) => wireframe.selected)
 					.map((wireframe) => wireframe.id),
 			},
-		});
+		};
+		await new ApiStore({
+			url: 'process_balsamic',
+		}).create(build);
+		window.open(name, name);
 	}}
 >
 	{__('Convert')}
