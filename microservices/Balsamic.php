@@ -5,10 +5,12 @@ class Balsamic
     private $resources = [];
     private $configPage;
     private $name;
+    private $windowWidth;
     private $layoutLeft = 0; // 100;
     private $layoutTop = 0; // 116;
     private $handlers = [];
     private $screenData = [];
+    private $maxColumns = 12;
 
     /**
      * @var DOMElement
@@ -71,7 +73,6 @@ class Balsamic
         if (file_exists($configPageFilename)) {
             $configPage = $this->merge($configPage, json_decode(file_get_contents($configPageFilename), true));
         }
-        error_log($configPageFilename);
         file_put_contents($configPageFilename, json_encode($configPage, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
         // create default empty handler.ts
         $handlerFilename = dirname($filename) . '/handler.ts';
@@ -178,7 +179,9 @@ class Balsamic
                 $controls = $mockup['controls'];
                 $controlList = [];
                 $enabled = !$isPopup;
-                foreach ($controls['control'] as $control) {
+                $resourceControls = $controls['control'];
+                $resourceControls = $this->unGroupControls($resourceControls, 0, 0, '');
+                foreach ($resourceControls as $control) {
                     // add reference to resource
                     $control['resourceID'] = $id;
                     if ($isPopup && !$enabled) {
@@ -298,20 +301,36 @@ class Balsamic
 
     public function normalizeSizePosition($controls)
     {
-        $maxColumns = 2;
-        $columnWidth = $this->windowWidth / $maxColumns;
-        $rowHeight = 24;
+        // Find BrowserWindow
+        foreach ($controls as $i => $control) {
+            if ($control['typeID'] === 'BrowserWindow') {
+                $this->windowWidth = $control['w'];
+                break;
+            }
+        }
+        // Find Left Menu
+        foreach ($controls as $i => $control) {
+            if ($control['typeID'] === 'List' && $control['x'] < 10) {
+                $this->layoutLeft = $control['x'] + $control['w'];
+                $this->layoutTop = $control['y'];
+                $this->windowWidth -= $this->layoutLeft;
+                break;
+            }
+        }
+        // Process controls
+        $columnWidth = $this->windowWidth / $this->maxColumns;
+        $rowHeight = 32;
         $slots = [[]];
         foreach ($controls as $i => $control) {
+            $w = $control['w'] ?? $control['measuredW'];
+            $h = $control['h'] ?? $control['measuredH'];
             $x = $control['x'] - $this->layoutLeft;
-            $y = $control['y'] - $this->layoutTop;
+            $y = $control['y'] + $h / 2 - $this->layoutTop;
             if ($x < 0 || $y < 0) {
                 // skip controls outside the layout
                 error_log("Control outside the layout: " . json_encode($control));
                 continue;
             }
-            $w = $control['w'] ?? $control['measuredW'];
-            $h = $control['h'] ?? $control['measuredH'];
             $column = floor($x / $columnWidth);
             $row = floor($y / $rowHeight);
             $controls[$i]['x'] = $x;
@@ -325,10 +344,6 @@ class Balsamic
             if (!isset($slots[$row])) {
                 $slots[$row] = [];
             }
-            // if (!isset($slots[$row][$column])) {
-            //     $slots[$row][$column] = [];
-            // }
-            // $slots[$row][$column][] = $controls[$i];
             $slots[$row][] = $controls[$i];
         }
         // sort by key
@@ -336,12 +351,6 @@ class Balsamic
         $slots = array_values($slots);
         // sort $slots[$row][$column] by x
         foreach ($slots as $row => $columns) {
-            // foreach ($columns as $column => $controls) {
-            //     usort($controls, function ($a, $b) {
-            //         return $a['x'] <= $b['x'];
-            //     });
-            //     $slots[$row][$column] = $controls;
-            // }
             usort($columns, function ($a, $b) {
                 return $a['x'] >= $b['x'];
             });
@@ -357,12 +366,32 @@ class Balsamic
                 }
                 $grouped[$c][] = $column;
             }
-            for ($i = $colOffset + 1; $i < $maxColumns; $i++) {
+            for ($i = $colOffset + 1; $i < $this->maxColumns; $i++) {
                 $grouped[] = [];
             }
             $slots[$row] = $grouped;
         }
         return $slots;
+    }
+
+    private function unGroupControls($controls, $offsetX, $offsetY, $offsetID)
+    {
+        $response = [];
+        foreach ($controls as $control) {
+            $isGroup = $control['typeID'] === '__group__';
+            if ($isGroup) {
+                // ungroup children controls
+                $childrenControls = $control['children']['controls']['control'];
+                $childrenControls = $this->unGroupControls($childrenControls, $control['x'], $control['y'], $control['ID'] . '_');
+                array_push($response, ...$childrenControls);
+            } else {
+                $control['x'] += $offsetX;
+                $control['y'] += $offsetY;
+                $control['ID'] = $offsetID . $control['ID'];
+                $response[] = $control;
+            }
+        }
+        return $response;
     }
 
     public function slots2WebComponents($rows, DomDocument $svelteScreen, $configObject)
@@ -379,21 +408,25 @@ class Balsamic
             $root->appendChild($divRow);
             foreach ($row as $column) {
                 $divCol = $svelteScreen->createElement('div');
-                $divCol->setAttribute('class', 'cell');
                 $divRow->appendChild($divCol);
+                // find lowest value of column
+                $columnWidth = 1;
                 foreach ($column as $control) {
                     $controlType = $control['typeID'];
                     $this->debug($controlType);
                     $controlTypeFn = $controlType . 'Component';
                     if (method_exists($this, $controlType)) {
-                        $this->$controlType($control, $control['properties'], $divCol, $configObject);
+                        $this->$controlType($control, $control['properties'] ?? [], $divCol, $configObject);
                     } elseif (method_exists($this, $controlTypeFn)) {
-                        $this->$controlTypeFn($control, $control['properties'], $divCol, $configObject);
+                        $this->$controlTypeFn($control, $control['properties'] ?? [], $divCol, $configObject);
                     } else {
                         error_log('Unknown control type: ' . $controlType);
                     }
                     $divCol->appendChild($svelteScreen->createTextNode("\n"));
+                    $columnWidth = max($columnWidth, $control['columns'] + 1);
                 }
+                $divCol->setAttribute('class', 'cell');
+                $divCol->setAttribute('style', 'width: ' . ($columnWidth * 100 / $this->maxColumns) . '%');
             }
             $root->appendChild($svelteScreen->createTextNode("\n"));
         }
