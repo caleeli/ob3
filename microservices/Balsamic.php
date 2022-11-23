@@ -16,6 +16,7 @@ class Balsamic
      * @var DOMElement
      */
     private $popup;
+    private $popupControl;
 
     public function __construct($sqlite_file, $name)
     {
@@ -77,7 +78,7 @@ class Balsamic
         // create default empty handler.ts
         $handlerFilename = dirname($filename) . '/handler.ts';
         if (!file_exists($handlerFilename)) {
-            file_put_contents($handlerFilename, 'export default function handler(action: string, data: any) { console.log(action, data); }');
+            file_put_contents($handlerFilename, 'export default function handler(action: string, detail: any, data: any): any { console.log(action, data); }');
         }
         // save page.svelte
         file_put_contents($filename, $svelteScreen);
@@ -199,10 +200,6 @@ class Balsamic
 
             $controlList = array_values($controlList);
             $controlList = $this->detectHorizontalMerges($controlList);
-            foreach ($controlList as $control) {
-                $controlType = $control['typeID'];
-                // debug($controlType . ": " . json_encode($control, JSON_UNESCAPED_UNICODE));
-            }
             $slots = $this->normalizeSizePosition($controlList);
             // debug(json_encode($slots, JSON_UNESCAPED_UNICODE));
             $this->slots2WebComponents($slots, $svelteScreen, $this->configPage);
@@ -411,7 +408,22 @@ class Balsamic
             }
             $root->appendChild($divRow);
             $merged = 0;
+            if ($this->popup) {
+                $maxColumns = $this->popupControl['columns'] + 1;
+            } else {
+                $maxColumns = $this->maxColumns;
+            }
+            $c = -1;
             foreach ($row as $column) {
+                $c++;
+                if ($this->popup) {
+                    if ($c <= $this->popupControl['column']) {
+                        continue;
+                    }
+                    if ($c >= ($this->popupControl['column'] + $this->popupControl['columns'])) {
+                        continue;
+                    }
+                }
                 $divCol = $svelteScreen->createElement('div');
                 $divCol->setAttribute('class', 'cell');
                 // find lowest value of column
@@ -421,8 +433,8 @@ class Balsamic
                 } elseif ($merged) {
                     $divColM = $svelteScreen->createElement('div');
                     $divColM->setAttribute('class', 'cell');
-                    $divColM->setAttribute('style', 'width: ' . ($merged * 100 / $this->maxColumns) . '%');
-                    $divRow->appendChild($divColM); 
+                    $divColM->setAttribute('style', 'width: ' . ($merged * 100 / $maxColumns) . '%');
+                    $divRow->appendChild($divColM);
                 }
                 $merged = 0;
                 $divRow->appendChild($divCol);
@@ -441,13 +453,16 @@ class Balsamic
                     $divCol->appendChild($svelteScreen->createTextNode("\n"));
                     $columnWidth = max($columnWidth, $control['columns'] + 1);
                 }
-                $divCol->setAttribute('style', 'width: ' . ($columnWidth * 100 / $this->maxColumns) . '%');
+                $c += $columnWidth - 1;
+                $divCol->setAttribute('style', 'width: ' . ($columnWidth * 100 / $maxColumns) . '%');
+                // $divCol->setAttribute('columnWidth', "100 * $columnWidth / $maxColumns");
             }
             if ($merged) {
                 $divColM = $svelteScreen->createElement('div');
                 $divColM->setAttribute('class', 'cell');
-                $divColM->setAttribute('style', 'width: ' . ($merged * 100 / $this->maxColumns) . '%');
-                $divRow->appendChild($divColM); 
+                $divColM->setAttribute('style', 'width: ' . ($merged * 100 / $maxColumns) . '%');
+                // $divColM->setAttribute('columnWidth', "100 * $merged / $maxColumns");
+                $divRow->appendChild($divColM);
             }
             $root->appendChild($svelteScreen->createTextNode("\n"));
         }
@@ -610,15 +625,15 @@ class Balsamic
                 $actions = preg_match_all('/\[(.*?)\](?:\(([\w-]+)\))?/', $row, $matches);
                 $actions = $matches[1];
                 $links = $matches[2];
-                // foreach ($links as $j => $link) {
-                //     $action = $actions[$j];
-                //     if ($link) {
-                //         $resourceName = $this->getPopupNameFor($link);
-                //         $linkHandlerName = $gridUniqueName . ucfirst($this->convertLabel2Variable($link));
-                //         $this->addOpenLinkAction($linkHandlerName, $resourceName);
-                //         $actionTriggers["on:$action"] = '{(e) => data = handler("' . $linkHandlerName . '", e.detail, data)}';
-                //     }
-                // }
+                foreach ($links as $j => $link) {
+                    $action = $actions[$j];
+                    if ($link) {
+                        $resourceName = $this->getPopupNameFor($link);
+                        $linkHandlerName = $gridUniqueName . ucfirst($this->convertLabel2Variable($link));
+                        $this->addOpenLinkAction($linkHandlerName, $resourceName);
+                        $actionTriggers["on:$action"] = '{(e) => data.'.$resourceName.'.open=true}';
+                    }
+                }
                 $headers[] = [
                     'label' => $header,
                     'value' => json_encode($actions, JSON_UNESCAPED_UNICODE),
@@ -647,10 +662,10 @@ class Balsamic
         $node->setAttribute('config', '{new GridConfig(config.' . $gridUniqueName . ')}');
         $node->setAttribute('store', '{new ApiStore(config.' . $gridStoreUniqueName . ')}');
         $node->setAttribute('configStore', '{configStore}');
-        $node->setAttribute('on:action', '{(e) => data = handler(e.detail.action, e.detail, data)}');
-        // foreach($actionTriggers as $event => $handler) {
-        //     $node->setAttribute($event, $handler);
-        // }
+        $node->setAttribute('on:action', '{(e) => Object.assign(data, handler(e.detail.action, e.detail, data))}');
+        foreach ($actionTriggers as $event => $handler) {
+            $node->setAttribute($event, $handler);
+        }
         // add code to script
         $script = $svelteScreen->ownerDocument->getElementsByTagName('script')->item(0);
         $this->addUniqueScriptCode($script, 'import Grid  from "$lib/Grid.svelte";');
@@ -708,6 +723,8 @@ class Balsamic
         $node->setAttribute('bind:open', '{data.' . $name . '.open}');
         $node->setAttribute('title', '{__(' . json_encode($label, JSON_UNESCAPED_UNICODE) . ')}');
         $node->setAttribute('size', 'max');
+        $popupWidth = min(ceil(($control['w'] / $this->windowWidth) * 10), 10) * 10;
+        $node->setAttribute('class', 'popup-' . $popupWidth);
         $node->appendChild($div->ownerDocument->createTextNode("\n"));
         $screen = $div->parentNode->parentNode;
         $screen->appendChild($node);
@@ -719,6 +736,7 @@ class Balsamic
         $this->addScreenData($name, json_encode(['open' => false]));
         // move children to dialog
         $this->popup = $node;
+        $this->popupControl = $control;
     }
 
     private function getPopupNameFor($resourceID)

@@ -392,17 +392,13 @@
 /* Grid system */
 .row {
 	display: flex;
-	flex-wrap: wrap;
+	flex-wrap: nowrap;
 	flex-direction: row;
-}
-.column {
-	display: flex;
-	flex-direction: column;
 }
 .cell {
 	display: flex;
 	flex-direction: row;
-	flex-grow: 1;
+	overflow: hidden;
 }
 .cell > div {
 	flex-grow: 1;
@@ -418,4 +414,34 @@
 	height: 100vh;
 	display: flex;
 	flex-direction: column;
+}
+.popup-10 {
+	inline-size: 10vw!important;
+}
+.popup-20 {
+	inline-size: 20vw!important;
+}
+.popup-30 {
+	inline-size: 30vw!important;
+}
+.popup-40 {
+	inline-size: 40vw!important;
+}
+.popup-50 {
+	inline-size: 50vw!important;
+}
+.popup-60 {
+	inline-size: 60vw!important;
+}
+.popup-70 {
+	inline-size: 70vw!important;
+}
+.popup-80 {
+	inline-size: 80vw!important;
+}
+.popup-90 {
+	inline-size: 90vw!important;
+}
+.popup-100 {
+	inline-size: 100vw!important;
 }
