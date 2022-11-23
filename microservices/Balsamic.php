@@ -181,6 +181,10 @@ class Balsamic
                 $controlList = [];
                 $enabled = !$isPopup;
                 $resourceControls = $controls['control'];
+                // sort by zOrder
+                usort($resourceControls, function ($a, $b) {
+                    return ($a['zOrder'] * 1) > ($b['zOrder'] * 1);
+                });
                 $resourceControls = $this->unGroupControls($resourceControls, 0, 0, '');
                 foreach ($resourceControls as $control) {
                     // add reference to resource
@@ -326,8 +330,13 @@ class Balsamic
             $w = $control['w'] ?? $control['measuredW'];
             $h = $control['h'] ?? $control['measuredH'];
             $x = $control['x'] - $this->layoutLeft;
-            $y = $control['y'] + $h / 2 - $this->layoutTop;
-            if ($x < 0 || $y < 0) {
+            if ($control['typeID'] === 'FieldSet') {
+                $y = $control['y'] - $this->layoutTop;
+            } else {
+                $y = $control['y'] + $h / 2 - $this->layoutTop;
+            }
+            // FieldSet could be outside the layout
+            if ($control['typeID'] !== 'FieldSet' && ($x < 0 || $y < 0)) {
                 // skip controls outside the layout
                 error_log("Control outside the layout: " . json_encode($control));
                 continue;
@@ -381,7 +390,7 @@ class Balsamic
         foreach ($controls as $control) {
             $isGroup = $control['typeID'] === '__group__';
             if ($isGroup) {
-                // ungroup children controls
+                // un-group children controls
                 $childrenControls = $control['children']['controls']['control'];
                 $childrenControls = $this->unGroupControls($childrenControls, $control['x'], $control['y'], $control['ID'] . '_');
                 array_push($response, ...$childrenControls);
@@ -417,6 +426,7 @@ class Balsamic
             foreach ($row as $column) {
                 $c++;
                 if ($this->popup) {
+                    // ignore columns outside the popup
                     if ($c <= $this->popupControl['column']) {
                         continue;
                     }
