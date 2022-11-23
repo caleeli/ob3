@@ -260,10 +260,14 @@ class Balsamic
                             $merged['typeID'] = 'IconTextInput';
                         }
                         $merged['ID'] = $left['ID'];
-                        $merged['measuredW'] = $right['measuredW'] + $left['measuredW'] - ($right['x'] - $left['x']);
+                        $rightW = $right['w'] ?? $right['measuredW'];
+                        $leftW = $left['w'] ?? $left['measuredW'];
+                        $rightH = $right['h'] ?? $right['measuredH'];
+                        $leftH = $left['h'] ?? $left['measuredH'];
+                        $merged['measuredW'] = $rightW + $leftW - ($right['x'] - $left['x']);
                         $merged['x'] = $left['x'];
                         $merged['y'] = min($left['y'], $right['y']);
-                        $merged['measuredH'] = max($left['y'] + $left['measuredH'], $right['y'] + $right['measuredH']) - $merged['y'];
+                        $merged['measuredH'] = max($left['y'] + $leftH, $right['y'] + $rightH) - $merged['y'];
                         $merged['w'] = $merged['measuredW'];
                         $merged['h'] = $merged['measuredH'];
                         $merged['properties'] = array_merge($left['properties'], $right['properties']);
@@ -406,10 +410,22 @@ class Balsamic
                 $root = $this->popup;
             }
             $root->appendChild($divRow);
+            $merged = 0;
             foreach ($row as $column) {
                 $divCol = $svelteScreen->createElement('div');
-                $divRow->appendChild($divCol);
+                $divCol->setAttribute('class', 'cell');
                 // find lowest value of column
+                if (count($column) === 0) {
+                    $merged++;
+                    continue;
+                } elseif ($merged) {
+                    $divColM = $svelteScreen->createElement('div');
+                    $divColM->setAttribute('class', 'cell');
+                    $divColM->setAttribute('style', 'width: ' . ($merged * 100 / $this->maxColumns) . '%');
+                    $divRow->appendChild($divColM); 
+                }
+                $merged = 0;
+                $divRow->appendChild($divCol);
                 $columnWidth = 1;
                 foreach ($column as $control) {
                     $controlType = $control['typeID'];
@@ -425,8 +441,13 @@ class Balsamic
                     $divCol->appendChild($svelteScreen->createTextNode("\n"));
                     $columnWidth = max($columnWidth, $control['columns'] + 1);
                 }
-                $divCol->setAttribute('class', 'cell');
                 $divCol->setAttribute('style', 'width: ' . ($columnWidth * 100 / $this->maxColumns) . '%');
+            }
+            if ($merged) {
+                $divColM = $svelteScreen->createElement('div');
+                $divColM->setAttribute('class', 'cell');
+                $divColM->setAttribute('style', 'width: ' . ($merged * 100 / $this->maxColumns) . '%');
+                $divRow->appendChild($divColM); 
             }
             $root->appendChild($svelteScreen->createTextNode("\n"));
         }
