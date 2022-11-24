@@ -714,9 +714,44 @@ class Balsamic
 
     private function Label($control, $controlProperties, DOMElement $svelteScreen, $configObject)
     {
-        // error_log(json_encode($control));
+        // error_log(json_encode($controlProperties));
         $node = $svelteScreen->ownerDocument->createElement('label');
         $node->nodeValue = $controlProperties['text'];
+        // styles
+        $style = "";
+        // color
+        if (isset($controlProperties['color'])) {
+            // convert to hex with leading zeros
+            $color = dechex($controlProperties['color']);
+            $color = str_pad($color, 6, '0', STR_PAD_LEFT);
+            $style .= "color: #{$color};";
+        }
+        // bold
+        if (isset($controlProperties['bold']) && $controlProperties['bold']) {
+            $style .= "font-weight: bold;";
+        }
+        // italic
+        if (isset($controlProperties['italic']) && $controlProperties['italic']) {
+            $style .= "font-style: italic;";
+        }
+        // underline
+        if (isset($controlProperties['underline']) && $controlProperties['underline']) {
+            $style .= "text-decoration: underline;";
+        }
+        // align
+        if (isset($controlProperties['align'])) {
+            $style .= "display: inline-block;width: 100%;text-align: {$controlProperties['align']};";
+        }
+        // size
+        if (isset($controlProperties['size'])) {
+            $defaultBalsamiqSize = 13;
+            $size = round($controlProperties['size'] / $defaultBalsamiqSize * 10) * 0.1;
+            $style .= "font-size: {$size}rem;";
+        }
+        error_log($style);
+        if ($style) {
+            $node->setAttribute('style', $style);
+        }
         $svelteScreen->appendChild($node);
         // add code to script
         $script = $svelteScreen->ownerDocument->getElementsByTagName('script')->item(0);
