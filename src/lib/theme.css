@@ -406,6 +406,11 @@
 .cell > table {
 	flex-grow: 1;
 }
+.cell label {
+	margin-right: 0.5rem;
+	margin-top: 0.5rem;
+	display: inline-block;
+}
 .page-body {
 	margin: 0;
 	padding: 0;

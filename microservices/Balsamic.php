@@ -204,7 +204,7 @@ class Balsamic
 
             $controlList = array_values($controlList);
             $controlList = $this->detectHorizontalMerges($controlList);
-            $slots = $this->normalizeSizePosition($controlList);
+            $slots = $this->normalizeSizePosition($controlList, $isPopup);
             // debug(json_encode($slots, JSON_UNESCAPED_UNICODE));
             $this->slots2WebComponents($slots, $svelteScreen, $this->configPage);
 
@@ -304,26 +304,39 @@ class Balsamic
         return $controls;
     }
 
-    public function normalizeSizePosition($controls)
+    public function normalizeSizePosition($controls, $isPopup)
     {
-        // Find BrowserWindow
-        foreach ($controls as $i => $control) {
-            if ($control['typeID'] === 'BrowserWindow') {
-                $this->windowWidth = $control['w'];
-                break;
+        if (!$isPopup) {
+            // Find BrowserWindow
+            foreach ($controls as $i => $control) {
+                if ($control['typeID'] === 'BrowserWindow') {
+                    $this->windowWidth = $control['w'];
+                    break;
+                }
             }
-        }
-        // Find Left Menu
-        foreach ($controls as $i => $control) {
-            if ($control['typeID'] === 'List' && $control['x'] < 10) {
-                $this->layoutLeft = $control['x'] + $control['w'];
-                $this->layoutTop = $control['y'];
-                $this->windowWidth -= $this->layoutLeft;
-                break;
+            // Find Left Menu
+            foreach ($controls as $i => $control) {
+                if ($control['typeID'] === 'List' && $control['x'] < 10) {
+                    $this->layoutLeft = $control['x'] + $control['w'];
+                    $this->layoutTop = $control['y'];
+                    $this->windowWidth -= $this->layoutLeft;
+                    break;
+                }
+            }
+            $windowWidth = $this->windowWidth;
+        } else {
+            // Find FieldSet
+            foreach ($controls as $i => $control) {
+                if ($control['typeID'] === 'FieldSet') {
+                    $this->layoutLeft = $control['x'];
+                    $this->layoutTop = $control['y'];
+                    $windowWidth = $control['w'];
+                    break;
+                }
             }
         }
         // Process controls
-        $columnWidth = $this->windowWidth / $this->maxColumns;
+        $columnWidth = $windowWidth / $this->maxColumns;
         $rowHeight = 32;
         $slots = [[]];
         foreach ($controls as $i => $control) {
@@ -355,7 +368,7 @@ class Balsamic
             // $controls[$i]['columns'] = max(0, round(($x + $w) / $columnWidth) -1) - $column;
             // error_log(@$control['properties']['text'] . " X=" . $column);
             // error_log(@$control['properties']['text'] . " Max W=" . ($controls[$i]['columns']));
-            // error_log("x+w=" . ($x + $w) . " windowWidth=" . $this->windowWidth);
+            // error_log("x+w=" . ($x + $w) . " windowWidth=" . $windowWidth);
             if (!isset($slots[$row])) {
                 $slots[$row] = [];
             }
@@ -399,7 +412,7 @@ class Balsamic
                 }
                 $dbg[] = $text;
             }
-            error_log("Row max $c_max: " . implode(' | ', $dbg));
+            // error_log("Row max $c_max: " . implode(' | ', $dbg));
             $slots[$row] = $grouped;
         }
         return $slots;
@@ -463,12 +476,12 @@ class Balsamic
                 foreach ($column as $control) {
                     if ($this->popup) {
                         // ignore columns outside the popup
-                        if ($control['column'] < $this->popupControl['column']) {
-                            continue;
-                        }
-                        if ($control['column'] > ($this->popupControl['column'] + $this->popupControl['columns'])) {
-                            continue;
-                        }
+                      //  if ($control['column'] < $this->popupControl['column']) {
+                      //      continue;
+                      //  }
+                      //  if ($control['column'] > ($this->popupControl['column'] + $this->popupControl['columns'])) {
+                      //      continue;
+                      //  }
                     }
                     $controlType = $control['typeID'];
                     $this->debug($controlType);
@@ -595,20 +608,32 @@ class Balsamic
     }
 
     ////
-    public function Button($controlPosition, $controlProperties, DOMElement $svelteScreen)
+    public function Button($control, $controlProperties, DOMElement $svelteScreen)
     {
         $node = $svelteScreen->ownerDocument->createElement('Button');
         $node->nodeValue = $controlProperties['text'];
+        // add handler
+        $handlerName = $this->convertLabel2Variable($controlProperties['text']) . 'Handler';
+        $handlerCode = 'Object.assign(data, handler(' . json_encode($handlerName) . ', e.detail, data))';
+        $link = $controlProperties['href']['ID'] ?? null;
+        if ($link) {
+            $resourceName = $this->getPopupNameFor($link);
+            $this->addHandler($handlerName, "");
+            $handlerCode = 'data.'.$resourceName.'.open=true;' . $handlerCode;
+        }
+        $node->setAttribute('on:click', "{(e) => { $handlerCode }}");
+        
         $svelteScreen->appendChild($node);
         // add code to script
         $script = $svelteScreen->ownerDocument->getElementsByTagName('script')->item(0);
         $this->addUniqueScriptCode($script, 'import { Button } from "fluent-svelte";');
+        $this->addUniqueScriptCode($script, 'import handler from "./handler";');
     }
 
     ////
     public function TextInput($controlPosition, $controlProperties, DOMElement $svelteScreen)
     {
-        error_log(json_encode($controlProperties, JSON_PRETTY_PRINT));
+        // error_log(json_encode($controlProperties, JSON_PRETTY_PRINT));
         $node = $svelteScreen->ownerDocument->createElement('TextBox');
         $name = $controlProperties['text'];
         $name = preg_replace('/[^a-zA-Z0-9]+/', '_', $name);
@@ -713,9 +738,14 @@ class Balsamic
 
     private function addOpenLinkAction($handlerName, $popupName)
     {
+        $this->addHandler($handlerName, "openPopup('{$popupName}');");
+    }
+
+    private function addHandler($handlerName, $code = '')
+    {
         $this->handlers[$handlerName] = [
             'name' => $handlerName,
-            'code' => "openPopup('{$popupName}');",
+            'code' => $code,
         ];
     }
 
@@ -742,7 +772,7 @@ class Balsamic
         $node = $svelteScreen->ownerDocument->createElement('label');
         $node->nodeValue = $controlProperties['text'];
         // styles
-        $style = "margin-right: 0.5rem;";
+        $style = "";
         // color
         if (isset($controlProperties['color'])) {
             // convert to hex with leading zeros
@@ -764,7 +794,7 @@ class Balsamic
         }
         // align
         if (isset($controlProperties['align'])) {
-            $style .= "display: inline-block;width: 100%;text-align: {$controlProperties['align']};";
+            $style .= "width: 100%; text-align: {$controlProperties['align']};";
         }
         // size
         if (isset($controlProperties['size'])) {
