@@ -610,8 +610,13 @@ class Balsamic
     ////
     public function Button($control, $controlProperties, DOMElement $svelteScreen)
     {
+        // error_log(json_encode($controlProperties));
         $node = $svelteScreen->ownerDocument->createElement('Button');
         $node->nodeValue = $controlProperties['text'];
+        // color
+        if (isset($controlProperties['color'])) {
+            $node->setAttribute('variant', 'accent');
+        }
         // add handler
         $handlerName = $this->convertLabel2Variable($controlProperties['text']) . 'Handler';
         $handlerCode = 'Object.assign(data, handler(' . json_encode($handlerName) . ', e.detail, data))';
