@@ -7,13 +7,13 @@
 use Google\Client;
 use Google\Service\Drive;
 
-$base = dirname($_SERVER['SCRIPT_URI']);
+$callback = $_ENV['GOOGLE_CALLBACK_URL'];
+$configJsonPath = $_ENV['GOOGLE_APPLICATION_CREDENTIALS'];
 
-$configJsonPath = realpath(getenv('GOOGLE_APPLICATION_CREDENTIALS'));
 $client = new Client();
 $client->setAuthConfig($configJsonPath);
 $client->useApplicationDefaultCredentials();
-$client->setRedirectUri($base . '/gdrive_cb');
+$client->setRedirectUri($callback);
 $client->addScope(Drive::DRIVE);
 // with refresh_token
 $client->setAccessType('offline');
