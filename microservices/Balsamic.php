@@ -10,7 +10,7 @@ class Balsamic
     private $layoutTop = 0; // 116;
     private $handlers = [];
     private $screenData = [];
-    private $maxColumns = 12;
+    private $maxColumns = 128;
 
     /**
      * @var DOMElement
@@ -342,6 +342,7 @@ class Balsamic
                 continue;
             }
             $column = floor($x / $columnWidth);
+            // $column = max(0, round($x / $columnWidth) -1);
             $row = floor($y / $rowHeight);
             $controls[$i]['x'] = $x;
             $controls[$i]['y'] = $y;
@@ -350,7 +351,11 @@ class Balsamic
             $controls[$i]['measuredW'] = $w;
             $controls[$i]['measuredH'] = $h;
             $controls[$i]['column'] = $column;
-            $controls[$i]['columns'] = floor($w / $columnWidth);
+            $controls[$i]['columns'] = floor(($x + $w) / $columnWidth) - $column;
+            // $controls[$i]['columns'] = max(0, round(($x + $w) / $columnWidth) -1) - $column;
+            // error_log(@$control['properties']['text'] . " X=" . $column);
+            // error_log(@$control['properties']['text'] . " Max W=" . ($controls[$i]['columns']));
+            // error_log("x+w=" . ($x + $w) . " windowWidth=" . $this->windowWidth);
             if (!isset($slots[$row])) {
                 $slots[$row] = [];
             }
@@ -359,26 +364,42 @@ class Balsamic
         // sort by key
         ksort($slots);
         $slots = array_values($slots);
-        // sort $slots[$row][$column] by x
-        foreach ($slots as $row => $columns) {
-            usort($columns, function ($a, $b) {
+        foreach ($slots as $row => $controls) {
+            // sort $slots[$row][$column] by x
+            usort($controls, function ($a, $b) {
                 return $a['x'] >= $b['x'];
             });
-            $grouped = [];
-            $colOffset = 0;
-            foreach ($columns as $column) {
-                $c = $column['column'] - $colOffset;
-                $colOffset += $column['columns'];
-                for ($i=0; $i <=$c; $i++) {
-                    if (!isset($grouped[$i])) {
-                        $grouped[$i] = [];
+            $grouped = [[]];
+            $c = 0;
+            $c_max = 0;
+            foreach ($controls as $control) {
+                if ($control['column'] > $c_max) {
+                    // add empty columns to $grouped
+                    for ($i=$c_max; $i<$control['column']; $i++) {
+                        $grouped[] = [];
                     }
+                    $c = $control['column'];
+                    $c_max = $c + $control['columns'];
                 }
-                $grouped[$c][] = $column;
+                if ($control['column'] >= $c && $control['column'] <= $c_max) {
+                    $c_max = max($c_max, $control['column'] + $control['columns']);
+                    $g = count($grouped) -1;
+                    $grouped[$g][] = $control;
+                }
             }
-            for ($i = $colOffset + 1; $i < $this->maxColumns; $i++) {
+            // add empty columns to complete `$this->maxColumns`
+            for ($i=$c_max; $i<$this->maxColumns - 1; $i++) {
                 $grouped[] = [];
             }
+            $dbg = [];
+            foreach ($grouped as $g) {
+                $text = '';
+                foreach ($g as $control) {
+                    $text .= ($control['properties']['text'] ?? $control['typeID']) . $control['column'] . '+' . $control['columns'] . ',';
+                }
+                $dbg[] = $text;
+            }
+            error_log("Row max $c_max: " . implode(' | ', $dbg));
             $slots[$row] = $grouped;
         }
         return $slots;
@@ -422,18 +443,7 @@ class Balsamic
             } else {
                 $maxColumns = $this->maxColumns;
             }
-            $c = -1;
             foreach ($row as $column) {
-                $c++;
-                if ($this->popup) {
-                    // ignore columns outside the popup
-                    if ($c <= $this->popupControl['column']) {
-                        continue;
-                    }
-                    if ($c >= ($this->popupControl['column'] + $this->popupControl['columns'])) {
-                        continue;
-                    }
-                }
                 $divCol = $svelteScreen->createElement('div');
                 $divCol->setAttribute('class', 'cell');
                 // find lowest value of column
@@ -448,8 +458,18 @@ class Balsamic
                 }
                 $merged = 0;
                 $divRow->appendChild($divCol);
-                $columnWidth = 1;
+                $cMin = $this->maxColumns;
+                $cMax = 0;
                 foreach ($column as $control) {
+                    if ($this->popup) {
+                        // ignore columns outside the popup
+                        if ($control['column'] < $this->popupControl['column']) {
+                            continue;
+                        }
+                        if ($control['column'] > ($this->popupControl['column'] + $this->popupControl['columns'])) {
+                            continue;
+                        }
+                    }
                     $controlType = $control['typeID'];
                     $this->debug($controlType);
                     $controlTypeFn = $controlType . 'Component';
@@ -461,11 +481,10 @@ class Balsamic
                         error_log('Unknown control type: ' . $controlType);
                     }
                     $divCol->appendChild($svelteScreen->createTextNode("\n"));
-                    $columnWidth = max($columnWidth, $control['columns'] + 1);
+                    $cMin = min($cMin, $control['column']);
+                    $cMax = max($cMin, $control['column'] + $control['columns']);
                 }
-                $c += $columnWidth - 1;
-                $divCol->setAttribute('style', 'width: ' . ($columnWidth * 100 / $maxColumns) . '%');
-                // $divCol->setAttribute('columnWidth', "100 * $columnWidth / $maxColumns");
+                $divCol->setAttribute('style', 'width: ' . (($cMax - $cMin + 1) * 100 / $maxColumns) . '%');
             }
             if ($merged) {
                 $divColM = $svelteScreen->createElement('div');
@@ -589,6 +608,7 @@ class Balsamic
     ////
     public function TextInput($controlPosition, $controlProperties, DOMElement $svelteScreen)
     {
+        error_log(json_encode($controlProperties, JSON_PRETTY_PRINT));
         $node = $svelteScreen->ownerDocument->createElement('TextBox');
         $name = $controlProperties['text'];
         $name = preg_replace('/[^a-zA-Z0-9]+/', '_', $name);
@@ -596,6 +616,10 @@ class Balsamic
         $svelteScreen->appendChild($node);
         $node->setAttribute('bind:value', '{data.'.$name.'}');
         $node->setAttribute('placeholder', $label);
+        // state disabled
+        if (isset($controlProperties['state']) && $controlProperties['state'] === 'disabled') {
+            $node->setAttribute('disabled', '{true}');
+        }
         // add code to script
         $script = $svelteScreen->ownerDocument->getElementsByTagName('script')->item(0);
         $this->addUniqueScriptCode($script, 'import { TextBox } from "fluent-svelte";');
@@ -718,7 +742,7 @@ class Balsamic
         $node = $svelteScreen->ownerDocument->createElement('label');
         $node->nodeValue = $controlProperties['text'];
         // styles
-        $style = "";
+        $style = "margin-right: 0.5rem;";
         // color
         if (isset($controlProperties['color'])) {
             // convert to hex with leading zeros
@@ -748,7 +772,6 @@ class Balsamic
             $size = round($controlProperties['size'] / $defaultBalsamiqSize * 10) * 0.1;
             $style .= "font-size: {$size}rem;";
         }
-        error_log($style);
         if ($style) {
             $node->setAttribute('style', $style);
         }

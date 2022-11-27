@@ -3,8 +3,10 @@
 	import ApiStore from '$lib/ApiStore';
 	import FileInput from '$lib/FileInput.svelte';
 	import { Button, Checkbox, TextBox } from 'fluent-svelte';
+	const backend_base = import.meta.env.VITE_BACKEND_URL;
 
 	let subir_archivo: { filename: null };
+	let fileID = '';
 	let name = '';
 	let wireframes: {
 		id: string;
@@ -12,8 +14,64 @@
 		branch: string;
 		selected: boolean;
 	}[] = [];
+	const gdrive_auth = backend_base + 'gdrive_auth';
+	let token = "";
+	// get gdrive token from local storage when not SSR
+	if (typeof window !== 'undefined') {
+		token = localStorage.getItem('gdrive_token') || "";
+	}
+	// save gdrive token to local storage
+	function saveToken() {
+		localStorage.setItem('gdrive_token', token);
+	}
 </script>
 
+<label for="fileID">{__('GDrive File ID')}:</label>
+<TextBox id="fileID" bind:value={fileID} placeholder={__('GDrive File ID')} />
+<Button
+	disabled={!fileID && !token}
+	on:click={async () => {
+		// check if fileID is a URL
+		const isURL = fileID.match(/https:\/\/drive.google.com\/file\/d\/(.*)\/view/);
+		if (isURL) {
+			fileID = isURL[1];
+		}
+		if (!token) {
+			window.open(gdrive_auth, "gdrive_auth");
+		}
+		const build = {
+			attributes: {
+				fileID,
+				token,
+			},
+		};
+		let file = await new ApiStore({
+			url: 'gdrive_file',
+		}).create(build);
+		subir_archivo = file.attributes;
+		wireframes = file.attributes.wireframes
+		console.log(subir_archivo);
+	}}
+>
+	{__('Load from GDrive')}
+</Button>
+<Button
+	on:click={async () => {
+		window.open(gdrive_auth, "gdrive_auth");
+		// listen post message from gdrive auth window
+		window.addEventListener('message', (event) => {
+			if (!event.origin || event.origin !== backend_base.substring(0, event.origin.length)) {
+				console.log(event.origin);
+				return;
+			}
+			console.log("saved!");
+			token = event.data;
+			saveToken();
+		});
+	}}
+>
+	{__('Connect to GDrive')}
+</Button>
 <FileInput
 	label="subir archivo"
 	bind:value={subir_archivo}
