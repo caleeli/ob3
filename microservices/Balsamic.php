@@ -346,7 +346,7 @@ class Balsamic
             if ($control['typeID'] === 'FieldSet') {
                 $y = $control['y'] - $this->layoutTop;
             } else {
-                $y = $control['y'] + $h / 2 - $this->layoutTop;
+                $y = $control['y'] + min($h, 28) / 2 - $this->layoutTop;
             }
             // FieldSet could be outside the layout
             if ($control['typeID'] !== 'FieldSet' && ($x < 0 || $y < 0)) {
@@ -474,15 +474,6 @@ class Balsamic
                 $cMin = $this->maxColumns;
                 $cMax = 0;
                 foreach ($column as $control) {
-                    if ($this->popup) {
-                        // ignore columns outside the popup
-                      //  if ($control['column'] < $this->popupControl['column']) {
-                      //      continue;
-                      //  }
-                      //  if ($control['column'] > ($this->popupControl['column'] + $this->popupControl['columns'])) {
-                      //      continue;
-                      //  }
-                    }
                     $controlType = $control['typeID'];
                     $this->debug($controlType);
                     $controlTypeFn = $controlType . 'Component';
@@ -653,7 +644,27 @@ class Balsamic
         // add code to script
         $script = $svelteScreen->ownerDocument->getElementsByTagName('script')->item(0);
         $this->addUniqueScriptCode($script, 'import { TextBox } from "fluent-svelte";');
-        // $this->addUniqueScriptCode($script, "let {$name}:string;");
+        $this->addScreenData($name, '""');
+    }
+
+    public function TextArea($control, $controlProperties, DOMElement $svelteScreen)
+    {
+        $node = $svelteScreen->ownerDocument->createElement('TextArea');
+        $name = $controlProperties['text'];
+        $name = $this->convertLabel2Variable($name);
+        $label = '{__(' . json_encode($controlProperties['text'], JSON_UNESCAPED_UNICODE) . ')}';
+        $svelteScreen->appendChild($node);
+        $node->setAttribute('bind:value', '{data.'.$name.'}');
+        $node->setAttribute('placeholder', $label);
+        $rows = round($control['h'] / 19);
+        $node->setAttribute('rows', $rows);
+        // state disabled
+        if (isset($controlProperties['state']) && $controlProperties['state'] === 'disabled') {
+            $node->setAttribute('disabled', '{true}');
+        }
+        // add code to script
+        $script = $svelteScreen->ownerDocument->getElementsByTagName('script')->item(0);
+        $this->addUniqueScriptCode($script, 'import TextArea from "$lib/TextArea.svelte";');
         $this->addScreenData($name, '""');
     }
 
@@ -739,6 +750,22 @@ class Balsamic
         $this->addUniqueScriptCode($script, 'import GridConfig from "$lib/GridConfig";');
         $this->addUniqueScriptCode($script, 'import handler from "./handler";');
         $this->addUniqueScriptCode($script, 'let configStore = new ConfigStore("' . $this->name . '", config);');
+    }
+
+    // FileBrowser
+    public function Tree($control, $controlProperties, DOMElement $svelteScreen, $configObject)
+    {
+        error_log(json_encode($control));
+        $node = $svelteScreen->ownerDocument->createElement('FileBrowser');
+        $name = $controlProperties['text'];
+        $name = $this->convertLabel2Variable($name);
+        $svelteScreen->appendChild($node);
+        $rows = round($control['h'] / 19);
+        $node->setAttribute('rows', $rows);
+
+        // add code to script
+        $script = $svelteScreen->ownerDocument->getElementsByTagName('script')->item(0);
+        $this->addUniqueScriptCode($script, 'import FileBrowser from "$lib/FileBrowser.svelte";');
     }
 
     private function addOpenLinkAction($handlerName, $popupName)
