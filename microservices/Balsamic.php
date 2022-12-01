@@ -757,15 +757,18 @@ class Balsamic
     {
         error_log(json_encode($control));
         $node = $svelteScreen->ownerDocument->createElement('FileBrowser');
-        $name = $controlProperties['text'];
+        $name = explode("\n", $controlProperties['text'])[0];
+        $name = substr($name, 0, 2) === "F " ? substr($name, 2) : $name;
         $name = $this->convertLabel2Variable($name);
         $svelteScreen->appendChild($node);
         $rows = round($control['h'] / 19);
-        $node->setAttribute('rows', $rows);
+        $node->setAttribute('rows', '{' . $rows . '}');
+        $node->setAttribute('bind:value', '{data.' . $name . '}');
 
         // add code to script
         $script = $svelteScreen->ownerDocument->getElementsByTagName('script')->item(0);
         $this->addUniqueScriptCode($script, 'import FileBrowser from "$lib/FileBrowser.svelte";');
+        $this->addScreenData($name, '""');
     }
 
     private function addOpenLinkAction($handlerName, $popupName)

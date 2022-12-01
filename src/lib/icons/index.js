@@ -9,6 +9,10 @@ import lista_revision from './lista_revision.svelte';
 import lista_revision_final from './lista_revision_final.svelte';
 import lista_revision_preliminar from './lista_revision_preliminar.svelte';
 import seguimiento_auditoria from './seguimiento_auditoria.svelte';
+import docx from './docx.svelte';
+import xlsx from './xlsx.svelte';
+import pdf from './pdf.svelte';
+import file from './file.svelte';
 
 export default [
 	{
@@ -54,5 +58,21 @@ export default [
 	{
 		name: 'seguimiento_auditoria',
 		component: seguimiento_auditoria,
+	},
+	{
+		name: 'docx',
+		component: docx,
+	},
+	{
+		name: 'xlsx',
+		component: xlsx,
+	},
+	{
+		name: 'pdf',
+		component: pdf,
+	},
+	{
+		name: 'file',
+		component: file,
 	},
 ];
