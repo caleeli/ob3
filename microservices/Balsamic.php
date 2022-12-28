@@ -3,6 +3,7 @@
 class Balsamic
 {
     private $resources = [];
+    private $comments = [];
     private $configPage;
     private $name;
     private $windowWidth;
@@ -142,6 +143,11 @@ class Balsamic
         $statement->execute();
         $resources = $statement->fetchAll(PDO::FETCH_ASSOC);
         $this->resources = $resources;
+        // Select all the comments in the COMMENTS table with data different from `{}`
+        $statement = $this->connection->prepare('SELECT * FROM COMMENTS WHERE DATA != "{}"');
+        $statement->execute();
+        $comments = $statement->fetchAll(PDO::FETCH_ASSOC);
+        $this->comments = $comments;
 
         $svelteScreen = new DOMDocument();
         // Add <script lang="ts"> to the document
@@ -233,6 +239,7 @@ class Balsamic
             echo $html;
         }
     }
+
     public function debug(...$params)
     {
         if ($this->preview) {
@@ -245,6 +252,31 @@ class Balsamic
         if (!$isComplex) {
             echo "\n";
         }
+    }
+// DE0DEDAD-A21A-430A-8F31-63E242CA5983	
+    public function commentAt($control, $default)
+    {
+        $resourceId = $control['resourceID'];
+        $x = $control['originalX'];
+        $y = $control['originalY'];
+        $width = $control['w'];
+        $height = $control['h'];
+        $comments = $this->comments;
+        foreach ($comments as $comment) {
+            if ($comment['RESOURCEID'] !== $resourceId) {
+                continue;
+            }
+            $commentData = json_decode($comment['DATA'], true);
+            $commentX = $commentData['callouts'][0]['x'];
+            $commentY = $commentData['callouts'][0]['y'] + 20;
+            if ($commentX >= $x && $commentX <= $x + $width && $commentY >= $y && $commentY <= $y + $height) {
+                preg_match('/^\[\(\d+\)\]\([\w-]+\)\s(.+)$/', $commentData['text'], $matches);
+                if (count($matches) > 1) {
+                    return trim($matches[1]);
+                }
+            }
+        }
+        return $default;
     }
 
     ////
@@ -357,6 +389,8 @@ class Balsamic
             $column = floor($x / $columnWidth);
             // $column = max(0, round($x / $columnWidth) -1);
             $row = floor($y / $rowHeight);
+            $controls[$i]['originalX'] = $controls[$i]['x'];
+            $controls[$i]['originalY'] = $controls[$i]['y'];
             $controls[$i]['x'] = $x;
             $controls[$i]['y'] = $y;
             $controls[$i]['w'] = $w;
@@ -563,6 +597,7 @@ class Balsamic
         $node = $svelteScreen->ownerDocument->createElement('FileInput');
         // bind value
         $name = $controlProperties['text'];
+        //$name = $this->commentAt($controlPosition['x'], $controlPosition['y']);
         $name = preg_replace('/[^a-zA-Z0-9]+/', '_', $name);
         $label = '{__(' . json_encode($controlProperties['text'], JSON_UNESCAPED_UNICODE) . ')}';
         $node->setAttribute('bind:value', '{data.'.$name.'}');
@@ -601,7 +636,6 @@ class Balsamic
     ////
     public function Button($control, $controlProperties, DOMElement $svelteScreen)
     {
-        // error_log(json_encode($controlProperties));
         $node = $svelteScreen->ownerDocument->createElement('Button');
         $node->nodeValue = $controlProperties['text'];
         // color
@@ -618,7 +652,7 @@ class Balsamic
             $handlerCode = 'data.'.$resourceName.'.open=true;' . $handlerCode;
         }
         $node->setAttribute('on:click', "{(e) => { $handlerCode }}");
-        
+
         $svelteScreen->appendChild($node);
         // add code to script
         $script = $svelteScreen->ownerDocument->getElementsByTagName('script')->item(0);
@@ -627,11 +661,12 @@ class Balsamic
     }
 
     ////
-    public function TextInput($controlPosition, $controlProperties, DOMElement $svelteScreen)
+    public function TextInput($control, $controlProperties, DOMElement $svelteScreen)
     {
         // error_log(json_encode($controlProperties, JSON_PRETTY_PRINT));
         $node = $svelteScreen->ownerDocument->createElement('TextBox');
         $name = $controlProperties['text'];
+        $name = $this->commentAt($control, $name);
         $name = preg_replace('/[^a-zA-Z0-9]+/', '_', $name);
         $label = '{__(' . json_encode($controlProperties['text'], JSON_UNESCAPED_UNICODE) . ')}';
         $svelteScreen->appendChild($node);
@@ -651,6 +686,7 @@ class Balsamic
     {
         $node = $svelteScreen->ownerDocument->createElement('TextArea');
         $name = $controlProperties['text'];
+        $name = $this->commentAt($control, $name);
         $name = $this->convertLabel2Variable($name);
         $label = '{__(' . json_encode($controlProperties['text'], JSON_UNESCAPED_UNICODE) . ')}';
         $svelteScreen->appendChild($node);
@@ -795,10 +831,23 @@ class Balsamic
         $node = $svelteScreen->ownerDocument->createElement('ComboBox');
         $svelteScreen->appendChild($node);
         $name = $this->convertLabel2Variable($controlProperties['text']);
+        $name = $this->commentAt($control, $name);
+        $storeName = 'store' . ucfirst($name);
+        $node->setAttribute('bind:value', '{data.' . $name . '}');
+        $configObject->$storeName = [
+            'url' => 'users',
+        ];
+        $node->setAttribute('store', '{new ApiStore(config.' . $storeName . ')}');
+        $node->setAttribute('configStore', '{configStore}');
 
         // add code to script
         $script = $svelteScreen->ownerDocument->getElementsByTagName('script')->item(0);
+        $this->addUniqueScriptCode($script, 'import ApiStore  from "$lib/ApiStore";');
         $this->addUniqueScriptCode($script, 'import ComboBox from "$lib/ComboBox.svelte";');
+        $this->addUniqueScriptCode($script, 'import ConfigStore from "$lib/ConfigStore";');
+        $this->addUniqueScriptCode($script, 'import config from "./config.json";');
+        $this->addUniqueScriptCode($script, 'let configStore = new ConfigStore("' . $this->name . '", config);');
+        $this->addScreenData($name, '""');
     }
 
     private function Label($control, $controlProperties, DOMElement $svelteScreen, $configObject)
@@ -881,6 +930,9 @@ class Balsamic
 
     public function convertLabel2Variable($label)
     {
+        // remove boundary - - used to identify placeholder
+        $label = preg_replace('/^-/', '', $label);
+        $label = preg_replace('/-$/', '', $label);
         // remove accents á -> é -> e ...
         $label = $this->normalize($label);
         // remove non alphanumeric characters
