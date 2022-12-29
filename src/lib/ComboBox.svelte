@@ -203,11 +203,11 @@
 
 	// Load items from store
 	async function loadFromStore() {
+		if (!store) return;
 		items = (await store.get()).map((item) => {
 			const key = Object.keys(item.attributes).findIndex((key) => key != 'id');
 			return { value: item.id, name: String(Object.values(item.attributes)[key]) };
 		});
-		console.log(items);
 	}
 	$: if (store) {
 		loadFromStore();

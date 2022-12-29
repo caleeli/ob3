@@ -143,6 +143,18 @@ class Balsamic
         $statement->execute();
         $resources = $statement->fetchAll(PDO::FETCH_ASSOC);
         $this->resources = $resources;
+        // sort resources by attributes order if exists
+        usort($this->resources, function ($a, $b) {
+            $a = json_decode($a['ATTRIBUTES'], true);
+            $b = json_decode($b['ATTRIBUTES'], true);
+            if (!isset($a['order'])) {
+                return false;
+            }
+            if (!isset($b['order'])) {
+                return false;
+            }
+            return $a['order'] > $b['order'];
+        });
         // Select all the comments in the COMMENTS table with data different from `{}`
         $statement = $this->connection->prepare('SELECT * FROM COMMENTS WHERE DATA != "{}"');
         $statement->execute();
@@ -185,22 +197,25 @@ class Balsamic
                 $mockup = $data['mockup'];
                 $controls = $mockup['controls'];
                 $controlList = [];
-                $enabled = !$isPopup;
+                $minIndex = 0;
                 $resourceControls = $controls['control'];
                 // sort by zOrder
                 usort($resourceControls, function ($a, $b) {
                     return ($a['zOrder'] * 1) > ($b['zOrder'] * 1);
                 });
                 $resourceControls = $this->unGroupControls($resourceControls, 0, 0, '');
-                foreach ($resourceControls as $control) {
+                // Find last FieldSet or Alert box
+                foreach ($resourceControls as $index => $control) {
+                    if ($control['typeID'] === 'FieldSet' || $control['typeID'] === 'Alert') {
+                        $isPopup = true;
+                        $minIndex = $index; // include FieldSet or Alert box
+                    }
+                }
+                foreach ($resourceControls as $index => $control) {
                     // add reference to resource
                     $control['resourceID'] = $id;
-                    if ($isPopup && !$enabled) {
-                        if ($control['typeID'] === 'FieldSet') {
-                            $enabled = true;
-                        } else {
-                            continue;
-                        }
+                    if ($isPopup && $index < $minIndex) {
+                        continue;
                     }
                     if (!isset($controlList[$control['ID']])) {
                         $controlList[$control['ID']] = $control;
@@ -253,7 +268,7 @@ class Balsamic
             echo "\n";
         }
     }
-// DE0DEDAD-A21A-430A-8F31-63E242CA5983	
+    // DE0DEDAD-A21A-430A-8F31-63E242CA5983
     public function commentAt($control, $default)
     {
         $resourceId = $control['resourceID'];
@@ -357,20 +372,21 @@ class Balsamic
             }
             $windowWidth = $this->windowWidth;
         } else {
-            // Find FieldSet
+            // Find last FieldSet or Alert box
             foreach ($controls as $i => $control) {
-                if ($control['typeID'] === 'FieldSet') {
+                if ($control['typeID'] === 'FieldSet' || $control['typeID'] === 'Alert') {
                     $this->layoutLeft = $control['x'];
                     $this->layoutTop = $control['y'];
+                    $control['w'] = $control['w'] ?? $control['measuredW'];
                     $windowWidth = $control['w'];
-                    break;
                 }
             }
         }
         // Process controls
         $columnWidth = $windowWidth / $this->maxColumns;
-        $rowHeight = 32;
+        $rowHeight = 16;
         $slots = [[]];
+        $zoneWidth = $windowWidth / 3;
         foreach ($controls as $i => $control) {
             $w = $control['w'] ?? $control['measuredW'];
             $h = $control['h'] ?? $control['measuredH'];
@@ -391,6 +407,7 @@ class Balsamic
             $row = floor($y / $rowHeight);
             $controls[$i]['originalX'] = $controls[$i]['x'];
             $controls[$i]['originalY'] = $controls[$i]['y'];
+            $controls[$i]['horizontalZone'] = min(max(0, floor($x / $zoneWidth)), 2);
             $controls[$i]['x'] = $x;
             $controls[$i]['y'] = $y;
             $controls[$i]['w'] = $w;
@@ -399,10 +416,6 @@ class Balsamic
             $controls[$i]['measuredH'] = $h;
             $controls[$i]['column'] = $column;
             $controls[$i]['columns'] = floor(($x + $w) / $columnWidth) - $column;
-            // $controls[$i]['columns'] = max(0, round(($x + $w) / $columnWidth) -1) - $column;
-            // error_log(@$control['properties']['text'] . " X=" . $column);
-            // error_log(@$control['properties']['text'] . " Max W=" . ($controls[$i]['columns']));
-            // error_log("x+w=" . ($x + $w) . " windowWidth=" . $windowWidth);
             if (!isset($slots[$row])) {
                 $slots[$row] = [];
             }
@@ -522,12 +535,14 @@ class Balsamic
                     $cMin = min($cMin, $control['column']);
                     $cMax = max($cMin, $control['column'] + $control['columns']);
                 }
-                $divCol->setAttribute('style', 'width: ' . (($cMax - $cMin + 1) * 100 / $maxColumns) . '%');
+                $style = $divCol->getAttribute('style');
+                $divCol->setAttribute('style', 'width: ' . (($cMax - $cMin + 1) * 100 / $maxColumns) . '%;' . $style);
             }
             if ($merged) {
                 $divColM = $svelteScreen->createElement('div');
                 $divColM->setAttribute('class', 'cell');
-                $divColM->setAttribute('style', 'width: ' . ($merged * 100 / $maxColumns) . '%');
+                $style = $divCol->getAttribute('style');
+                $divColM->setAttribute('style', 'width: ' . ($merged * 100 / $maxColumns) . '%;' . $style);
                 // $divColM->setAttribute('columnWidth', "100 * $merged / $maxColumns");
                 $divRow->appendChild($divColM);
             }
@@ -592,16 +607,16 @@ class Balsamic
     }
 
     ////
-    public function FileInput($controlPosition, $controlProperties, DOMElement $svelteScreen)
+    public function FileInput($control, $controlProperties, DOMElement $svelteScreen)
     {
         $node = $svelteScreen->ownerDocument->createElement('FileInput');
         // bind value
         $name = $controlProperties['text'];
-        //$name = $this->commentAt($controlPosition['x'], $controlPosition['y']);
+        $name = $this->commentAt($control, $name);
         $name = preg_replace('/[^a-zA-Z0-9]+/', '_', $name);
         $label = '{__(' . json_encode($controlProperties['text'], JSON_UNESCAPED_UNICODE) . ')}';
         $node->setAttribute('bind:value', '{data.'.$name.'}');
-        $node->setAttribute('placeholder', $label);
+        // $node->setAttribute('placeholder', $label);
         $node->setAttribute('store', '{fileStore}');
         $svelteScreen->appendChild($node);
         // add code to script
@@ -637,10 +652,24 @@ class Balsamic
     public function Button($control, $controlProperties, DOMElement $svelteScreen)
     {
         $node = $svelteScreen->ownerDocument->createElement('Button');
-        $node->nodeValue = $controlProperties['text'];
+        $node->nodeValue = "\n{__(" . json_encode($controlProperties['text'], JSON_UNESCAPED_UNICODE) . ", data)}\n";
         // color
         if (isset($controlProperties['color'])) {
             $node->setAttribute('variant', 'accent');
+        }
+        // if horizontalZone == 2 => align to right
+        if ($control['horizontalZone'] == 2) {
+            $parentStyle = $svelteScreen->getAttribute('style') ?? '';
+            // find justify-content
+            $parentStyle = preg_replace('/\s*justify-content:\s*[^;]+;/', '', $parentStyle);
+            $svelteScreen->setAttribute('style', $parentStyle . '; justify-content: flex-end;');
+        }
+        // if horizontalZone == 1 => align to center
+        if ($control['horizontalZone'] == 1) {
+            $parentStyle = $svelteScreen->getAttribute('style') ?? '';
+            // find justify-content
+            $parentStyle = preg_replace('/\s*justify-content:\s*[^;]+;/', '', $parentStyle);
+            $svelteScreen->setAttribute('style', $parentStyle . '; justify-content: center;');
         }
         // add handler
         $handlerName = $this->convertLabel2Variable($controlProperties['text']) . 'Handler';
@@ -665,14 +694,35 @@ class Balsamic
     {
         // error_log(json_encode($controlProperties, JSON_PRETTY_PRINT));
         $node = $svelteScreen->ownerDocument->createElement('TextBox');
-        $name = $controlProperties['text'];
+        $name = $this->convertLabel2Variable($controlProperties['text']);
         $name = $this->commentAt($control, $name);
-        error_log($name);
         $name = preg_replace('/[^a-zA-Z0-9]+/', '_', $name);
-        $label = '{__(' . json_encode($controlProperties['text'], JSON_UNESCAPED_UNICODE) . ')}';
+        // $label = '{__(' . json_encode($controlProperties['text'], JSON_UNESCAPED_UNICODE) . ')}';
         $svelteScreen->appendChild($node);
         $node->setAttribute('bind:value', '{data.'.$name.'}');
-        $node->setAttribute('placeholder', $label);
+        // $node->setAttribute('placeholder', $label);
+        // state disabled
+        if (isset($controlProperties['state']) && $controlProperties['state'] === 'disabled') {
+            $node->setAttribute('disabled', '{true}');
+        }
+        // add code to script
+        $script = $svelteScreen->ownerDocument->getElementsByTagName('script')->item(0);
+        $this->addUniqueScriptCode($script, 'import { TextBox } from "fluent-svelte";');
+        $this->addScreenData($name, '""');
+    }
+
+    public function DateChooser($control, $controlProperties, DOMElement $svelteScreen)
+    {
+        // error_log(json_encode($controlProperties, JSON_PRETTY_PRINT));
+        $node = $svelteScreen->ownerDocument->createElement('TextBox');
+        $name = $this->convertLabel2Variable($controlProperties['text']);
+        $name = $this->commentAt($control, $name);
+        $name = preg_replace('/[^a-zA-Z0-9]+/', '_', $name);
+        // $label = '{__(' . json_encode($controlProperties['text'], JSON_UNESCAPED_UNICODE) . ')}';
+        $svelteScreen->appendChild($node);
+        $node->setAttribute('bind:value', '{data.'.$name.'}');
+        $node->setAttribute('type', 'date');
+        // $node->setAttribute('placeholder', $label);
         // state disabled
         if (isset($controlProperties['state']) && $controlProperties['state'] === 'disabled') {
             $node->setAttribute('disabled', '{true}');
@@ -689,7 +739,7 @@ class Balsamic
         $name = $controlProperties['text'];
         $name = $this->commentAt($control, $name);
         $name = $this->convertLabel2Variable($name);
-        $label = '{__(' . json_encode($controlProperties['text'], JSON_UNESCAPED_UNICODE) . ')}';
+        $label = '{__(' . json_encode($name, JSON_UNESCAPED_UNICODE) . ')}';
         $svelteScreen->appendChild($node);
         $node->setAttribute('bind:value', '{data.'.$name.'}');
         $node->setAttribute('placeholder', $label);
@@ -922,6 +972,64 @@ class Balsamic
         $this->popupControl = $control;
     }
 
+    // <ContentDialog >
+    public function Alert($control, $controlProperties, DOMElement $div, $configObject)
+    {
+        // error_log(json_encode($control));
+        $node = $div->ownerDocument->createElement('ContentDialog');
+        $label = $controlProperties['text'];
+        $name = $this->getPopupNameFor($control['resourceID']);
+        $node->setAttribute('bind:open', '{data.' . $name . '.open}');
+        // $node->setAttribute('title', '{__(' . json_encode($label, JSON_UNESCAPED_UNICODE) . ')}');
+        $node->setAttribute('size', 'max');
+        // $popupWidth = min(ceil(($control['w'] / $this->windowWidth) * 10), 10) * 10;
+        // $node->setAttribute('class', 'popup-' . $popupWidth);
+        $node->appendChild($div->ownerDocument->createTextNode("\n"));
+        $screen = $div->parentNode->parentNode;
+        $screen->appendChild($node);
+        $screen->removeChild($div->parentNode);
+        // add code to script
+        $script = $div->ownerDocument->getElementsByTagName('script')->item(0);
+        $this->addUniqueScriptCode($script, 'import { ContentDialog } from "fluent-svelte";');
+        // $this->addUniqueScriptCode($script, 'let ' . $name . ' = {open: false};');
+        $this->addScreenData($name, json_encode(['open' => false]));
+        // Last line of label contains the buttons
+        $lines = explode("\n", $label);
+        $buttons = array_pop($lines);
+        $label = implode("\n", $lines);
+        // Add text to popup with class="alert-text"
+        $textNode = $div->ownerDocument->createElement('p');
+        $textNode->appendChild($div->ownerDocument->createTextNode('{__(' . json_encode($label, JSON_UNESCAPED_UNICODE) . ', data)}' . "\n"));
+        $textNode->setAttribute('class', 'alert-text');
+        $node->appendChild($textNode);
+        // Add buttons to popup
+        $center = $div->ownerDocument->createElement('center');
+        $node->appendChild($center);
+        $center->appendChild($div->ownerDocument->createTextNode("\n"));
+        $node->appendChild($div->ownerDocument->createTextNode("\n"));
+        $buttons = explode(',', $buttons);
+        $alertUniqueName = "alert{$control['ID']}";
+        foreach ($buttons as $i => $button) {
+            $button = trim($button);
+            $buttonNode = $div->ownerDocument->createElement('Button');
+            $buttonNode->appendChild($div->ownerDocument->createTextNode("\n{__(" . json_encode($button, JSON_UNESCAPED_UNICODE) . ", data)}\n"));
+            $link = $controlProperties['hrefs']['href'][$i] ?? null;
+            if ($link && $link['ID']) {
+                $link = $link['ID'];
+                $resourceName = $this->getPopupNameFor($link);
+                $linkHandlerName = $alertUniqueName . ucfirst($this->convertLabel2Variable($button));
+                $this->addOpenLinkAction($linkHandlerName, $resourceName);
+                $buttonNode->setAttribute('on:click', '{(e) => { Object.assign(data, handler(' . json_encode($linkHandlerName) . ', e.detail, data)); data.' . $resourceName . '.open=true}}');
+                $this->addScreenData($resourceName, json_encode(['open' => false]));
+            }
+            $center->appendChild($buttonNode);
+            $center->appendChild($div->ownerDocument->createTextNode("\n"));
+        }
+        // move children to dialog
+        $this->popup = $node;
+        $this->popupControl = $control;
+    }
+
     private function getPopupNameFor($resourceID)
     {
         $name = $this->getResourceName($resourceID);
@@ -946,6 +1054,10 @@ class Balsamic
         $label = preg_replace('/_$/', '', $label);
         // lowercase
         $label = strtolower($label);
+        // add variable prefix if starts with number
+        if (preg_match('/^[0-9]/', $label)) {
+            $label = 'var' . $label;
+        }
         // camel case
         $label = preg_replace_callback('/_([a-z])/', function ($matches) {
             return strtoupper($matches[1]);
