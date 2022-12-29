@@ -399,7 +399,6 @@
 .cell {
 	display: flex;
 	flex-direction: row;
-	overflow: hidden;
 }
 .cell > div {
 	flex-grow: 1;

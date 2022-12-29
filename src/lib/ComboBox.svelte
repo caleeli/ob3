@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { createEventDispatcher, tick } from 'svelte';
-	import { get_current_component, onMount } from 'svelte/internal';
-
 	import { createEventForwarder, externalMouseEvents, uid } from 'fluent-svelte/internal';
-
-	import ComboBoxItem from 'fluent-svelte/ComboBox/ComboBoxItem.svelte';
+	import { get_current_component, onMount } from 'svelte/internal';
 	import Button from 'fluent-svelte/Button/Button.svelte';
+	import ComboBoxItem from 'fluent-svelte/ComboBox/ComboBoxItem.svelte';
 	import TextBox from 'fluent-svelte/TextBox/TextBox.svelte';
 	import TextBoxButton from 'fluent-svelte/TextBox/TextBoxButton.svelte';
+	import type ConfigStore from './ConfigStore';
+	import type StoreInterface from './StoreInterface';
 
 	interface Item {
 		name: string;
@@ -26,6 +26,9 @@
 
 	/** Array of objects representing the dropdown items. */
 	export let items: Item[] = [];
+
+	export let store: StoreInterface | null = null;
+	export let configStore: ConfigStore | null = null;
 
 	/** Determines if the ComboBox can be searched. */
 	export let editable = false;
@@ -196,6 +199,18 @@
 
 		if (match && !match.disabled) value = match.value;
 		searchValue = searchInputElement.value;
+	}
+
+	// Load items from store
+	async function loadFromStore() {
+		items = (await store.get()).map((item) => {
+			const key = Object.keys(item.attributes).findIndex((key) => key != 'id');
+			return { value: item.id, name: String(Object.values(item.attributes)[key]) };
+		});
+		console.log(items);
+	}
+	$: if (store) {
+		loadFromStore();
 	}
 </script>
 
