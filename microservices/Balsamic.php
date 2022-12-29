@@ -667,6 +667,7 @@ class Balsamic
         $node = $svelteScreen->ownerDocument->createElement('TextBox');
         $name = $controlProperties['text'];
         $name = $this->commentAt($control, $name);
+        error_log($name);
         $name = preg_replace('/[^a-zA-Z0-9]+/', '_', $name);
         $label = '{__(' . json_encode($controlProperties['text'], JSON_UNESCAPED_UNICODE) . ')}';
         $svelteScreen->appendChild($node);
