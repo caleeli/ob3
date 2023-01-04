@@ -616,9 +616,9 @@ class Balsamic
         $name = $controlProperties['text'];
         $name = $this->commentAt($control, $name);
         $name = preg_replace('/[^a-zA-Z0-9]+/', '_', $name);
-        $label = '{__(' . json_encode($controlProperties['text'], JSON_UNESCAPED_UNICODE) . ')}';
         $node->setAttribute('bind:value', '{data.'.$name.'}');
-        // $node->setAttribute('placeholder', $label);
+        $placeholder = '{__(' . json_encode($name, JSON_UNESCAPED_UNICODE) . ')}';
+        $node->setAttribute('placeholder', $placeholder);
         $node->setAttribute('store', '{fileStore}');
         $svelteScreen->appendChild($node);
         // add code to script
@@ -703,10 +703,10 @@ class Balsamic
         $name = $this->convertLabel2Variable($controlProperties['text']);
         $name = $this->commentAt($control, $name);
         $name = preg_replace('/[^a-zA-Z0-9]+/', '_', $name);
-        // $label = '{__(' . json_encode($controlProperties['text'], JSON_UNESCAPED_UNICODE) . ')}';
         $svelteScreen->appendChild($node);
         $node->setAttribute('bind:value', '{data.'.$name.'}');
-        $node->setAttribute('placeholder', $name);
+        $placeholder = '{__(' . json_encode($name, JSON_UNESCAPED_UNICODE) . ')}';
+        $node->setAttribute('placeholder', $placeholder);
         // state disabled
         if (isset($controlProperties['state']) && $controlProperties['state'] === 'disabled') {
             $node->setAttribute('disabled', '{true}');
@@ -728,7 +728,8 @@ class Balsamic
         $svelteScreen->appendChild($node);
         $node->setAttribute('bind:value', '{data.'.$name.'}');
         $node->setAttribute('type', 'date');
-        $node->setAttribute('placeholder', $name);
+        $placeholder = '{__(' . json_encode($name, JSON_UNESCAPED_UNICODE) . ')}';
+        $node->setAttribute('placeholder', $placeholder);
         // state disabled
         if (isset($controlProperties['state']) && $controlProperties['state'] === 'disabled') {
             $node->setAttribute('disabled', '{true}');
@@ -745,10 +746,10 @@ class Balsamic
         $name = $controlProperties['text'];
         $name = $this->commentAt($control, $name);
         $name = $this->convertLabel2Variable($name);
-        // $label = '{__(' . json_encode($name, JSON_UNESCAPED_UNICODE) . ')}';
         $svelteScreen->appendChild($node);
         $node->setAttribute('bind:value', '{data.'.$name.'}');
-        $node->setAttribute('placeholder', $name);
+        $placeholder = '{__(' . json_encode($name, JSON_UNESCAPED_UNICODE) . ')}';
+        $node->setAttribute('placeholder', $placeholder);
         $rows = round($control['h'] / 19);
         $node->setAttribute('rows', $rows);
         // state disabled
@@ -896,7 +897,8 @@ class Balsamic
         ];
         $node->setAttribute('store', '{new ApiStore(config.' . $storeName . ')}');
         $node->setAttribute('configStore', '{configStore}');
-        $node->setAttribute('placeholder', $name);
+        $placeholder = '{__(' . json_encode($name, JSON_UNESCAPED_UNICODE) . ')}';
+        $node->setAttribute('placeholder', $placeholder);
 
         // add code to script
         $script = $svelteScreen->ownerDocument->getElementsByTagName('script')->item(0);
