@@ -450,3 +450,8 @@
 .popup-100 {
 	inline-size: 100vw!important;
 }
+/* text with car return like pre */
+.alert-text {
+	white-space: pre-wrap;
+	text-align: center;
+}

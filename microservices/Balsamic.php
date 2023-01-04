@@ -12,6 +12,7 @@ class Balsamic
     private $handlers = [];
     private $screenData = [];
     private $maxColumns = 128;
+    private $prefix = '';
 
     /**
      * @var DOMElement
@@ -171,6 +172,7 @@ class Balsamic
         $this->configPage = new StdClass;
 
         $isPopup = false;
+        $this->prefix = '';
         foreach ($resources as $resource) {
             if ($selected && !in_array($resource['ID'], $selected)) {
                 continue;
@@ -208,6 +210,8 @@ class Balsamic
                 foreach ($resourceControls as $index => $control) {
                     if ($control['typeID'] === 'FieldSet' || $control['typeID'] === 'Alert') {
                         $isPopup = true;
+                        $popupName = $name;
+                        $this->prefix = $this->convertLabel2Variable($popupName);
                         $minIndex = $index; // include FieldSet or Alert box
                     }
                 }
@@ -229,8 +233,6 @@ class Balsamic
             // debug(json_encode($slots, JSON_UNESCAPED_UNICODE));
             $this->slots2WebComponents($slots, $svelteScreen, $this->configPage);
 
-            // the next resources are popups
-            $isPopup = true;
             // only first resource
             if (!$selected) {
                 break;
@@ -672,7 +674,11 @@ class Balsamic
             $svelteScreen->setAttribute('style', $parentStyle . '; justify-content: center;');
         }
         // add handler
-        $handlerName = $this->convertLabel2Variable($controlProperties['text']) . 'Handler';
+        if ($this->prefix) {
+            $handlerName = $this->prefix . ucfirst($this->convertLabel2Variable($controlProperties['text']) . 'Handler');
+        } else {
+            $handlerName = $this->convertLabel2Variable($controlProperties['text']) . 'Handler';
+        }
         $handlerCode = 'Object.assign(data, handler(' . json_encode($handlerName) . ', e.detail, data))';
         $link = $controlProperties['href']['ID'] ?? null;
         if ($link) {
