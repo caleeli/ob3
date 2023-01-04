@@ -8,7 +8,10 @@
 	import TextBoxButton from 'fluent-svelte/TextBox/TextBoxButton.svelte';
 	import type ConfigStore from './ConfigStore';
 	import type StoreInterface from './StoreInterface';
-
+	import { onConfigModeChange, addModelConfig } from './editMode';
+	import EditProperties from './EditProperties.svelte';
+	import type FormField from './FormField';
+	import ApiStore from './ApiStore';
 	interface Item {
 		name: string;
 		value: any;
@@ -212,6 +215,30 @@
 	$: if (store) {
 		loadFromStore();
 	}
+	//
+	export let configurable = true;
+	let configMode = false;
+	onConfigModeChange((mode: boolean) => {
+		configMode = mode && configurable;
+	});
+	let editConfigTitle = '';
+	let editConfigForm: FormField[][] = [];
+	if (store instanceof ApiStore) {
+		addModelConfig(editConfigForm, store);
+	}
+	let editConfigData = { store, configStore };
+	let openConfigMode = false;
+	function updateConfig() {
+		configStore = configStore;
+		loadFromStore();
+		saveConfig();
+	}
+	function saveConfig() {
+		if (!configStore) {
+			return;
+		}
+		configStore.save();
+	}
 </script>
 
 <!--
@@ -237,8 +264,12 @@ When the combo box is closed, it either displays the current selection or is emp
 	class:disabled
 	class:editable
 	class:open
+	class:configMode
 	on:outermousedown={() => {
 		if (open) open = false;
+	}}
+	on:click={() => {
+		if (configMode) openConfigMode = true;
 	}}
 	bind:this={containerElement}
 	{...$$restProps}
@@ -364,9 +395,22 @@ When the combo box is closed, it either displays the current selection or is emp
 	{/if}
 </div>
 
+<EditProperties
+	title={editConfigTitle}
+	form={editConfigForm}
+	data={editConfigData}
+	bind:open={openConfigMode}
+	on:save={updateConfig}
+/>
+
 <style lang="scss">
 	@use 'fluent-svelte/ComboBox/ComboBox';
 	.combo-box-dropdown {
 		max-height: 180px;
+	}
+	.configMode::after {
+		content: '⚙️';
+		position: absolute;
+		right: 0;
 	}
 </style>

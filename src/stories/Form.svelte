@@ -26,6 +26,7 @@
 	export let store: ApiStore | undefined = undefined;
 	export let configStore: ConfigStore | undefined = undefined;
 	export let margin = '0px';
+	export let configurable = false;
 
 	// helpers used in: combo data source
 	const helpers = {
@@ -435,6 +436,7 @@
 							items={cell_runtime[indexOf(cell)].options}
 							class="w-100"
 							editable={cell.editable || false}
+							{configurable}
 							bind:searchValue={cell.searchValue}
 							bind:value={accessor[getName(cell)]}
 							on:keydown={(e) => comboBoxKeydown(e, cell)}
